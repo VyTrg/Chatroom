@@ -5,8 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
+
 @Entity
-@Table(name="block")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,20 +24,22 @@ public class messageModel {
     private String attachmentUrl;
 
     @Column(name = "create_at")
-    private java.time.LocalDateTime createAt;
+    private LocalDateTime createAt;
 
     @Column(name = "delete_at")
-    private java.time.LocalDateTime deleteAt;
+    private LocalDateTime deleteAt;
 
     @Column(name = "update_at")
-    private java.time.LocalDateTime updateAt;
+    private LocalDateTime updateAt;
 
     @Column(name = "is_read")
     private Boolean isRead;
 
-    @OneToMany
+//    @ManyToOne
+//    @JoinColumn(name="id")
     private userModel sender;
 
-    @OneToMany
-    private receiverModel receiver;
+//    @ManyToOne
+//    @JoinColumn(name="id")
+    private userModel receiver;
 }

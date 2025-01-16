@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="contact_with")
+//@Table(name="contact_with")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,10 +18,10 @@ public class contactWithModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-//    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     private userModel contactOne;
 
-//    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     private userModel contactTwo;
 
     @Column(name="create_at")

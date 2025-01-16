@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="group")
+//@Table(name="group")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,6 +24,6 @@ public class groupModel extends receiverModel{
     @Column(name="create_at")
     private LocalDateTime createAt;
 
-//    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     private userModel createBy;
 }
