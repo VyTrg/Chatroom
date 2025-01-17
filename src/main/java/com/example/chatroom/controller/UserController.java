@@ -30,4 +30,32 @@ public class UserController {
         User user = userRepository.findById(userId).orElseThrow(() -> new ApiRequestException("User With id=" + userId + " Not Found"));
         return ResponseEntity.ok().body(user).getBody();
     }
+
+    @PostMapping
+    public User createUser(@RequestBody User user) {
+        return userRepository.save(user);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable(value = "id")Long userId, @RequestBody User userDetails) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ApiRequestException("User With id=" + userId + " Not Found"));
+        user.setFirstName(userDetails.getFirstName());
+        user.setLastName(userDetails.getLastName());
+        user.setEmail(userDetails.getEmail());
+        user.setUsername(userDetails.getUsername());
+        user.setHashPassword(userDetails.getHashPassword());
+        user.setProfilePicture(userDetails.getProfilePicture());
+
+        final User updatedUser = userRepository.save(user);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable(value = "id")Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ApiRequestException("User With id=" + userId + " Not Found"));
+        userRepository.delete(user);
+        return ResponseEntity.ok().build();
+    }
+
 }
