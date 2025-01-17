@@ -1,9 +1,12 @@
 package com.example.chatroom.controller;
 
 
+import com.example.chatroom.exception.ApiRequestException;
 import com.example.chatroom.model.User;
 import com.example.chatroom.repository.UserRepository;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +27,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public User getUserById(@PathVariable(value = "id")Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResolutionException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ApiRequestException("User With id=" + userId + " Not Found"));
         return ResponseEntity.ok().body(user).getBody();
-
     }
 }
