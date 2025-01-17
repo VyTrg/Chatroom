@@ -8,7 +8,9 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 
 @Entity
@@ -16,56 +18,57 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "[user]", schema = "dbo")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "first_name")
     private String firstName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "last_name")
     private String lastName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "username")
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "hash_password")
     private String hashPassword;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "email")
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "status")
     private Boolean status;//true = online, false = offline
 
-    @Column(nullable = true)
-    private LocalDate lastSeen;
+    @Column(nullable = false, name = "last_seen")
+    private LocalDateTime lastSeen;
 
-    @Column(nullable = true)
+    @Column(nullable = true, name = "profile_picture")
     private String profilePicture;//file url
 
     @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Block> blockerUser;
+    private Set<Block> blockerUser;
 
     @OneToMany(mappedBy = "blocked", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Block> blockerByUser;
+    private Set<Block> blockerByUser;
 
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContactRequest> senderUserRequest;
+    private Set<ContactRequest> senderUserRequest;
 
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContactRequest> receiverUser;
+    private Set<ContactRequest> receiverUser;
 
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Message> senderUserMessages;
+    private Set<Message> senderUserMessages;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ConversationMember> userConversations;
+    private Set<ConversationMember> userConversations;
 
     @OneToMany(mappedBy = "contactOne", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContactWith> contactOneWiths;
+    private Set<ContactWith> contactOneWiths;
 
     @OneToMany(mappedBy = "contactTwo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContactWith> contactTwoWiths;
+    private Set<ContactWith> contactTwoWiths;
 }

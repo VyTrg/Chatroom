@@ -16,18 +16,18 @@ public class ContactWith {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "contact_one_id")
+    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "contact_one_id",insertable=false, updatable=false)
     private User contactOne;
 
-    @ManyToOne
-    @JoinColumn(name = "contact_two_id")
+    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "contact_two_id",insertable=false, updatable=false)
     private User contactTwo;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "create_at")
     private LocalDateTime createdAt;
 
-    @Column(nullable = true)
+    @Column(nullable = true, name = "delete_at")
     private LocalDateTime deletedAt;
 
     public ContactWith() {

@@ -16,27 +16,27 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "user_id",insertable=false, updatable=false)
     private User sender;
 
-    @ManyToOne
-    @JoinColumn(name = "conversation_id")
+    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "conversation_id",insertable=false, updatable=false)
     private Conversation conversation;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "message_text")
     private String messageText;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "create_at")
     private LocalDateTime createdAt;
 
-    @Column(nullable = true)
+    @Column(nullable = true, name = "delete_at")
     private LocalDateTime deletedAt;
 
-    @Column(nullable = true)
+    @Column(nullable = true, name = "update_at")
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "is_read")
     private Boolean isRead;
 
     public Message() {

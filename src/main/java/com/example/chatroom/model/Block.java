@@ -3,7 +3,6 @@ package com.example.chatroom.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -18,15 +17,15 @@ public class Block {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "blocker_id")
+    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "blocker_id",insertable=false, updatable=false)
     private User blocker;
 
-    @ManyToOne
-    @JoinColumn(name = "blocked_id")
+    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "blocked_id",insertable=false, updatable=false)
     private User blocked;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "created_at")
     private LocalDateTime createdAt;
 
     public Block() {

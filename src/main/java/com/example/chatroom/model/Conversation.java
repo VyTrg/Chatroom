@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -18,16 +19,16 @@ public class Conversation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "name")
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "is_group")
     private Boolean isGroup;
 
-    @Column(nullable = true)
+    @Column(nullable = true, name = "image_url")
     private String imageUrl;//image url here
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "created_at")
     private LocalDateTime createdAt;
 
     public Conversation() {
@@ -35,8 +36,8 @@ public class Conversation {
     }
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Message> messages;
+    private Set<Message> messages;
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ConversationMember> conversationMembers;
+    private Set<ConversationMember> conversationMembers;
 }

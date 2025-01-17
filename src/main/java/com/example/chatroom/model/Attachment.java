@@ -16,17 +16,17 @@ public class Attachment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "message_id")
+    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "message_id",insertable=false, updatable=false)
     private Message message;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "file_url")
     private String fileUrl;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "file_type")
     private String fileType;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "upload_at")
     private LocalDateTime uploadAt;
 
     public Attachment() {

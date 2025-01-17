@@ -18,18 +18,18 @@ public class ConversationMember {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "conversation_id")
+    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "conversation_id",insertable=false, updatable=false)
     private Conversation conversation;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "user_id",insertable=false, updatable=false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "role")
     private String role;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "joined_at")
     private LocalDateTime joinedAt;
 
     public ConversationMember() {
