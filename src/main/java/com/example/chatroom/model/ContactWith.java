@@ -24,10 +24,10 @@ public class ContactWith {
     @JoinColumn(name = "contact_two_id",insertable=false, updatable=false)
     private User contactTwo;
 
-    @Column(nullable = false, name = "create_at")
+    @Column(nullable = false, name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(nullable = true, name = "delete_at")
+    @Column(nullable = true, name = "deleted_at")
     private LocalDateTime deletedAt;
 
     public ContactWith() {

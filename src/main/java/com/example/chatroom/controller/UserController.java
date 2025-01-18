@@ -1,44 +1,45 @@
 package com.example.chatroom.controller;
 
 
-import com.example.chatroom.exception.ApiRequestException;
+
 import com.example.chatroom.model.User;
-import com.example.chatroom.repository.UserRepository;
-import jakarta.annotation.Nullable;
+
+import com.example.chatroom.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.module.ResolutionException;
 import java.util.List;
+
+
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserServiceImpl userService;
 
     @GetMapping
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")
     public User getUserById(@PathVariable(value = "id")Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ApiRequestException("User With id=" + userId + " Not Found"));
+        User user = userService.getUserById(userId);
         return ResponseEntity.ok().body(user).getBody();
     }
 
     @PostMapping
     public User createUser(@RequestBody User user) {
-        return userRepository.save(user);
+        return userService.saveUser(user);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable(value = "id")Long userId, @RequestBody User userDetails) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ApiRequestException("User With id=" + userId + " Not Found"));
+        User user = userService.getUserById(userId);
         user.setFirstName(userDetails.getFirstName());
         user.setLastName(userDetails.getLastName());
         user.setEmail(userDetails.getEmail());
@@ -46,15 +47,15 @@ public class UserController {
         user.setHashPassword(userDetails.getHashPassword());
         user.setProfilePicture(userDetails.getProfilePicture());
 
-        final User updatedUser = userRepository.save(user);
+        final User updatedUser = userService.updateUser(user);
         return ResponseEntity.ok(updatedUser);
     }
 
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable(value = "id")Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ApiRequestException("User With id=" + userId + " Not Found"));
-        userRepository.delete(user);
+        User user = userService.getUserById(userId);
+        userService.deleteUser(user);
         return ResponseEntity.ok().build();
     }
 

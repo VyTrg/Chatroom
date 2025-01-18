@@ -27,13 +27,13 @@ public class Message {
     @Column(nullable = false, name = "message_text")
     private String messageText;
 
-    @Column(nullable = false, name = "create_at")
+    @Column(nullable = false, name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(nullable = true, name = "delete_at")
+    @Column(nullable = true, name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(nullable = true, name = "update_at")
+    @Column(nullable = true, name = "updated_at")
     private LocalDateTime updatedAt;
 
     @Column(nullable = false, name = "is_read")
