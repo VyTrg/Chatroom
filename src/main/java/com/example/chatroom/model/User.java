@@ -49,6 +49,9 @@ public class User {
     @Column(nullable = true, name = "profile_picture")
     private String profilePicture;//file url
 
+    @Transient
+    private String password;
+
     @JsonIgnore
     @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Block> blockerUser;
