@@ -1,5 +1,6 @@
 package com.example.chatroom.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -48,27 +49,35 @@ public class User {
     @Column(nullable = true, name = "profile_picture")
     private String profilePicture;//file url
 
+    @JsonIgnore
     @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Block> blockerUser;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "blocked", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Block> blockerByUser;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ContactRequest> senderUserRequest;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ContactRequest> receiverUser;
+    private Set<ContactRequest> receiverUserRequest;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Message> senderUserMessages;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ConversationMember> userConversations;
 
+    @JsonIgnore //prevent recursive result
     @OneToMany(mappedBy = "contactOne", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ContactWith> contactOneWiths;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "contactTwo", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ContactWith> contactTwoWiths;
 }
