@@ -2,9 +2,12 @@ package com.example.chatroom.controller;
 
 
 
+import com.example.chatroom.dto.UserDTO;
 import com.example.chatroom.model.User;
 
 import com.example.chatroom.service.UserServiceImpl;
+import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
@@ -16,10 +19,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@AllArgsConstructor
 public class UserController {
 
     @Autowired
     private UserServiceImpl userService;
+
+    @Autowired
+    private ModelMapper mapper;
+
 
     @GetMapping
     public List<User> getAllUsers() {
@@ -27,9 +35,10 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable(value = "id")Long userId) {
+    public ResponseEntity<UserDTO> getUserById(@PathVariable(value = "id")Long userId) {
         User user = userService.getUserById(userId);
-        return ResponseEntity.ok().body(user).getBody();
+        UserDTO userDTO = mapper.map(user, UserDTO.class);
+        return ResponseEntity.ok(userDTO);
     }
 
     @PostMapping

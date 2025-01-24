@@ -1,8 +1,10 @@
 package com.example.chatroom.service;
 
+
 import com.example.chatroom.exception.ApiRequestException;
 import com.example.chatroom.model.User;
 import com.example.chatroom.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,4 +39,5 @@ public class UserServiceImpl implements UserService {
     public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new ApiRequestException("User With id=" + id + " Not Found"));
     }
+
 }
