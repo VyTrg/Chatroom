@@ -17,7 +17,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
+
 @AllArgsConstructor
 @Table(name = "[user]", schema = "dbo")
 public class User {
@@ -49,35 +49,42 @@ public class User {
     @Column(nullable = true, name = "profile_picture")
     private String profilePicture;//file url
 
+    @Column(nullable = false, name = "enabled")
+    private Boolean enabled;
+
     @JsonIgnore
     @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Block> blockerUser;
+    private List<Block> blockerUser;
 
     @JsonIgnore
     @OneToMany(mappedBy = "blocked", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Block> blockerByUser;
+    private List<Block> blockerByUser;
 
     @JsonIgnore
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ContactRequest> senderUserRequest;
+    private List<ContactRequest> senderUserRequest;
 
     @JsonIgnore
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ContactRequest> receiverUserRequest;
+    private List<ContactRequest> receiverUserRequest;
 
     @JsonIgnore
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Message> senderUserMessages;
+    private List<Message> senderUserMessages;
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ConversationMember> userConversations;
+    private List<ConversationMember> userConversations;
 
-    @JsonIgnore //prevent recursive result
-    @OneToMany(mappedBy = "contactOne", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ContactWith> contactOneWiths;
+//    @JsonIgnore //prevent recursive result
+//    @OneToMany(mappedBy = "contactOne", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<ContactWith> contactOneWiths;
 
     @JsonIgnore
     @OneToMany(mappedBy = "contactTwo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ContactWith> contactTwoWiths;
+    private List<ContactWith> contactList;
+
+    public User() {
+        this.enabled = false;
+    }
 }

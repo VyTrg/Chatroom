@@ -38,9 +38,9 @@ public class Conversation {
 
     @JsonIgnore
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Message> messages;
+    private List<Message> messages;
 
     @JsonIgnore
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ConversationMember> conversationMembers;
+    private List<ConversationMember> conversationMembers;
 }
