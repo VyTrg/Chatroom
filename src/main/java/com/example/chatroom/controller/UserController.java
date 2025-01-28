@@ -2,7 +2,7 @@ package com.example.chatroom.controller;
 
 
 
-import com.example.chatroom.dto.UserContactsDTO;
+import com.example.chatroom.dto.UserWithContactsDTO;
 import com.example.chatroom.model.User;
 
 
@@ -31,8 +31,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public UserContactsDTO getUserInforById(@PathVariable(value = "id")Long userId) {
-        return userService.getUserDTOById(userId);
+    public UserWithContactsDTO getUserInforById(@PathVariable(value = "id")Long userId) {
+        return userService.getUserWithContactsDTOById(userId);
     }
 
     @PostMapping
