@@ -52,7 +52,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // cong frontend chay
-        config.setAllowedOrigins(List.of("http://localhost:63342"));
+        config.setAllowedOrigins(List.of("*"));
 
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

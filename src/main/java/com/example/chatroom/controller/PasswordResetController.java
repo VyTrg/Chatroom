@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -34,41 +33,36 @@ public class PasswordResetController {
         String email = request.get("email");
 
         if (email == null || email.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email khong duoc de trong.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email không được để trống.");
         }
 
-        System.out.println("Received request: " + email);
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isEmpty()) {
-            System.out.println("Email not found: " + email);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email khong ton tai.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email không tồn tại trong hệ thống.");
         }
 
-        String token = JwtUtil.generateToken(email);
-        String resetLink = "http://localhost:8080/api/auth/reset-password?token=" + token;
+        // Tao JWT token có thoi gian het han
+        String token = JwtUtil.generateToken(email, 15 * 60 * 1000);
+        String resetLink = "http://localhost:8080/reset-password.html#token=" + token;
 
+        // Gui email dat lai mat khau
         sendEmail(email, resetLink);
 
-        return ResponseEntity.ok("Email dat lai mat khau da duoc gui.");
+        return ResponseEntity.ok("Email đặt lại mật khẩu đã được gửi.");
     }
 
     private void sendEmail(String to, String link) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setSubject("Dat lai mat khau");
-        message.setText("Nhan vao lien ket de dat lai mat khau: " + link);
+        message.setSubject("Đặt lại mật khẩu");
+        message.setText("Nhấp vào liên kết để đặt lại mật khẩu: " + link);
         mailSender.send(message);
     }
 
     @GetMapping("/reset-password")
-    public String showResetPasswordPage(@RequestParam("token") String token, Model model) {
-        if (!JwtUtil.isTokenValid(token)) {
-            return "error";
-        }
-
-        model.addAttribute("token", token);
-        return "reset-password";
+    public String showResetPasswordPage() {
+        return "reset-password.html"; // Tra ve file tu thu muc /static/
     }
 
     @PostMapping("/reset-password")
@@ -77,23 +71,26 @@ public class PasswordResetController {
         String newPassword = request.get("newPassword");
 
         if (token == null || newPassword == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token va mat khau moi khong duoc de trong.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token và mật khẩu mới không được để trống.");
         }
 
+        // Kiem tra token co hop le khong
         if (!JwtUtil.isTokenValid(token)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token khong hop le hoac da het han.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ hoặc đã hết hạn.");
         }
 
+        // Lay email tu JWT Token
         String email = JwtUtil.extractEmail(token);
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nguoi dung khong ton tai.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Người dùng không tồn tại.");
         }
 
+        // Cap nhat mat khau moi
         User user = userOptional.get();
         user.setHashPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        return ResponseEntity.ok("Mat khau da duoc cap nhat thanh cong.");
+        return ResponseEntity.ok("Mật khẩu đã được cập nhật thành công.");
     }
 }

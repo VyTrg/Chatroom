@@ -3,36 +3,38 @@ package com.example.chatroom.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Date;
-import javax.crypto.SecretKey;
 
 public class JwtUtil {
-    private static final String SECRET_KEY = "your-very-secure-and-long-secret-key-32bytes";
-
-    public static String generateToken(String email) {
+    private static final String SECRET_KEY = Base64.getEncoder().encodeToString("yoursecretkeyabcdefghabcdefghabc".getBytes());
+    // Tao token co thoi gian het han
+    public static String generateToken(String email, long expirationMillis) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
-                .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
 
-    public static String extractEmail(String token) {
-        return getClaims(token).getSubject();
-    }
-
+    // Kiem tra token hop le
     public static boolean isTokenValid(String token) {
-        return getClaims(token).getExpiration().after(new Date());
+        try {
+            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    private static Claims getClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
+    // Trich xuat email tu token
+    public static String extractEmail(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(SECRET_KEY)
                 .parseClaimsJws(token)
                 .getBody();
+        return claims.getSubject();
     }
 }

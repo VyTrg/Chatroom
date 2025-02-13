@@ -73,7 +73,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ConversationMember> userConversations;
 
-    @JsonIgnore //prevent recursive result
+    @JsonIgnore
     @OneToMany(mappedBy = "contactOne", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ContactWith> contactOneWiths;
 
