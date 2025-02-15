@@ -1,8 +1,9 @@
 package com.example.chatroom.config;
 
-<<<<<<< HEAD
+
 
 import com.example.chatroom.security.JwtFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,38 +21,27 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 
+
+
 @Configuration
 public class SecurityConfig {
+
     private final JwtFilter jwtFilter;
-
-    public SecurityConfig(JwtFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
-=======
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-
-@Configuration
-public class SecurityConfig {
 
     @Value("${security.password.encoder.strength:10}")
     private int strength;
 
+    public SecurityConfig(JwtFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(strength);
->>>>>>> 9c654eab582b3e21472de4610babb8be24e61c0c
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-<<<<<<< HEAD
         http.csrf(csrf -> csrf.disable()) // Tắt CSRF khi sử dụng JWT
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/logout").permitAll() // Cho phép truy cập không cần login
@@ -70,10 +60,6 @@ public class SecurityConfig {
     }
 
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
 //    @Bean
 //    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -118,25 +104,10 @@ public class SecurityConfig {
         return source;
     }
 
-
-
-
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-=======
-        // Cấu hình CSRF
-//        http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
-        http.csrf(AbstractHttpConfigurer::disable);  // Tắt CSRF để API có thể nhận request từ Postman
-        // Cấu hình các yêu cầu và bảo mật
-        http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register", "/registrationConfirm").permitAll() // Cho phép đăng ký mà không cần xác thực
-                        .anyRequest().authenticated()) // Bảo mật tất cả các yêu cầu còn lại
-                .formLogin(Customizer.withDefaults()); // cấu hình form login
-//                http.formLogin(AbstractHttpConfigurer::disable);// ❌ Tắt form login mặc định
-        return http.build();
-    }
->>>>>>> 9c654eab582b3e21472de4610babb8be24e61c0c
+
+
 }

@@ -1,6 +1,6 @@
 package com.example.chatroom.controller;
 
-<<<<<<< HEAD
+
 import com.example.chatroom.model.User;
 import com.example.chatroom.repository.UserRepository;
 import com.example.chatroom.security.JwtUtil;
@@ -11,22 +11,21 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Optional;
-=======
+
 import com.example.chatroom.dto.UserDto;
 import com.example.chatroom.service.UserServiceRegister;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+
 
 import java.util.HashMap;
-import java.util.Map;
->>>>>>> 9c654eab582b3e21472de4610babb8be24e61c0c
+
+
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-<<<<<<< HEAD
+
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -63,7 +62,7 @@ public class AuthController {
         }
         return ResponseEntity.status(401).body("Invalid credentials");
     }
-=======
+
 
     @Autowired
     private UserServiceRegister userService;
@@ -89,5 +88,5 @@ public class AuthController {
         }
     }
 
->>>>>>> 9c654eab582b3e21472de4610babb8be24e61c0c
+
 }

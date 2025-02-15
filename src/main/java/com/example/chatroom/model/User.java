@@ -7,13 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-<<<<<<< HEAD
-=======
-import java.time.LocalDate;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-
->>>>>>> 9c654eab582b3e21472de4610babb8be24e61c0c
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -57,15 +53,12 @@ public class User {
     private String profilePicture;//file url
 
     @Column(nullable = false, name = "enabled")
-<<<<<<< HEAD
     private Boolean enabled;// true or false
-=======
-    private boolean enabled = false; // Đánh dấu tài khoản đã kích hoạt hay chưa
 
     @JsonIgnore
     @Transient
     private String password;
->>>>>>> 9c654eab582b3e21472de4610babb8be24e61c0c
+
 
     @JsonIgnore
     @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -97,14 +90,11 @@ public class User {
 
     @JsonIgnore
     @OneToMany(mappedBy = "contactTwo", cascade = CascadeType.ALL, orphanRemoval = true)
-<<<<<<< HEAD
     private List<ContactWith> contactTwo;
 
     public User() {
         this.enabled = false;
     }
-=======
-    private Set<ContactWith> contactTwoWiths;
 
     public User(String firstName, String lastName, String username, String password, String email, Boolean status, LocalDateTime lastSeen, String profilePicture, boolean enabled) {
         this.firstName = firstName;
@@ -139,6 +129,5 @@ public class User {
         return new BCryptPasswordEncoder().encode(password);
     }
 
->>>>>>> 9c654eab582b3e21472de4610babb8be24e61c0c
 }
 
