@@ -11,7 +11,10 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
+<<<<<<< HEAD
 
+=======
+>>>>>>> 656a5f37f2d1e12b1886acd83faa1157c10a0f91
 public class ContactWith {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
