@@ -1,4 +1,8 @@
 package com.example.chatroom.repository;
 
-public class VerificationTokenRepository {
+import com.example.chatroom.model.VerificationToken;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Long> {
+    VerificationToken findByToken(String token);
 }

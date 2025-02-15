@@ -6,8 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +40,8 @@ public class User {
     @Column(nullable = false, name = "hash_password")
     private String hashPassword;
 
+    @Email
+    @NotNull
     @Column(nullable = false, name = "email")
     private String email;
 
@@ -49,6 +54,10 @@ public class User {
     @Column(nullable = true, name = "profile_picture")
     private String profilePicture;//file url
 
+    @Column(nullable = false, name = "enabled")
+    private boolean enabled = false; // Đánh dấu tài khoản đã kích hoạt hay chưa
+
+    @JsonIgnore
     @Transient
     private String password;
 
@@ -83,4 +92,39 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "contactTwo", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ContactWith> contactTwoWiths;
+
+    public User(String firstName, String lastName, String username, String password, String email, Boolean status, LocalDateTime lastSeen, String profilePicture, boolean enabled) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.setPassword(password); // Dùng setter để hash mật khẩu
+        this.email = email;
+        this.status = status;
+        this.lastSeen = lastSeen;
+        this.profilePicture = profilePicture;
+        this.enabled = enabled;
+    }
+
+
+    // Hash password trước khi lưu vào database
+    public void setPassword(String password) {
+        this.password = password;
+        this.hashPassword = hashPassword(password);
+    }
+
+    // Tự động hash mật khẩu trước khi lưu hoặc cập nhật
+    @PrePersist
+    @PreUpdate
+    private void preSave() {
+        if (this.password != null) {
+            this.hashPassword = hashPassword(this.password);
+        }
+    }
+
+    // Hash mật khẩu bằng BCrypt
+    private String hashPassword(String password) {
+        return new BCryptPasswordEncoder().encode(password);
+    }
+
 }
+

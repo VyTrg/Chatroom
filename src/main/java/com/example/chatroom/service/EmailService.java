@@ -1,4 +1,9 @@
 package com.example.chatroom.service;
 
-public class EmailService {
+import org.springframework.scheduling.annotation.Async;
+
+public interface EmailService {
+    @Async
+    void sendVerificationEmail(String to, String confirmationUrl);
+    void sendEmail(String to, String subject, String body);
 }
