@@ -3,10 +3,12 @@ package com.example.chatroom.mapper;
 import com.example.chatroom.dto.UserWithContactsDTO;
 import com.example.chatroom.model.ContactWith;
 import com.example.chatroom.model.User;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class UserWithContactsMapper {
     public UserWithContactsDTO toUserWithContactsDTO(User user, List<ContactWith> contacts) {
         UserWithContactsDTO userWithContactsDTO = new UserWithContactsDTO();
@@ -19,12 +21,19 @@ public class UserWithContactsMapper {
         List<UserWithContactsDTO.ContactDTO> contactDTOs = new ArrayList<>();
         for (ContactWith contactWith : contacts) {
             UserWithContactsDTO.ContactDTO contactDTO = new UserWithContactsDTO.ContactDTO();
-            contactDTO.setContactId(contactWith.getId());
-            contactDTO.setContactFirstName(contactWith.getContactTwo().getFirstName());
-            contactDTO.setContactLastName(contactWith.getContactTwo().getLastName());
-            contactDTO.setContactStatus(contactWith.getContactTwo().getStatus());
-            contactDTO.setContactProfilePicture(contactWith.getContactTwo().getProfilePicture());
-            contactDTO.setContactEnabled(contactWith.getContactTwo().getEnabled());
+            User friend;
+            if(contactWith.getContactOne().getId().equals(user.getId())) {//check user's id
+                friend = contactWith.getContactTwo();
+            }
+            else {
+                friend = contactWith.getContactOne();
+            }
+            contactDTO.setContactId(friend.getId());
+            contactDTO.setContactFirstName(friend.getFirstName());
+            contactDTO.setContactLastName(friend.getLastName());
+            contactDTO.setContactStatus(friend.getStatus());
+            contactDTO.setContactProfilePicture(friend.getProfilePicture());
+            contactDTO.setContactEnabled(friend.getEnabled());
             contactDTOs.add(contactDTO);
         }
         userWithContactsDTO.setContacts(contactDTOs);

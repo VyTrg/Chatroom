@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Swipe – The Simplest Chat Platform</title>
+    <title>Chatroom</title>
     <meta name="description" content="#">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap core CSS -->
@@ -12,16 +12,17 @@
     <link href="css/swipe.min.css" type="text/css" rel="stylesheet">
     <!-- Favicon -->
     <link href="img/favicon.png" type="image/png" rel="icon">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </head>
 <body>
 <main>
     <div class="layout">
-        <!-- Start of Navigation -->
         <div class="navigation">
             <div class="container">
                 <div class="inside">
+<!--                    menu-->
                     <div class="nav nav-tab menu">
                         <button class="btn"><img class="avatar-xl" src="img/avatars/avatar-male-1.jpg" alt="avatar"></button>
                         <a href="#members" data-toggle="tab"><i class="material-icons">account_circle</i></a>
@@ -34,13 +35,10 @@
                 </div>
             </div>
         </div>
-        <!-- End of Navigation -->
-        <!-- Start of Sidebar -->
         <div class="sidebar" id="sidebar">
             <div class="container">
                 <div class="col-md-12">
                     <div class="tab-content">
-                        <!-- Start of Contacts -->
                         <div class="tab-pane fade" id="members">
                             <div class="search">
                                 <form class="form-inline position-relative">
@@ -50,135 +48,27 @@
                                 <button class="btn create" data-toggle="modal" data-target="#exampleModalCenter"><i class="material-icons">person_add</i></button>
                             </div>
                             <div class="list-group sort">
-                                <button class="btn filterMembersBtn active show" data-toggle="list" data-filter="all">All</button>
-                                <button class="btn filterMembersBtn" data-toggle="list" data-filter="online">Online</button>
-                                <button class="btn filterMembersBtn" data-toggle="list" data-filter="offline">Offline</button>
+                                <button class="btn filterMembersBtn active show" data-toggle="list" data-filter="all" style="border: none">All</button>
+                                <button class="btn filterMembersBtn" data-toggle="list" data-filter="online" style="border: none">Online</button>
+                                <button class="btn filterMembersBtn" data-toggle="list" data-filter="offline" style="border: none">Offline</button>
                             </div>
+<!--                            contact list-->
                             <div class="contacts">
                                 <h1>Contacts</h1>
                                 <div class="list-group" id="contacts" role="tablist">
-                                    <a href="#" class="filterMembers all online contact" data-toggle="list">
-                                        <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons online">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Janette Dalton</h5>
-                                            <p>Sofia, Bulgaria</p>
-                                        </div>
-                                        <div class="person-add">
-                                            <i class="material-icons">person</i>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="filterMembers all online contact" data-toggle="list">
-                                        <img class="avatar-md" src="img/avatars/avatar-male-1.jpg" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons online">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Michael Knudsen</h5>
-                                            <p>Washington, USA</p>
-                                        </div>
-                                        <div class="person-add">
-                                            <i class="material-icons">person</i>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="filterMembers all online contact" data-toggle="list">
-                                        <img class="avatar-md" src="img/avatars/avatar-female-2.jpg" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons online">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Lean Avent</h5>
-                                            <p>Shanghai, China</p>
-                                        </div>
-                                        <div class="person-add">
-                                            <i class="material-icons">person</i>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="filterMembers all online contact" data-toggle="list">
-                                        <img class="avatar-md" src="img/avatars/avatar-male-2.jpg" data-toggle="tooltip" data-placement="top" title="Mariette" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons online">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Mariette Toles</h5>
-                                            <p>Helena, Montana</p>
-                                        </div>
-                                        <div class="person-add">
-                                            <i class="material-icons">person</i>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="filterMembers all online contact" data-toggle="list">
-                                        <img class="avatar-md" src="img/avatars/avatar-female-3.jpg" data-toggle="tooltip" data-placement="top" title="Harmony" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons online">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Harmony Otero</h5>
-                                            <p>Indore, India</p>
-                                        </div>
-                                        <div class="person-add">
-                                            <i class="material-icons">person</i>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="filterMembers all offline contact" data-toggle="list">
-                                        <img class="avatar-md" src="img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons offline">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Keith Morris</h5>
-                                            <p>Chisinau, Moldova</p>
-                                        </div>
-                                        <div class="person-add">
-                                            <i class="material-icons">person</i>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="filterMembers all offline contact" data-toggle="list">
-                                        <img class="avatar-md" src="img/avatars/avatar-female-6.jpg" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons offline">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Louis Martinez</h5>
-                                            <p>Vienna, Austria</p>
-                                        </div>
-                                        <div class="person-add">
-                                            <i class="material-icons">person</i>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="filterMembers all offline contact" data-toggle="list">
-                                        <img class="avatar-md" src="img/avatars/avatar-male-3.jpg" data-toggle="tooltip" data-placement="top" title="Ryan" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons offline">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Ryan Foster</h5>
-                                            <p>Oslo, Norway</p>
-                                        </div>
-                                        <div class="person-add">
-                                            <i class="material-icons">person</i>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="filterMembers all offline contact" data-toggle="list">
-                                        <img class="avatar-md" src="img/avatars/avatar-male-4.jpg" data-toggle="tooltip" data-placement="top" title="Mildred" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons offline">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Mildred Bennett</h5>
-                                            <p>London, United Kingdom</p>
-                                        </div>
-                                        <div class="person-add">
-                                            <i class="material-icons">person</i>
-                                        </div>
-                                    </a>
+<!--                                    <a href="#" class="filterMembers all online contact" data-toggle="list">-->
+<!--                                        <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">-->
+<!--                                        <div class="status">-->
+<!--                                            <i class="material-icons online">fiber_manual_record</i>-->
+<!--                                        </div>-->
+<!--                                        <div class="data">-->
+<!--                                            <h5>Janette Dalton</h5>-->
+<!--                                        </div>-->
+<!--                                    </a>-->
                                 </div>
                             </div>
                         </div>
-                        <!-- End of Contacts -->
-                        <!-- Start of Discussions -->
+<!--                        discussions-->
                         <div id="discussions" class="tab-pane fade active show">
                             <div class="search">
                                 <form class="form-inline position-relative">
@@ -207,103 +97,6 @@
                                             <h5>Janette Dalton</h5>
                                             <span>Mon</span>
                                             <p>A new feature has been updated to your account. Check it out...</p>
-                                        </div>
-                                    </a>
-                                    <a href="#list-empty" class="filterDiscussions all unread single" id="list-empty-list" data-toggle="list" role="tab">
-                                        <img class="avatar-md" src="img/avatars/avatar-male-1.jpg" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons offline">fiber_manual_record</i>
-                                        </div>
-                                        <div class="new bg-pink">
-                                            <span>+10</span>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Michael Knudsen</h5>
-                                            <span>Sun</span>
-                                            <p>How can i improve my chances of getting a deposit?</p>
-                                        </div>
-                                    </a>
-                                    <a href="#list-chat" class="filterDiscussions all read single" id="list-chat-list2" data-toggle="list" role="tab">
-                                        <img class="avatar-md" src="img/avatars/avatar-female-2.jpg" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons offline">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Lean Avent</h5>
-                                            <span>Tus</span>
-                                            <p>Hey Chris, could i ask you to help me out with variation...</p>
-                                        </div>
-                                    </a>
-                                    <a href="#list-empty" class="filterDiscussions all read single" id="list-empty-list2" data-toggle="list" role="tab">
-                                        <img class="avatar-md" src="img/avatars/avatar-male-2.jpg" data-toggle="tooltip" data-placement="top" title="Mariette" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons offline">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Mariette Toles</h5>
-                                            <span>5 mins</span>
-                                            <p>By injected humour, or randomised words which...</p>
-                                        </div>
-                                    </a>
-                                    <a href="#list-chat" class="filterDiscussions all read single" id="list-chat-list3" data-toggle="list" role="tab">
-                                        <img class="avatar-md" src="img/avatars/avatar-female-3.jpg" data-toggle="tooltip" data-placement="top" title="Harmony" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons online">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Harmony Otero</h5>
-                                            <span>Mon</span>
-                                            <p>No more running out of the office at 4pm on Fridays!</p>
-                                        </div>
-                                    </a>
-                                    <a href="#list-empty" class="filterDiscussions all read single" id="list-empty-list3" data-toggle="list" role="tab">
-                                        <img class="avatar-md" src="img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons offline">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Keith Morris</h5>
-                                            <span>Fri</span>
-                                            <p>All your favourite books at your reach! We are now mobile.</p>
-                                        </div>
-                                    </a>
-                                    <a href="#list-request" class="filterDiscussions all unread single" id="list-request-list" data-toggle="list" role="tab">
-                                        <img class="avatar-md" src="img/avatars/avatar-female-6.jpg" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons offline">fiber_manual_record</i>
-                                        </div>
-                                        <div class="new bg-gray">
-                                            <span>?</span>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Louis Martinez</h5>
-                                            <span>Feb 10</span>
-                                            <p>Hi Keith, I'd like to add you as a contact.</p>
-                                        </div>
-                                    </a>
-                                    <a href="#list-empty" class="filterDiscussions all read single" id="list-empty-list4" data-toggle="list" role="tab">
-                                        <img class="avatar-md" src="img/avatars/avatar-male-3.jpg" data-toggle="tooltip" data-placement="top" title="Ryan" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons offline">fiber_manual_record</i>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Ryan Foster</h5>
-                                            <span>Feb 9</span>
-                                            <p>Dear Deborah, your Thai massage is today at 5pm.</p>
-                                        </div>
-                                    </a>
-                                    <a href="#list-chat" class="filterDiscussions all unread single" id="list-chat-list5" data-toggle="list" role="tab">
-                                        <img class="avatar-md" src="img/avatars/avatar-male-4.jpg" data-toggle="tooltip" data-placement="top" title="Mildred" alt="avatar">
-                                        <div class="status">
-                                            <i class="material-icons offline">fiber_manual_record</i>
-                                        </div>
-                                        <div class="new bg-green">
-                                            <span>+9</span>
-                                        </div>
-                                        <div class="data">
-                                            <h5>Mildred Bennett</h5>
-                                            <span>Thu</span>
-                                            <p>Unfortunately your session today has been cancelled!</p>
                                         </div>
                                     </a>
                                 </div>
@@ -600,8 +393,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- End of Notifications Settings -->
-                                    <!-- Start of Connections -->
                                     <div class="category">
                                         <a href="#" class="title collapsed" id="headingFour" data-toggle="collapse" data-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
                                             <i class="material-icons md-30 online">sync</i>
@@ -819,13 +610,13 @@
                     <div class="content">
                         <form>
                             <div class="form-group">
-                                <label for="user">Username:</label>
+                                <label for="user">Email:</label>
                                 <input type="text" class="form-control" id="user" placeholder="Add recipient..." required>
-                                <div class="user" id="contact">
-                                    <img class="avatar-sm" src="img/avatars/avatar-female-5.jpg" alt="avatar">
-                                    <h5>Keith Morris</h5>
-                                    <button class="btn"><i class="material-icons">close</i></button>
-                                </div>
+<!--                                <div class="user" id="contact">-->
+<!--                                    <img class="avatar-sm" src="img/avatars/avatar-female-5.jpg" alt="avatar">-->
+<!--                                    <h5>Keith Morris</h5>-->
+<!--                                    <button class="btn"><i class="material-icons">close</i></button>-->
+<!--                                </div>-->
                             </div>
                             <div class="form-group">
                                 <label for="welcome">Message:</label>
@@ -1251,5 +1042,36 @@
     scrollToBottom(document.getElementById('content'));
 </script>
 </body>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetchUserData(2);
+    });
+    const baseURL = "http://localhost:8080/api"
+    function fetchUserData(userId) {
+        fetch(baseURL + '/users/' + userId)
+            .then(response => response.json())
+            .then(data => {
+                let contactsList = document.getElementById('contacts');
+                contactsList.innerHTML = ''; // Clear existing contacts
+                data.contacts.forEach(contact => {
+                    let status = contact.status ? "online" : "offline";
+                    let contactCard = `
+                    <a href="#" class="filterMembers all online contact" data-toggle="list">
+                        <img class="avatar-md" src="${contact.contactProfilePicture || 'img/avatars/default-avatar.png'}" data-toggle="tooltip" data-placement="top" title="${contact.contactFirstName}" alt="avatar">
+                        <div class="status">
+                            <i class="material-icons ${status}">fiber_manual_record</i>
+                        </div>
+                        <div class="data">
+                            <h5>${contact.contactFirstName} ${contact.contactLastName}</h5>
+                        </div>
+                    </a>
+                `;
+                    contactsList.innerHTML += contactCard;
+                });
+            })
+            .catch(error => console.error("Error fetching data:", error));
+    }
+
+</script>
 
 </html>

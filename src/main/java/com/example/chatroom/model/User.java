@@ -50,7 +50,7 @@ public class User {
     private String profilePicture;//file url
 
     @Column(nullable = false, name = "enabled")
-    private Boolean enabled;
+    private Boolean enabled;// true or false
 
     @JsonIgnore
     @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -76,13 +76,13 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConversationMember> userConversations;
 
-//    @JsonIgnore //prevent recursive result
-//    @OneToMany(mappedBy = "contactOne", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<ContactWith> contactOneWiths;
+    @JsonIgnore //prevent recursive result
+    @OneToMany(mappedBy = "contactOne", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ContactWith> contactOne;
 
     @JsonIgnore
     @OneToMany(mappedBy = "contactTwo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContactWith> contactList;
+    private List<ContactWith> contactTwo;
 
     public User() {
         this.enabled = false;

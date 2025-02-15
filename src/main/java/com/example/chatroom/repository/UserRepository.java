@@ -10,6 +10,6 @@ import java.util.List;
 
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    @Query(value = "select * from contact_with where contact_one_id = ?",nativeQuery = true)
+    @Query(value = "select * from contact_with where contact_one_id = ?1 and contact_two_id <> ?1 or contact_two_id = ?1 and contact_one_id <> ?1",nativeQuery = true)
     List<ContactWith> findAllContacts(Long userId);
 }

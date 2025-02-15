@@ -16,12 +16,12 @@ public class ContactWith {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "contact_one_id",insertable=false, updatable=false)
+    @ManyToOne(cascade=CascadeType.ALL, optional=false, fetch=FetchType.LAZY)
+    @JoinColumn(name = "contact_one_id")
     private User contactOne;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "contact_two_id",insertable=false, updatable=false)
+    @ManyToOne(cascade=CascadeType.ALL, optional=false, fetch=FetchType.LAZY)
+    @JoinColumn(name = "contact_two_id")
     private User contactTwo;
 
     @Column(nullable = false, name = "created_at")
@@ -33,4 +33,6 @@ public class ContactWith {
     public ContactWith() {
         this.createdAt = LocalDateTime.now();
     }
+
+
 }

@@ -34,10 +34,10 @@ public class ContactWithController {
     public ContactWith updateContact(@PathVariable("id") Long id, @RequestBody ContactWith contactWith) {
         ContactWith contact = contactWithService.getContactWithById(id);
 
-        contact.setContactOne(contactWith.getContactOne());
-        contact.setContactTwo(contactWith.getContactTwo());
-        contact.setCreatedAt(contactWith.getCreatedAt());
-        contact.setDeletedAt(contactWith.getDeletedAt());
+//        contact.setContactOne(contactWith.getContactOne());
+//        contact.setContactTwo(contactWith.getContactTwo());
+//        contact.setCreatedAt(contactWith.getCreatedAt());
+//        contact.setDeletedAt(contactWith.getDeletedAt());
         final ContactWith updatedContact = contactWithService.updateContactWith(contact);
         return ResponseEntity.ok().body(updatedContact).getBody();
     }
