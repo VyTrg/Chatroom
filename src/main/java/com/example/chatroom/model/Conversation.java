@@ -38,9 +38,17 @@ public class Conversation {
 
     @JsonIgnore
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
+<<<<<<< HEAD
     private Set<Message> messages;
 
     @JsonIgnore
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ConversationMember> conversationMembers;
+=======
+    private List<Message> messages;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConversationMember> conversationMembers;
+>>>>>>> a22ce46 (chatroom Huy moi lam dang ky dang nhap co giao dien)
 }

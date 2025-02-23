@@ -16,12 +16,21 @@ public class ContactWith {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+<<<<<<< HEAD
     @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
     @JoinColumn(name = "contact_one_id",insertable=false, updatable=false)
     private User contactOne;
 
     @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
     @JoinColumn(name = "contact_two_id",insertable=false, updatable=false)
+=======
+    @ManyToOne(cascade=CascadeType.ALL, optional=false, fetch=FetchType.LAZY)
+    @JoinColumn(name = "contact_one_id")
+    private User contactOne;
+
+    @ManyToOne(cascade=CascadeType.ALL, optional=false, fetch=FetchType.LAZY)
+    @JoinColumn(name = "contact_two_id")
+>>>>>>> a22ce46 (chatroom Huy moi lam dang ky dang nhap co giao dien)
     private User contactTwo;
 
     @Column(nullable = false, name = "created_at")
@@ -33,4 +42,9 @@ public class ContactWith {
     public ContactWith() {
         this.createdAt = LocalDateTime.now();
     }
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> a22ce46 (chatroom Huy moi lam dang ky dang nhap co giao dien)
 }
