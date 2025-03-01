@@ -107,6 +107,6 @@ public class UserServiceRegisterImpl implements UserServiceRegister {
     }
 
     private boolean emailExists(String email) {
-        return userRepository.findByEmail(email) != null;
+        return userRepository.findByEmail(email).isPresent();
     }
 }
