@@ -37,7 +37,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if (requestURI.contains("/api/auth/login") || requestURI.contains("/api/auth/register")
                 || requestURI.contains("/api/auth/verify") || requestURI.contains("/api/users")
                 || requestURI.contains("/home") || requestURI.contains("/signup") || requestURI.contains("/login")
-                || requestURI.startsWith("/css/") || requestURI.startsWith("/js/") || requestURI.startsWith("/img/") || requestURI.startsWith("/fonts/")) {
+                || requestURI.startsWith("/css/") || requestURI.startsWith("/js/") || requestURI.startsWith("/img/") || requestURI.startsWith("/fonts/")||requestURI.contains("/forgot-password")) {
             chain.doFilter(request, response);
             return;
         }

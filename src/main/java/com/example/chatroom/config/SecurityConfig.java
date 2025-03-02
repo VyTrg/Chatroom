@@ -68,7 +68,8 @@ public class SecurityConfig {
                                 "/js/**",         // Cấp quyền truy cập file JS
                                 "/img/**",        // Cấp quyền truy cập file ảnh
                                 "/fonts/**",      // Cấp quyền truy cập font chữ
-                                "/static/**"      // Đảm bảo các file tĩnh trong static có thể truy cập
+                                "/static/**" ,
+                                "/api/auth/forgot-password"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
