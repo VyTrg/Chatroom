@@ -8,8 +8,12 @@ import lombok.Setter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+
+
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +22,6 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-
 @AllArgsConstructor
 @Table(name = "[user]", schema = "dbo")
 public class User {
@@ -38,6 +41,7 @@ public class User {
     @Column(nullable = false, name = "hash_password")
     private String hashPassword;
 
+
     @Email
     @NotNull
     @Column(nullable = false, name = "email")
@@ -52,13 +56,13 @@ public class User {
     @Column(nullable = true, name = "profile_picture")
     private String profilePicture;//file url
 
+
     @Column(nullable = false, name = "enabled")
     private Boolean enabled;// true or false
 
     @JsonIgnore
     @Transient
     private String password;
-
 
     @JsonIgnore
     @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -130,4 +134,5 @@ public class User {
     }
 
 }
+
 

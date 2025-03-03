@@ -18,7 +18,6 @@ public class JwtUtil {
     private final JwtBlacklistService jwtBlacklistService;
     private static final long EXPIRATION_TIME = 86400000; // 1 ngày
 
-    // Constructor duy nhất, inject cả secret key và JwtBlacklistService
     public JwtUtil(@Value("${jwt.secret}") String secret, JwtBlacklistService jwtBlacklistService) {
         this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
         this.jwtBlacklistService = jwtBlacklistService;
@@ -33,7 +32,6 @@ public class JwtUtil {
     }
 
     public boolean validateToken(String token) {
-        // Kiểm tra nếu token đã bị đưa vào blacklist (đăng xuất)
         if (jwtBlacklistService.isBlacklisted(token)) {
             return false;
         }
@@ -48,13 +46,25 @@ public class JwtUtil {
         }
     }
 
-    public String generateToken(String username) {
+//    public String generateToken(String username) {
+//        return Jwts.builder()
+//                .setSubject(username)
+//                .setIssuedAt(new Date())
+//                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+//    }
+    // 🆕 Tạo token với thời gian hết hạn tùy chỉnh
+    public String generateToken(String username, long expirationTime) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public String generateToken(String username) {
+        return generateToken(username, EXPIRATION_TIME);
     }
 
     public String extractUsername(String token) {
@@ -87,5 +97,15 @@ public class JwtUtil {
         } catch (JwtException e) {
             return true;
         }
+    }
+
+    // 🆕 Trích xuất email từ token
+    public String extractEmail(String token) {
+        return extractUsername(token);
+    }
+
+    // 🆕 Kiểm tra token có hợp lệ không (cho reset password)
+    public boolean isTokenValid(String token) {
+        return validateToken(token);
     }
 }

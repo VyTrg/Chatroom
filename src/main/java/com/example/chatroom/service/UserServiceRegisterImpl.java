@@ -40,7 +40,9 @@ public class UserServiceRegisterImpl implements UserServiceRegister {
         user.setLastName(userDto.getLastName());//lưu họ
         user.setUsername(userDto.getUsername());//lưu tên người dùng
         user.setEmail(userDto.getEmail());//lưu email
-        user.setPassword(passwordEncoder.encode(userDto.getPassword())); //mã hóa mật khẩu trước khi lưu
+//        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        user.setHashPassword(passwordEncoder.encode(userDto.getPassword()));
+        //mã hóa mật khẩu trước khi lưu
         user.setStatus(false);//đặt trạng thái offline
         user.setLastSeen(LocalDateTime.now());//lưu thời gian hoạt động gần nhất của user
         user.setEnabled(false);// tài khoản chưa kích hoạt
@@ -107,6 +109,6 @@ public class UserServiceRegisterImpl implements UserServiceRegister {
     }
 
     private boolean emailExists(String email) {
-        return userRepository.findByEmail(email) != null;
+        return userRepository.findByEmail(email).isPresent();
     }
 }

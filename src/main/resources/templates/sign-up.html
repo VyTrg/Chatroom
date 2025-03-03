@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Sign Up</title>
+	<meta name="description" content="#">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<!-- Bootstrap core CSS -->
+	<link href="../static/css/lib/bootstrap.min.css" type="text/css" rel="stylesheet">
+	<!-- Swipe core CSS -->
+	<link href="../static/css/swipe.min.css" type="text/css" rel="stylesheet">
+	<!-- Favicon -->
+<!--	<link href="img/favicon.png" type="image/png" rel="icon">-->
+</head>
+
+<body class="start">
+<main>
+	<div class="layout">
+		<!-- Start of Sign Up -->
+		<div class="main order-md-2">
+			<div class="start">
+				<div class="container">
+					<div class="col-md-12">
+						<div class="content">
+							<h1>Create Account</h1>
+							<div class="third-party">
+								<button class="btn item bg-blue">
+									<i class="material-icons">pages</i>
+								</button>
+								<button class="btn item bg-teal">
+									<i class="material-icons">party_mode</i>
+								</button>
+								<button class="btn item bg-purple">
+									<i class="material-icons">whatshot</i>
+								</button>
+							</div>
+							<p>or use your email for registration:</p>
+							<form id="signupForm" class="signup">
+								<div class="form-group">
+									<div class="form-group">
+										<input type="text" id="inputLastName" name="LastName" class="form-control" placeholder="Last Name" required>
+									</div>
+									<div class="form-group">
+										<input type="text" id="inputFirstName" name="FirstName" class="form-control" placeholder="First Name" required>
+									</div>
+								</div>
+								<div class="form-parent">
+									<div class="form-group">
+										<input type="text" id="inputUserName" name="username" class="form-control" placeholder="Username" required>
+									</div>
+									<div class="form-group">
+										<input type="email" id="inputEmail" name="email" class="form-control" placeholder="Email Address" required>
+									</div>
+
+								</div>
+								<div class="form-group">
+									<input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
+								</div>
+								<button type="submit" class="btn button">Sign Up</button>
+								<div class="callout">
+									<span>Already a member? <a href="login">Sign In</a></span>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- End of Sign Up -->
+	</div> <!-- Layout -->
+</main>
+
+<!-- Bootstrap core JavaScript -->
+<script src="js/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="js/vendor/popper.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
+<script>
+	document.getElementById("signupForm").addEventListener("submit", function(event) {
+		event.preventDefault();  // Ngăn không cho form gửi mặc định
+
+		const formData = {
+			username: document.getElementById("inputUserName").value,
+			email: document.getElementById("inputEmail").value,
+			password: document.getElementById("inputPassword").value,
+			firstName: document.getElementById("inputFirstName").value,
+			lastName: document.getElementById("inputLastName").value,
+		};
+
+		// Gửi yêu cầu đăng ký đến API
+		fetch("/api/auth/register", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(formData)
+		})
+				.then(response => response.json())
+				.then(data => {
+					if (data.status === "success") {
+						alert(data.message);  // Hiển thị thông báo thành công
+						window.location.href = "/login";  // Chuyển hướng đến trang đăng nhập
+					} else {
+						alert(data.message || "Đã có lỗi xảy ra");  // Nếu message không có, hiển thị thông báo mặc định
+					}
+				})
+				.catch(error => {
+					alert("Có lỗi xảy ra khi đăng ký: " + error);
+				});
+	});
+</script>
+</body>
+
+</html>

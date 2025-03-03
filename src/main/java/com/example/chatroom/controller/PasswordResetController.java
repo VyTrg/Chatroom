@@ -2,7 +2,7 @@ package com.example.chatroom.controller;
 
 import com.example.chatroom.model.User;
 import com.example.chatroom.repository.UserRepository;
-import com.example.chatroom.util.JwtUtil;
+import com.example.chatroom.security.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
@@ -21,11 +21,13 @@ public class PasswordResetController {
     private final UserRepository userRepository;
     private final JavaMailSender mailSender;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public PasswordResetController(UserRepository userRepository, JavaMailSender mailSender, PasswordEncoder passwordEncoder) {
+    public PasswordResetController(UserRepository userRepository, JavaMailSender mailSender, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.mailSender = mailSender;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/forgot-password")
@@ -42,11 +44,11 @@ public class PasswordResetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email không tồn tại trong hệ thống.");
         }
 
-        // Tao JWT token có thoi gian het han
-        String token = JwtUtil.generateToken(email, 15 * 60 * 1000);
+        // 🆕 Tạo token với thời gian hết hạn 15 phút
+        String token = jwtUtil.generateToken(email, 15 * 60 * 1000);
         String resetLink = "http://localhost:8080/reset-password.html#token=" + token;
 
-        // Gui email dat lai mat khau
+        // Gửi email đặt lại mật khẩu
         sendEmail(email, resetLink);
 
         return ResponseEntity.ok("Email đặt lại mật khẩu đã được gửi.");
@@ -60,11 +62,6 @@ public class PasswordResetController {
         mailSender.send(message);
     }
 
-    @GetMapping("/reset-password")
-    public String showResetPasswordPage() {
-        return "reset-password.html"; // Tra ve file tu thu muc /static/
-    }
-
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
         String token = request.get("token");
@@ -74,19 +71,19 @@ public class PasswordResetController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token và mật khẩu mới không được để trống.");
         }
 
-        // Kiem tra token co hop le khong
-        if (!JwtUtil.isTokenValid(token)) {
+        // 🆕 Kiểm tra token có hợp lệ không
+        if (!jwtUtil.isTokenValid(token)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ hoặc đã hết hạn.");
         }
 
-        // Lay email tu JWT Token
-        String email = JwtUtil.extractEmail(token);
+        // 🆕 Lấy email từ JWT Token
+        String email = jwtUtil.extractEmail(token);
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Người dùng không tồn tại.");
         }
 
-        // Cap nhat mat khau moi
+        // Cập nhật mật khẩu mới
         User user = userOptional.get();
         user.setHashPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);

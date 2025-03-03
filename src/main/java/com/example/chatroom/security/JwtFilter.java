@@ -29,37 +29,37 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        String requestURI = request.getRequestURI();
-
-        // Bỏ qua filter nếu là login hoặc register
-        if (requestURI.contains("/api/auth/login") || requestURI.contains("/api/auth/register")) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-        String token = jwtUtil.extractToken(request);
-
-        // 🔴 Kiểm tra token có null hoặc bị logout không (nếu có thì từ chối)
-        if (token == null || jwtBlacklistService.isBlacklisted(token)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Trả về 401 Unauthorized
-            response.getWriter().write("Token không hợp lệ hoặc đã bị đăng xuất.");
-            return;
-        }
-
-        if (jwtUtil.validateToken(token)) {
-            String username = jwtUtil.extractUsername(token);
-            if (username != null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                if (userDetails != null) { // Kiểm tra null để tránh lỗi
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
-            }
-        }
-
-        chain.doFilter(request, response);
+//        String requestURI = request.getRequestURI();
+//
+//        // Bỏ qua filter nếu là login hoặc register
+//        if (requestURI.contains("/api/auth/login") || requestURI.contains("/api/auth/register")) {
+//            chain.doFilter(request, response);
+//            return;
+//        }
+//
+//        String token = jwtUtil.extractToken(request);
+//
+//        // 🔴 Kiểm tra token có null hoặc bị logout không (nếu có thì từ chối)
+//        if (token == null || jwtBlacklistService.isBlacklisted(token)) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Trả về 401 Unauthorized
+//            response.getWriter().write("Token không hợp lệ hoặc đã bị đăng xuất.");
+//            return;
+//        }
+//
+//        if (jwtUtil.validateToken(token)) {
+//            String username = jwtUtil.extractUsername(token);
+//            if (username != null) {
+//                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+//
+//                if (userDetails != null) { // Kiểm tra null để tránh lỗi
+//                    UsernamePasswordAuthenticationToken authToken =
+//                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+//
+//                    SecurityContextHolder.getContext().setAuthentication(authToken);
+//                }
+//            }
+//        }
+//
+//        chain.doFilter(request, response);
     }
 }
