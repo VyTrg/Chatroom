@@ -18,24 +18,35 @@
 <main>
 	<div class="layout">
 		<!-- Start of Sign Up -->
+		<div class="aside order-md-2">
+			<div class="container">
+				<div class="col-md-12">
+					<div class="preference">
+						<h2>Hello, Friend!</h2>
+						<p>Enter your personal details and start your journey with Chatroom today.</p>
+						<a href="login" class="btn button">Sign Up</a>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="main order-md-2">
 			<div class="start">
 				<div class="container">
 					<div class="col-md-12">
 						<div class="content">
 							<h1>Create Account</h1>
-							<div class="third-party">
-								<button class="btn item bg-blue">
-									<i class="material-icons">pages</i>
-								</button>
-								<button class="btn item bg-teal">
-									<i class="material-icons">party_mode</i>
-								</button>
-								<button class="btn item bg-purple">
-									<i class="material-icons">whatshot</i>
-								</button>
-							</div>
-							<p>or use your email for registration:</p>
+<!--							<div class="third-party">-->
+<!--								<button class="btn item bg-blue">-->
+<!--									<i class="material-icons">pages</i>-->
+<!--								</button>-->
+<!--								<button class="btn item bg-teal">-->
+<!--									<i class="material-icons">party_mode</i>-->
+<!--								</button>-->
+<!--								<button class="btn item bg-purple">-->
+<!--									<i class="material-icons">whatshot</i>-->
+<!--								</button>-->
+<!--							</div>-->
+<!--							<p>or use your email for registration:</p>-->
 							<form id="signupForm" class="signup">
 								<div class="form-group">
 									<div class="form-group">
@@ -56,6 +67,9 @@
 								</div>
 								<div class="form-group">
 									<input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
+								</div>
+								<div class="form-group">
+									<input type="password" id="confirmPassword" name="password" class="form-control" placeholder="Confirm Password" required>
 								</div>
 								<button type="submit" class="btn button">Sign Up</button>
 								<div class="callout">
@@ -90,25 +104,31 @@
 		};
 
 		// Gửi yêu cầu đăng ký đến API
-		fetch("/api/auth/register", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(formData)
-		})
-				.then(response => response.json())
-				.then(data => {
-					if (data.status === "success") {
-						alert(data.message);  // Hiển thị thông báo thành công
-						window.location.href = "/login";  // Chuyển hướng đến trang đăng nhập
-					} else {
-						alert(data.message || "Đã có lỗi xảy ra");  // Nếu message không có, hiển thị thông báo mặc định
-					}
-				})
-				.catch(error => {
-					alert("Có lỗi xảy ra khi đăng ký: " + error);
-				});
+		if (document.getElementById("confirmPassword").value !== formData.password.value) {
+			document.getElementById("confirmPassword").setCustomValidity("Passwords Don't Match");
+		}
+		else {
+			fetch("/api/auth/register", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(formData)
+			})
+					.then(response => response.json())
+					.then(data => {
+						if (data.status === "success") {
+							alert(data.message);  // Hiển thị thông báo thành công
+							window.location.href = "/login";  // Chuyển hướng đến trang đăng nhập
+						} else {
+							alert(data.message || "Đã có lỗi xảy ra");  // Nếu message không có, hiển thị thông báo mặc định
+						}
+					})
+					.catch(error => {
+						alert("Có lỗi xảy ra khi đăng ký: " + error);
+					});
+		}
+
 	});
 </script>
 </body>
