@@ -67,9 +67,15 @@
 								</div>
 								<div class="form-group">
 									<input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
+									<span class="position-absolute top-50 end-0 translate-middle-y me-2" onclick="togglePassword('inputPassword', 'toggleIcon1')" style="cursor: pointer;">
+									<i id="toggleIcon1" class="fa fa-eye"></i>
+									</span>
 								</div>
 								<div class="form-group">
 									<input type="password" id="confirmPassword" name="password" class="form-control" placeholder="Confirm Password" required>
+									<span class="position-absolute top-50 end-0 translate-middle-y me-2" onclick="togglePassword('confirmPassword', 'toggleIcon2')" style="cursor: pointer;">
+									<i id="toggleIcon2" class="fa fa-eye"></i>
+									</span>
 								</div>
 								<button type="submit" class="btn button">Sign Up</button>
 								<div class="callout">
@@ -92,7 +98,23 @@
 <script src="js/bootstrap.min.js"></script>
 
 <script>
-	document.getElementById("signupForm").addEventListener("submit", function(event) {
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+
+	function togglePassword(inputId, iconId) {
+		const input = document.getElementById(inputId);
+		const icon = document.getElementById(iconId);
+		if (input.type === "password") {
+			input.type = "text";
+			icon.classList.remove("fa-eye");
+			icon.classList.add("fa-eye-slash");
+		} else {
+			input.type = "password";
+			icon.classList.remove("fa-eye-slash");
+			icon.classList.add("fa-eye");
+		}
+	}
+
+	document.getElementById("signupForm").addEventListener("submit", function (event) {
 		event.preventDefault();  // Ngăn không cho form gửi mặc định
 
 		const formData = {
@@ -107,7 +129,6 @@
 		if (document.getElementById("confirmPassword").value !== formData.password.value) {
 			document.getElementById("confirmPassword").setCustomValidity("Passwords Don't Match");
 		}
-		else {
 			fetch("/api/auth/register", {
 				method: "POST",
 				headers: {
@@ -119,7 +140,7 @@
 					.then(data => {
 						if (data.status === "success") {
 							alert(data.message);  // Hiển thị thông báo thành công
-							window.location.href = "/login";  // Chuyển hướng đến trang đăng nhập
+							window.location.href = "http://localhost:8080/login";  // Chuyển hướng đến trang đăng nhập
 						} else {
 							alert(data.message || "Đã có lỗi xảy ra");  // Nếu message không có, hiển thị thông báo mặc định
 						}
@@ -127,7 +148,7 @@
 					.catch(error => {
 						alert("Có lỗi xảy ra khi đăng ký: " + error);
 					});
-		}
+
 
 	});
 </script>
