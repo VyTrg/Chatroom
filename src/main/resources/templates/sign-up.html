@@ -57,6 +57,9 @@
 								<div class="form-group">
 									<input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
 								</div>
+								<div class="form-group">
+									<input type="password" id="inputConfirmPassword" name="confirmPassword" class="form-control" placeholder="ConfirmPassword" required>
+								</div>
 								<button type="submit" class="btn button">Sign Up</button>
 								<div class="callout">
 									<span>Already a member? <a href="login">Sign In</a></span>
@@ -87,6 +90,7 @@
 			password: document.getElementById("inputPassword").value,
 			firstName: document.getElementById("inputFirstName").value,
 			lastName: document.getElementById("inputLastName").value,
+
 		};
 
 		// Gửi yêu cầu đăng ký đến API

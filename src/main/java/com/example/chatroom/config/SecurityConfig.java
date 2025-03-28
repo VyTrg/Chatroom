@@ -49,7 +49,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/home", "/login", "/sign-up").permitAll()
+                        .requestMatchers("/", "/home", "/login", "/sign-up", "/register").permitAll()
                         .requestMatchers("/api/**").authenticated()
                 )
                 .formLogin(withDefaults())
