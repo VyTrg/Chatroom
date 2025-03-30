@@ -12,7 +12,44 @@
 	<link href="css/swipe.min.css" type="text/css" rel="stylesheet">
 	<!-- Favicon -->
 	<link href="img/favicon.png" type="image/png" rel="icon">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+
+
+<!--	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>-->
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<!-- Popper.js and Bootstrap JS -->
+	<script src="js/vendor/popper.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+
 </head>
+
+<style>
+
+	/*hide egde eyes*/
+	input[type="password"]::-ms-reveal,
+	input[type="password"]::-ms-clear {
+		display: none;
+	}
+
+	.password-container {
+		position: relative;
+	}
+
+	.password-container input {
+		width: 100%;
+		padding-right: 40px;
+	}
+
+	.password-toggle {
+		position: absolute;
+		right: 10px;
+		top: 50%;
+		transform: translateY(-50%);
+		cursor: pointer;
+		color: #888;
+	}
+
+</style>
 
 <body class="start">
 <main>
@@ -35,6 +72,7 @@
 					<div class="col-md-12">
 						<div class="content">
 							<h1>Create Account</h1>
+
 <!--							<div class="third-party">-->
 <!--								<button class="btn item bg-blue">-->
 <!--									<i class="material-icons">pages</i>-->
@@ -48,15 +86,15 @@
 <!--							</div>-->
 <!--							<p>or use your email for registration:</p>-->
 							<form id="signupForm" class="signup">
-								<div class="form-group">
+<!--								<div class="form-group">-->
 									<div class="form-group">
 										<input type="text" id="inputLastName" name="LastName" class="form-control" placeholder="Last Name" required>
 									</div>
 									<div class="form-group">
 										<input type="text" id="inputFirstName" name="FirstName" class="form-control" placeholder="First Name" required>
 									</div>
-								</div>
-								<div class="form-parent">
+<!--								</div>-->
+<!--								<div class="form-parent">-->
 									<div class="form-group">
 										<input type="text" id="inputUserName" name="username" class="form-control" placeholder="Username" required>
 									</div>
@@ -64,24 +102,29 @@
 										<input type="email" id="inputEmail" name="email" class="form-control" placeholder="Email Address" required>
 									</div>
 
-								</div>
+<!--								</div>-->
 								<div class="form-group">
-									<input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
-									<span class="position-absolute top-50 end-0 translate-middle-y me-2" onclick="togglePassword('inputPassword', 'toggleIcon1')" style="cursor: pointer;">
-									<i id="toggleIcon1" class="fa fa-eye"></i>
-									</span>
+									<div class="password-container">
+										<input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password">
+										<i id="togglePassword1" class="fa fa-eye password-toggle"></i>
+									</div>
 								</div>
+
 								<div class="form-group">
-									<input type="password" id="confirmPassword" name="password" class="form-control" placeholder="Confirm Password" required>
-									<span class="position-absolute top-50 end-0 translate-middle-y me-2" onclick="togglePassword('confirmPassword', 'toggleIcon2')" style="cursor: pointer;">
-									<i id="toggleIcon2" class="fa fa-eye"></i>
-									</span>
+									<div class="password-container">
+										<input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password">
+										<i id="togglePassword2" class="fa fa-eye password-toggle"></i>
+									</div>
 								</div>
+
 								<button type="submit" class="btn button">Sign Up</button>
 								<div class="callout">
 									<span>Already a member? <a href="login">Sign In</a></span>
 								</div>
 							</form>
+							<div class="alert alert-light hide" role="alert" id="alert" style="display: none;">
+								Loading...
+							</div>
 						</div>
 					</div>
 				</div>
@@ -92,65 +135,126 @@
 </main>
 
 <!-- Bootstrap core JavaScript -->
-<script src="js/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script>window.jQuery || document.write('<script src="js/vendor/jquery-slim.min.js"><\/script>')</script>
-<script src="js/vendor/popper.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<!--<script src="js/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>-->
+<!--<script>window.jQuery || document.write('<script src="js/vendor/jquery-slim.min.js"><\/script>')</script>-->
+<!--<script src="js/vendor/popper.min.js"></script>-->
+<!--<script src="js/bootstrap.min.js"></script>-->
+
+
 
 <script>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 
-	function togglePassword(inputId, iconId) {
-		const input = document.getElementById(inputId);
-		const icon = document.getElementById(iconId);
-		if (input.type === "password") {
-			input.type = "text";
-			icon.classList.remove("fa-eye");
-			icon.classList.add("fa-eye-slash");
-		} else {
-			input.type = "password";
-			icon.classList.remove("fa-eye-slash");
-			icon.classList.add("fa-eye");
-		}
-	}
+
+	document.addEventListener("DOMContentLoaded", function () {
+		document.querySelectorAll(".password-toggle").forEach(icon => {
+			icon.addEventListener("click", function () {
+				const input = this.previousElementSibling;
+				if (input.type === "password") {
+					input.type = "text";
+					this.classList.replace("fa-eye", "fa-eye-slash");
+				} else {
+					input.type = "password";
+					this.classList.replace("fa-eye-slash", "fa-eye");
+				}
+			});
+		});
+	});
+
 
 	document.getElementById("signupForm").addEventListener("submit", function (event) {
-		event.preventDefault();  // Ngăn không cho form gửi mặc định
+		event.preventDefault();
 
+		const alertLoading = document.getElementById("alert");
+		const passwordInput = document.getElementById("inputPassword");
+		const confirmPasswordInput = document.getElementById("confirmPassword");
+		const lastNameInput = document.getElementById("inputLastName");
+		const firstNameInput = document.getElementById("inputFirstName");
+		const emailInput = document.getElementById("inputEmail");
+		const usernameInput = document.getElementById("inputUserName");
+
+		const password = passwordInput.value.trim();
+		const confirmPassword = confirmPasswordInput.value.trim();
+
+		passwordInput.setCustomValidity("");
+		confirmPasswordInput.setCustomValidity("");
+
+		let hasError = false;
+
+		if (password.length < 8) {
+			passwordInput.setCustomValidity("Password must contain at least 8 characters.");
+			hasError = true;
+		} else if (confirmPassword !== password) {
+			confirmPasswordInput.setCustomValidity("Passwords do not match.");
+			hasError = true;
+		}
+
+		if (hasError) {
+			passwordInput.reportValidity();
+			confirmPasswordInput.reportValidity();
+			passwordInput.value = "";
+			confirmPasswordInput.value = "";
+			return;
+		}
+		alertLoading.style.display = "block";
 		const formData = {
-			username: document.getElementById("inputUserName").value,
-			email: document.getElementById("inputEmail").value,
-			password: document.getElementById("inputPassword").value,
-			firstName: document.getElementById("inputFirstName").value,
-			lastName: document.getElementById("inputLastName").value,
+			lastName: lastNameInput.value,
+			firstName: firstNameInput.value,
+			email: emailInput.value,
+			username: usernameInput.value,
+			password: password
 		};
 
-		// Gửi yêu cầu đăng ký đến API
-		if (document.getElementById("confirmPassword").value !== formData.password.value) {
-			document.getElementById("confirmPassword").setCustomValidity("Passwords Don't Match");
-		}
-			fetch("/api/auth/register", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify(formData)
-			})
-					.then(response => response.json())
-					.then(data => {
-						if (data.status === "success") {
-							alert(data.message);  // Hiển thị thông báo thành công
-							window.location.href = "http://localhost:8080/login";  // Chuyển hướng đến trang đăng nhập
-						} else {
-							alert(data.message || "Đã có lỗi xảy ra");  // Nếu message không có, hiển thị thông báo mặc định
-						}
-					})
-					.catch(error => {
-						alert("Có lỗi xảy ra khi đăng ký: " + error);
-					});
+		fetch("http://localhost:8080/api/auth/register", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(formData)
+		})
+				.then(response => response.json())
+				.then(data => {
+					if (alertLoading) alertLoading.style.display = "none";
+					if (data.status === "success") {
+						alert("Verify message has been sent to your email. Please check your mail.");
+						// window.location.href = "/sign-in.html"; // Redirect to login page
+						lastNameInput.value = "";
+						firstNameInput.value = "";
+						emailInput.value = "";
+						usernameInput.value = "";
+						passwordInput.value = "";
+						confirmPasswordInput.value = "";
+					} else {
+						alert(data.message || "Some errors occurred.");
 
+						lastNameInput.value = "";
+						firstNameInput.value = "";
+						emailInput.value = "";
+						usernameInput.value = "";
+						passwordInput.value = "";
+						confirmPasswordInput.value = "";
+					}
+				})
+				.catch(error => {
+					if (alertLoading) alertLoading.style.display = "none";
+					alert("There are some errors in the registration step: " + error);
 
+					lastNameInput.value = "";
+					firstNameInput.value = "";
+					emailInput.value = "";
+					usernameInput.value = "";
+					passwordInput.value = "";
+					confirmPasswordInput.value = "";
+				});
 	});
+
+	document.getElementById("inputPassword").addEventListener("input", function () {
+		this.setCustomValidity("");
+	});
+	document.getElementById("confirmPassword").addEventListener("input", function () {
+		this.setCustomValidity("");
+	});
+
+
 </script>
 </body>
 
