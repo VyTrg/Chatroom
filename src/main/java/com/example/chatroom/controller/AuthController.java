@@ -84,10 +84,12 @@ public class AuthController {
 
         String token = jwtUtil.generateToken(username);
         System.out.println("Token được tạo: " + token);
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setLocation(URI.create("http://localhost:8080/home"));
-//        return new ResponseEntity<>(headers, HttpStatus.MOVED_PERMANENTLY);
-        return ResponseEntity.ok(Map.of("token", token));
+        return ResponseEntity.ok(Map.of(
+                "token", token,
+                "user", Map.of(
+                        "id", foundUser.getId()
+                )
+        ));
 
     }
 

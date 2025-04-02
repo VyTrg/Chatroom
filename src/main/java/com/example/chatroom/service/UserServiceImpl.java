@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -47,5 +48,10 @@ public class UserServiceImpl implements UserService {
         List<ContactWith> contactList = userRepository.findAllContacts(id);
         userWithContactsDTO = userWithContactsMapper.toUserWithContactsDTO(user, contactList);
         return userWithContactsDTO;
+    }
+
+    @Override
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }

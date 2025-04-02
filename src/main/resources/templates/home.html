@@ -24,7 +24,7 @@
                 <div class="inside">
 <!--                    menu-->
                     <div class="nav nav-tab menu">
-                        <button class="btn"><img class="avatar-xl" src="img/avatars/avatar-male-1.jpg" alt="avatar"></button>
+                        <button class="btn"><img class="avatar-xl" alt="avatar"></button>
                         <a href="#members" data-toggle="tab"><i class="material-icons">account_circle</i></a>
                         <a href="#discussions" data-toggle="tab" class="active"><i class="material-icons active">chat_bubble_outline</i></a>
                         <a href="#notifications" data-toggle="tab" class="f-grow1"><i class="material-icons">notifications_none</i></a>
@@ -217,8 +217,8 @@
                         <div class="tab-pane fade" id="settings">
                             <div class="settings">
                                 <div class="profile">
-                                    <img class="avatar-xl" src="img/avatars/avatar-male-1.jpg" alt="avatar">
-                                    <h1><a href="#">Michael Knudsen</a></h1>
+                                    <img class="avatar-xl" alt="avatar">
+                                    <h1>Michael Knudsen</h1>
 <!--                                    <span>Helena, Montana</span>-->
 <!--                                    <div class="stats">-->
 <!--                                        <div class="item">-->
@@ -251,7 +251,7 @@
                                             <div class="content">
                                                 <div class="upload">
                                                     <div class="data">
-                                                        <img class="avatar-xl" src="img/avatars/avatar-male-1.jpg" alt="image">
+                                                        <img class="avatar-xl" alt="image">
                                                         <label>
                                                             <input type="file">
                                                             <span class="btn button">Upload avatar</span>
@@ -263,24 +263,24 @@
                                                     <div class="parent">
                                                         <div class="field">
                                                             <label for="firstName">First name <span>*</span></label>
-                                                            <input type="text" class="form-control" id="firstName" placeholder="First name" value="Michael" required>
+                                                            <input type="text" class="form-control" id="firstName" placeholder="First name" required>
                                                         </div>
                                                         <div class="field">
                                                             <label for="lastName">Last name <span>*</span></label>
-                                                            <input type="text" class="form-control" id="lastName" placeholder="Last name" value="Knudsen" required>
+                                                            <input type="text" class="form-control" id="lastName" placeholder="Last name" required>
                                                         </div>
                                                     </div>
                                                     <div class="field">
                                                         <label for="email">Email <span>*</span></label>
-                                                        <input type="email" class="form-control" id="email" placeholder="Enter your email address" value="michael@gmail.com" required>
+                                                        <input type="email" class="form-control" id="email" placeholder="Enter your email address" required>
                                                     </div>
                                                     <div class="field">
                                                         <label for="username">Username <span>*</span></label>
-                                                        <input class="form-control" id="username" placeholder="Enter your username" value="michael" required>
+                                                        <input class="form-control" id="username" placeholder="Enter your username" required>
                                                     </div>
                                                     <div class="field">
                                                         <label for="password">Password</label>
-                                                        <input type="password" class="form-control" id="password" placeholder="Enter a new password" value="password" required>
+                                                        <input type="password" class="form-control" id="password" placeholder="Enter a new password" required>
                                                     </div>
 <!--                                                    <div class="field">-->
 <!--                                                        <label for="location">Location</label>-->
@@ -976,34 +976,104 @@
 </script>
 </body>
 <script>
+    const baseURL = "http://localhost:8080/api";
+
     document.addEventListener("DOMContentLoaded", function () {
-        fetchUserData(2);
+        let username = localStorage.getItem("username");
+
+        // if (username) {
+        //     username = decodeURIComponent(username);
+        // }
+
+        if (!username) {
+            console.error("No username found in localStorage.");
+            return;
+        }
+        fetchUserIdByUsername(username);
     });
-    const baseURL = "http://localhost:8080/api"
+
+    function fetchUserIdByUsername(username) {
+        const token = localStorage.getItem("token");
+
+        fetch(`${baseURL}/users/username/${username}`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch user ID");
+                }
+                return response.json();
+            })
+            .then(user => {
+                if (!user || !user.id) {
+                    console.error("User not found or invalid response");
+                    return;
+                }
+                document.getElementById("firstName").value = user.firstName;
+                document.getElementById("lastName").value = user.lastName;
+                document.getElementById("email").value = user.email;
+                document.getElementById("username").value = user.username;
+                document.getElementById("password").value = "";
+
+                const profileName = `${user.firstName} ${user.lastName}`;
+                const profileNameElement = document.querySelector(".profile h1");
+                if (profileNameElement) {
+                    profileNameElement.textContent = profileName;
+                }
+                const userImage = user.image ? user.image : "img/avatars/default-avatar.png";
+                const avatarImages = document.querySelectorAll("img.avatar-xl");
+                avatarImages.forEach(img => {
+                    img.src = userImage;
+                });
+                fetchUserData(user.id);
+            })
+            .catch(error => console.error("Error fetching user ID:", error));
+    }
+
     function fetchUserData(userId) {
-        fetch(baseURL + '/users/' + userId)
-            .then(response => response.json())
+        const token = localStorage.getItem("token");
+
+        fetch(`${baseURL}/users/id/${userId}`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch user data");
+                }
+                return response.json();
+            })
             .then(data => {
                 let contactsList = document.getElementById('contacts');
-                contactsList.innerHTML = ''; // Clear existing contacts
+                contactsList.innerHTML = ''; // Clear previous contacts
+
+                if (!data.contacts || data.contacts.length === 0) {
+                    contactsList.innerHTML = "<p>No contacts found</p>";
+                    return;
+                }
                 data.contacts.forEach(contact => {
                     let status = contact.status ? "online" : "offline";
                     let contactCard = `
-                    <a href="#" class="filterMembers all online contact" data-toggle="list">
-                        <img class="avatar-md" src="${contact.contactProfilePicture || 'img/avatars/default-avatar.png'}" data-toggle="tooltip" data-placement="top" title="${contact.contactFirstName}" alt="avatar">
-                        <div class="status">
-                            <i class="material-icons ${status}">fiber_manual_record</i>
-                        </div>
-                        <div class="data">
-                            <h5>${contact.contactFirstName} ${contact.contactLastName}</h5>
-                        </div>
-                    </a>
-                `;
+                <a href="#" class="filterMembers all ${status} contact" data-toggle="list">
+                    <img class="avatar-md" src="${contact.contactProfilePicture || 'img/avatars/default-avatar.png'}" data-toggle="tooltip" data-placement="top" title="${contact.contactFirstName}" alt="avatar">
+                    <div class="status">
+                        <i class="material-icons ${status}">fiber_manual_record</i>
+                    </div>
+                    <div class="data">
+                        <h5>${contact.contactFirstName} ${contact.contactLastName}</h5>
+                    </div>
+                </a>
+            `;
                     contactsList.innerHTML += contactCard;
                 });
             })
-            .catch(error => console.error("Error fetching data:", error));
+            .catch(error => console.error("Error fetching user data:", error));
     }
+
+
 
 </script>
 

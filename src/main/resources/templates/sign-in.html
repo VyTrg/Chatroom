@@ -145,8 +145,9 @@
 				})
 						.then(response => response.json())
 						.then(data => {
-							if (data.token) {  // ✅ Kiểm tra token thay vì "status"
-								window.location.href = "http://localhost:8080/home"; // Chuyển hướng sau khi đăng nhập thành công
+							if (data.token) {
+								localStorage.setItem("username", formData.username);
+								window.location.href = "http://localhost:8080/home";
 							}
 						})
 						.catch(error => {

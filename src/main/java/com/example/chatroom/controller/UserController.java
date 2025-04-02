@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+import java.util.Optional;
 
 
 @RestController
@@ -30,9 +30,14 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public UserWithContactsDTO getUserInforById(@PathVariable(value = "id")Long userId) {
         return userService.getUserWithContactsDTOById(userId);
+    }
+
+    @GetMapping("/username/{username}")
+    public Optional<User> getUserByUsername(@PathVariable(value = "username")String username) {
+        return userService.getUserByUsername(username);
     }
 
     @PostMapping
