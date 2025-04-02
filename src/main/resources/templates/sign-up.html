@@ -12,6 +12,8 @@
 	<link href="css/swipe.min.css" type="text/css" rel="stylesheet">
 	<!-- Favicon -->
 	<link href="img/favicon.png" type="image/png" rel="icon">
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 </head>
 
 <body class="start">
@@ -50,7 +52,7 @@
 							<form id="signupForm" class="signup">
 								<div class="form-group">
 									<div class="form-group">
-										<input type="text" id="inputLastName" name="LastName" class="form-control" placeholder="Last Name" required>
+										<label for="inputLastName"></label><input type="text" id="inputLastName" name="LastName" class="form-control" placeholder="Last Name" required>
 									</div>
 									<div class="form-group">
 										<input type="text" id="inputFirstName" name="FirstName" class="form-control" placeholder="First Name" required>
@@ -92,13 +94,19 @@
 </main>
 
 <!-- Bootstrap core JavaScript -->
-<script src="js/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script>window.jQuery || document.write('<script src="js/vendor/jquery-slim.min.js"><\/script>')</script>
-<script src="js/vendor/popper.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<!--<script src="../static/js/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>-->
+<!--<script>window.jQuery || document.write('<script src="../static/js/vendor/jquery-slim.min.js"><\/script>')</script>-->
+<!--<script src="../static/js/vendor/popper.min.js"></script>-->
+<!--<script src="../static/js/bootstrap.min.js"></script>-->
+
+<!--<script src="/js/jquery-3.3.1.slim.min.js" integrity="sha256-fNXJFIlca05BIO2Y5zh1xrShK3ME+/lYZ0j+ChxX2DA=" crossorigin="anonymous"></script>-->
+<script src="/js/jquery-3.3.1.slim.min.js"  crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="/js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="/js/vendor/popper.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
 
 <script>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+	// <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 
 	function togglePassword(inputId, iconId) {
 		const input = document.getElementById(inputId);
