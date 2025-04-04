@@ -146,6 +146,7 @@
 						.then(response => response.json())
 						.then(data => {
 							if (data.token) {
+								localStorage.setItem("token", data.token);
 								localStorage.setItem("username", formData.username);
 								window.location.href = "http://localhost:8080/home";
 							}
