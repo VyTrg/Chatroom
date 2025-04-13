@@ -1,6 +1,7 @@
 package com.example.chatroom.controller;
 
 import com.example.chatroom.chat.ChatMessage;
+import com.example.chatroom.service.ChatService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -17,6 +18,14 @@ public class ChatController {
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
         return chatMessage;
     }
+
+    @MessageMapping("/chat.private.{recipient}")
+    @SendTo("/topic/private.{recipient}")
+    public ChatMessage sendPrivateMessage(@Payload ChatMessage chatMessage) { return chatMessage; }
+
+    @MessageMapping("/chat.group.{groupId}")
+    @SendTo("/topic/group.{groupId}")
+    public ChatMessage sendGroupMessage(@Payload ChatMessage chatMessage) {return chatMessage; }
 
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")

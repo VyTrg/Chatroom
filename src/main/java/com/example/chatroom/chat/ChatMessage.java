@@ -14,4 +14,8 @@ public class ChatMessage {
     private String sender;
 
     private MessageType type;
+
+    private String recipient; //chat 1-1
+
+    private String groupID; //chat nhóm
 }
