@@ -70,7 +70,8 @@ public class SecurityConfig {
                                 "/img/**",        // Cấp quyền truy cập file ảnh
                                 "/fonts/**",      // Cấp quyền truy cập font chữ
                                 "/static/**" ,
-                                "/api/auth/forgot-password"
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password"
                         ).permitAll()
                         .anyRequest().authenticated()
                         
