@@ -4,6 +4,7 @@ import com.example.chatroom.dto.UserWithContactsDTO;
 import com.example.chatroom.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
     List<User> getAllUsers();
@@ -15,4 +16,6 @@ public interface UserService {
     void deleteUser(User user);
 
     UserWithContactsDTO getUserWithContactsDTOById(Long id);
+
+    Optional<User> getUserByUsername(String username);
 }

@@ -55,6 +55,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/login",
+                                "/api/auth/verify",
                                 "/api/auth/register",
                                 "/api/auth/logout",
                                 "/api/users/**",  // Cho phép truy cập API users
@@ -69,9 +70,11 @@ public class SecurityConfig {
                                 "/img/**",        // Cấp quyền truy cập file ảnh
                                 "/fonts/**",      // Cấp quyền truy cập font chữ
                                 "/static/**" ,
-                                "/api/auth/forgot-password"
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password"
                         ).permitAll()
                         .anyRequest().authenticated()
+                        
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -82,7 +85,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("*")); // Cho phép tất cả origin truy cập API
+//        config.setAllowedOrigins(List.of("*")); // Cho phép tất cả origin truy cập API
+        config.setAllowedOrigins(List.of("http://localhost:8080"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

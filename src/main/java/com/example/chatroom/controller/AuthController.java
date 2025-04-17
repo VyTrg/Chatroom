@@ -6,11 +6,17 @@ import com.example.chatroom.security.JwtUtil;
 import com.example.chatroom.service.JwtBlacklistService;
 import com.example.chatroom.dto.UserDto;
 import com.example.chatroom.service.UserServiceRegister;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -78,9 +84,15 @@ public class AuthController {
 
         String token = jwtUtil.generateToken(username);
         System.out.println("Token được tạo: " + token);
+        return ResponseEntity.ok(Map.of(
+                "token", token,
+                "user", Map.of(
+                        "id", foundUser.getId()
+                )
+        ));
 
-        return ResponseEntity.ok(Map.of("token", token));
     }
+
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody UserDto userDto) {
@@ -89,7 +101,7 @@ public class AuthController {
             User user = userService.registerNewUserAccount(userDto);
             String token = jwtUtil.generateToken(user.getUsername());
 
-            response.put("message", "Đăng ký thành công! Vui lòng xác nhận email.");
+            response.put("message", "Register successfully. Please check your email address.");
             response.put("token", token);
             response.put("status", "success");
             return ResponseEntity.ok(response);
@@ -98,5 +110,22 @@ public class AuthController {
             response.put("status", "error");
             return ResponseEntity.badRequest().body(response);
         }
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<String> verifUser(@RequestParam("token") String token, HttpServletResponse response) {
+        String result = userService.verifyUser(token);
+
+        if(result.equals("Tài khoản đã được xác minh thành công!")){
+            try{
+                response.sendRedirect("http://localhost:8080/login");
+            }
+            catch(Exception e){
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Xác minh thành công, nhưng không thể chuyển hướng. Hãy thử vào trang đăng nhập.");
+            }
+            return ResponseEntity.ok(result);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
     }
 }

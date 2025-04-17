@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -44,6 +44,7 @@ public class UserServiceRegisterImpl implements UserServiceRegister {
         }
 
         // Tạo đối tượng User mới
+
         User user = new User();
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
@@ -69,7 +70,6 @@ public class UserServiceRegisterImpl implements UserServiceRegister {
         } catch (Exception e) {
             System.out.println("Không gửi được email xác minh: " + e.getMessage());
         }
-
         return savedUser;
     }
 
@@ -106,10 +106,12 @@ public class UserServiceRegisterImpl implements UserServiceRegister {
             return "Mã thông báo xác minh không hợp lệ!";
         }
 
+        if (verificationToken.getExpiryDate().before(new Date())) {
+            return "Mã thông báo xác minh đã hết hạn!";
+        }
         User user = verificationToken.getUser();
         user.setEnabled(true);
         userRepository.save(user);
-
         tokenRepository.deleteById(verificationToken.getId());
 
         return "Tài khoản đã được xác minh thành công!";
@@ -124,4 +126,5 @@ public class UserServiceRegisterImpl implements UserServiceRegister {
     private boolean usernameExists(String username) {
         return userRepository.findByUsername(username).isPresent();
     }
+
 }
