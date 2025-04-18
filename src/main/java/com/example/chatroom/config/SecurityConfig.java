@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -70,11 +71,18 @@ public class SecurityConfig {
                                 "/img/**",        // Cấp quyền truy cập file ảnh
                                 "/fonts/**",      // Cấp quyền truy cập font chữ
                                 "/static/**" ,
-                                "/api/auth/forgot-password"
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password",
+                                "/ws/info/**",
+                                "/ws/**",
+                                "/ws-plans/**",
+                                "/ws-plans",
+                                "/ws-plans/info/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                         
                 )
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -84,8 +92,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+
 //        config.setAllowedOrigins(List.of("*")); // Cho phép tất cả origin truy cập API
-        config.setAllowedOrigins(List.of("http://localhost:8080"));
+//        config.setAllowedOrigins(List.of("http://localhost:8080"));
+
+        config.setAllowedOriginPatterns(List.of("*")); // Cho phép tất cả origin truy cập API và WebSocket
+
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

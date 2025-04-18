@@ -33,11 +33,19 @@ public class JwtFilter extends OncePerRequestFilter {
         // Lấy URI của yêu cầu
         String requestURI = request.getRequestURI();
 
+        // Bỏ qua xác thực cho WebSocket endpoint
+        if (requestURI.equals("/ws") || requestURI.startsWith("/ws/") || requestURI.startsWith("/ws/info")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+
         // Bỏ qua yêu cầu cho các API không yêu cầu JWT, ví dụ như login, register, verify, và các endpoint công khai
         if (requestURI.contains("/api/auth/login") || requestURI.contains("/api/auth/register")
+                || requestURI.contains("/forgot-password") || requestURI.contains("/reset-password")
                 || requestURI.contains("/api/auth/verify") || requestURI.contains("/api/users")
                 || requestURI.contains("/home") || requestURI.contains("/signup") || requestURI.contains("/login")
-                || requestURI.startsWith("/css/") || requestURI.startsWith("/js/") || requestURI.startsWith("/img/") || requestURI.startsWith("/fonts/")||requestURI.contains("/forgot-password")) {
+                || requestURI.startsWith("/css/") || requestURI.startsWith("/js/") || requestURI.startsWith("/img/") || requestURI.startsWith("/fonts/")) {
             chain.doFilter(request, response);
             return;
         }
@@ -45,7 +53,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // Lấy token từ header Authorization
         String token = jwtUtil.extractToken(request);
 
-        // Nếu không có token hoặc token đã bị blacklisted, trả về lỗi Unauthorized
+//        // Nếu không có token hoặc token đã bị blacklisted, trả về lỗi Unauthorized
         if (token == null || jwtBlacklistService.isBlacklisted(token)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Trả về 401 Unauthorized
             response.getWriter().write("Token không hợp lệ hoặc đã bị đăng xuất.");

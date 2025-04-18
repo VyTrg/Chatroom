@@ -46,7 +46,7 @@ public class JwtUtil {
         }
     }
 
-    // 🆕 Tạo token với thời gian hết hạn tùy chỉnh
+    // Tạo token với thời gian hết hạn tùy chỉnh
     public String generateToken(String username, long expirationTime) {
         return Jwts.builder()
                 .setSubject(username)
@@ -92,12 +92,12 @@ public class JwtUtil {
         }
     }
 
-    // 🆕 Trích xuất email từ token
+    // Trích xuất email từ token
     public String extractEmail(String token) {
         return extractUsername(token);
     }
 
-    // 🆕 Kiểm tra token có hợp lệ không (cho reset password)
+    // Kiểm tra token có hợp lệ không (cho reset password)
     public boolean isTokenValid(String token) {
         return validateToken(token);
     }
