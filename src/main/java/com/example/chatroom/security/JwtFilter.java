@@ -33,6 +33,13 @@ public class JwtFilter extends OncePerRequestFilter {
         // Lấy URI của yêu cầu
         String requestURI = request.getRequestURI();
 
+        // Bỏ qua xác thực cho WebSocket endpoint
+        if (requestURI.equals("/ws") || requestURI.startsWith("/ws/") || requestURI.startsWith("/ws/info")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+
         // Bỏ qua yêu cầu cho các API không yêu cầu JWT, ví dụ như login, register, verify, và các endpoint công khai
         if (requestURI.contains("/api/auth/login") || requestURI.contains("/api/auth/register")
                 || requestURI.contains("/forgot-password") || requestURI.contains("/reset-password")
