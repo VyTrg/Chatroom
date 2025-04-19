@@ -58,6 +58,11 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatMessage> loadMessages(int page, int size) {
+        return List.of();
+    }
+
+    @Override
+    public List<ChatMessage> loadMessages(Long conversationId, Long userId, int page, int size) {
         // Triển khai mới với phân trang
         if (messageRepository == null) {
             // Nếu chưa cấu hình repository, sử dụng danh sách trong bộ nhớ
@@ -65,7 +70,7 @@ public class ChatServiceImpl implements ChatService {
             int end = Math.min(start + size, messages.size());
             return new ArrayList<>(messages.subList(start, end));
         }
-
+        validateUserInConversation(conversationId, userId);
         // Nếu đã cấu hình repository
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         List<Message> messageEntities = messageRepository.findAll(pageable).getContent();
@@ -85,6 +90,12 @@ public class ChatServiceImpl implements ChatService {
     public void addMessage(ChatMessage message) {
         // Giữ lại triển khai hiện tại
         messages.add(message);
+    }
+    @Override
+    public void validateUserInConversation(Long conversationId, Long userId) {
+        if (!conversationMemberRepository.existsByUserIdAndConversationId(userId, conversationId)) {
+            throw new RuntimeException("User không thuộc cuộc hội thoại này");
+        }
     }
 
     @Override

@@ -22,14 +22,14 @@
         let currentConversationId = 1; // Thay bằng conversation thực tế
         let username = "alice"; // Giả lập username để test, cần lấy thực tế khi đăng nhập
         let userId = 1; // Nếu cần dùng userId thực
-        let groupId = 1; // Nếu cần dùng groupId
+        let groupId = 123; // Nếu cần dùng groupId
 
         function connectWebSocket() {
             // Thay vì dùng localhost, sử dụng URL tương đối hoặc lấy từ current window location
             const host = window.location.host; // Lấy host hiện tại (hostname:port)
             const protocol = window.location.protocol === 'https:' ? 'https' : 'http';
-            const socket = new SockJS(protocol + '://' + host + '/ws-plans');
-			console.log("Connect WebSocket to: " + protocol + '://' + host + '/ws-plans');
+            const socket = new SockJS(protocol + '://' + host + '/ws');
+			console.log("Connect WebSocket to: " + protocol + '://' + host + '/ws');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 // Lắng nghe topic public
@@ -79,20 +79,7 @@
 			scrollToBottom(chatContent);
 		}
 
-        // Gán sự kiện gửi cho form thay vì button để đảm bảo mọi trường hợp đều gửi được
-        document.addEventListener("DOMContentLoaded", function() {
-			connectWebSocket();
-            var bottomForm = document.querySelector('.bottom form');
-            if (bottomForm) {
-                bottomForm.onsubmit = function(e) {
-                    e.preventDefault();
-                    sendMessage();
-                };
-            }
-        });
-
-		// connectWebSocket();
-	</script>
+	</script>ws://localhost:8080/wsws://localhost:8080/wsws://localhost:8080/wsws://localhost:8080/ws
 
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {

@@ -1,95 +1,10 @@
-//package com.example.chatroom.controller;
-//
-//import com.example.chatroom.chat.ChatMessage;
-//import com.example.chatroom.model.Message;
-//import com.example.chatroom.service.ChatService;
-//import org.modelmapper.ModelMapper;
-//import org.springframework.messaging.handler.annotation.MessageMapping;
-//import org.springframework.messaging.handler.annotation.Payload;
-//import org.springframework.messaging.handler.annotation.SendTo;
-//import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-//import org.springframework.stereotype.Controller;
-//
-//import java.util.List;
-//import java.util.Objects;
-//
-//@Controller
-//public class ChatController {
-//
-//    private final ChatService chatService;
-//    private final ModelMapper modelMapper;
-//
-//    public ChatController(ChatService chatService) {
-//        this.chatService = chatService;
-//        this.modelMapper = modelMapper;
-//    }
-//
-//    @MessageMapping("/chat.newMessage")
-//    public void newMessage(@Payload ChatMessage chatMessage) {
-//        chatService.addMessage(chatMessage);
-//    }
-//
-//    @MessageMapping("/chat.loadMessages")
-//    public List<ChatMessage> loadMessages() {
-//        return chatService.loadMessages();
-//    }
-//
-////    @MessageMapping("/chat.sendMessage")
-////    @SendTo("/topic/public")
-////    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-////        return chatMessage;
-////    }
-////
-////    @MessageMapping("/chat.private.{recipient}")
-////    @SendTo("/topic/private.{recipient}")
-////    public ChatMessage sendPrivateMessage(@Payload ChatMessage chatMessage) { return chatMessage; }
-//
-////    @MessageMapping("/chat.group.{groupId}")
-////    @SendTo("/topic/group.{groupId}")
-////    public ChatMessage sendGroupMessage(@Payload ChatMessage chatMessage) {return chatMessage; }
-//
-//    // Gửi tin nhắn public
-//    @MessageMapping("/chat.sendMessage")
-//    @SendTo("/topic/public")
-//    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-//        // Chuyển ChatMessage (DTO) sang Message (entity)
-//        Message messageEntity = modelMapper.map(chatMessage, Message.class);
-//        chatService.addMessage(messageEntity); // Lưu DB
-//        return chatMessage; // Broadcast lại
-//    }
-//
-//    // Gửi tin nhắn riêng tư
-//    @MessageMapping("/chat.private.{recipient}")
-//    @SendTo("/topic/private.{recipient}")
-//    public ChatMessage sendPrivateMessage(@Payload ChatMessage chatMessage) {
-//        Message messageEntity = modelMapper.map(chatMessage, Message.class);
-//        chatService.addMessage(messageEntity);
-//        return chatMessage;
-//    }
-//
-//    @MessageMapping("/chat.group.{groupId}")
-//    @SendTo("/topic/group.{groupId}")
-//    public ChatMessage sendGroupMessage(@Payload ChatMessage chatMessage) {
-//        Message messageEntity = modelMapper.map(chatMessage, Message.class);
-//        chatService.addMessage(messageEntity);
-//        return chatMessage;
-//    }
-//
-//    @MessageMapping("/chat.addUser")
-//    @SendTo("/topic/public")
-//    public ChatMessage addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-//        // add username in web socket session
-//        Objects.requireNonNull(headerAccessor.getSessionAttributes()).put("username", chatMessage.getSender());
-//        return chatMessage;
-//    }
-//}
-
 package com.example.chatroom.controller;
 
 import com.example.chatroom.chat.ChatMessage;
 import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.Message;
 import com.example.chatroom.model.User;
+import com.example.chatroom.repository.ConversationMemberRepository;
 import com.example.chatroom.repository.ConversationRepository;
 import com.example.chatroom.repository.UserRepository;
 import com.example.chatroom.service.ChatService;
@@ -100,6 +15,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDateTime;
@@ -113,16 +29,19 @@ public class ChatController {
     private final ChatService chatService;
     private final UserRepository userRepository;
     private final ConversationRepository conversationRepository;
+    private final ConversationMemberRepository conversationMemberRepository;
     private final ModelMapper modelMapper;
 
     @Autowired
     public ChatController(ChatService chatService,
                           UserRepository userRepository,
                           ConversationRepository conversationRepository,
+                          ConversationMemberRepository conversationMemberRepository,
                           ModelMapper modelMapper) {
         this.chatService = chatService;
         this.userRepository = userRepository;
         this.conversationRepository = conversationRepository;
+        this.conversationMemberRepository = conversationMemberRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -138,9 +57,7 @@ public class ChatController {
         return chatService.loadMessages(page, size);
     }
 
-    /**
-     * Gửi tin nhắn công khai và lưu vào DB
-     */
+    //Gửi tin nhắn công khai
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
@@ -161,9 +78,11 @@ public class ChatController {
         return chatMessage; // Trả về cho client để hiển thị
     }
 
-    /**
-     * Gửi tin nhắn riêng tư và lưu vào DB
-     */
+
+// tin nhắn 1-1
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     @MessageMapping("/chat.private.{recipient}")
     @SendTo("/topic/private.{recipient}")
     public ChatMessage sendPrivateMessage(@Payload ChatMessage chatMessage,
@@ -187,14 +106,19 @@ public class ChatController {
 
             // Lưu tin nhắn vào DB
             chatService.saveMessage(message);
+            // Gửi trực tiếp cho user nhận (dùng /user/queue/private)
+            messagingTemplate.convertAndSendToUser(
+                    recipient, "/queue/private", chatMessage
+            );
         }
+        System.out.println("Recipient: " + recipient);
+        System.out.println("Sender: " + chatMessage.getSender());
+        System.out.println("Gửi tới /user/" + recipient + "/queue/private");
 
         return chatMessage;
     }
 
-    /**
-     * Gửi tin nhắn nhóm và lưu vào DB
-     */
+//gửi tin nhắn nhóm
     @MessageMapping("/chat.group.{groupId}")
     @SendTo("/topic/group.{groupId}")
     public ChatMessage sendGroupMessage(@Payload ChatMessage chatMessage,
@@ -203,6 +127,11 @@ public class ChatController {
         Optional<Conversation> conversation = conversationRepository.findById(groupId);
 
         if (sender.isPresent() && conversation.isPresent() && conversation.get().getIsGroup()) {
+            // Kiểm tra quyền
+            boolean isMember = conversationMemberRepository
+                    .existsByUserIdAndConversationId(sender.get().getId(), groupId);
+            if (!isMember) throw new RuntimeException("Bạn không thuộc nhóm này!");
+
             // Tạo entity Message để lưu
             Message message = new Message();
             message.setMessageText(chatMessage.getContent());
@@ -214,12 +143,11 @@ public class ChatController {
             // Lưu tin nhắn vào DB
             chatService.saveMessage(message);
         }
-
         return chatMessage;
     }
 
     /**
-     * Thêm người dùng vào kênh public
+     * Thêm người dùng vào kênh công khai
      */
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")

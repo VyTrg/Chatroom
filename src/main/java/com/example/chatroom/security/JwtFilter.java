@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -33,13 +34,6 @@ public class JwtFilter extends OncePerRequestFilter {
         // Lấy URI của yêu cầu
         String requestURI = request.getRequestURI();
 
-        // Bỏ qua xác thực cho WebSocket endpoint
-        if (requestURI.equals("/ws") || requestURI.startsWith("/ws/") || requestURI.startsWith("/ws/info")) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-
         // Bỏ qua yêu cầu cho các API không yêu cầu JWT, ví dụ như login, register, verify, và các endpoint công khai
         if (requestURI.contains("/api/auth/login") || requestURI.contains("/api/auth/register")
                 || requestURI.contains("/forgot-password") || requestURI.contains("/reset-password")
@@ -53,7 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // Lấy token từ header Authorization
         String token = jwtUtil.extractToken(request);
 
-//        // Nếu không có token hoặc token đã bị blacklisted, trả về lỗi Unauthorized
+        // Nếu không có token hoặc token đã bị blacklisted, trả về lỗi Unauthorized
         if (token == null || jwtBlacklistService.isBlacklisted(token)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Trả về 401 Unauthorized
             response.getWriter().write("Token không hợp lệ hoặc đã bị đăng xuất.");
