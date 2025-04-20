@@ -32,16 +32,32 @@ public class JwtUtil {
     }
 
     public boolean validateToken(String token) {
-        if (jwtBlacklistService.isBlacklisted(token)) {
+        System.out.println("=== [JWT_UTIL] Đang xác thực token ===");
+
+        if (token == null || token.isEmpty()) {
+            System.out.println("[JWT_UTIL] Token rỗng hoặc null");
             return false;
         }
+
+        if (jwtBlacklistService.isBlacklisted(token)) {
+            System.out.println("[JWT_UTIL] Token đã bị blacklist");
+            return false;
+        }
+
         try {
             Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token);
+
+            String username = extractUsername(token);
+            System.out.println("[JWT_UTIL] Token hợp lệ cho user: " + username);
             return true;
+        } catch (ExpiredJwtException e) {
+            System.err.println("[JWT_UTIL] Token đã hết hạn: " + e.getMessage());
+            return false;
         } catch (JwtException e) {
+            System.err.println("[JWT_UTIL] Lỗi xác thực token: " + e.getMessage());
             return false;
         }
     }
@@ -61,14 +77,20 @@ public class JwtUtil {
     }
 
     public String extractUsername(String token) {
+        System.out.println("[JWT_UTIL] Đang trích xuất username từ token");
+
         try {
-            return Jwts.parserBuilder()
+            String username = Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody()
                     .getSubject();
+
+            System.out.println("[JWT_UTIL] Username trích xuất được: " + username);
+            return username;
         } catch (JwtException e) {
+            System.err.println("[JWT_UTIL] Lỗi khi trích xuất username: " + e.getMessage());
             return null;
         }
     }
