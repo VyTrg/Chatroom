@@ -81,16 +81,15 @@ public class SecurityConfig {
                                 "/api/auth/reset-password",
                                 // Cho phép truy cập các endpoint WebSocket mà không cần xác thực trong security filter
                                 // Việc xác thực sẽ được xử lý bởi WebSocketConfig
-                                "/ws/**",         
-                                "/ws-plans/**",
-                                "/ws-plans",
-                                "/ws-plans/info/**",
-                                "/ws/info/**"
+                                "/ws",
+                                "/ws/**",
+                                "/ws/info/**",
+                                "/testchatusers.html"
                         ).permitAll()
                         .anyRequest().authenticated()
                         
                 )
-                .csrf(AbstractHttpConfigurer::disable)
+//                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

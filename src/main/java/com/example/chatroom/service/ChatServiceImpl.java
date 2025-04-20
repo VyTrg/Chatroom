@@ -1,4 +1,3 @@
-
 package com.example.chatroom.service;
 
 import com.example.chatroom.chat.ChatMessage;
@@ -10,6 +9,7 @@ import com.example.chatroom.model.User;
 import com.example.chatroom.repository.ConversationMemberRepository;
 import com.example.chatroom.repository.ConversationRepository;
 import com.example.chatroom.repository.MessageRepository;
+import com.example.chatroom.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -34,19 +34,22 @@ public class ChatServiceImpl implements ChatService {
     private MessageRepository messageRepository;
     private ConversationRepository conversationRepository;
     private ConversationMemberRepository conversationMemberRepository;
+    private UserRepository userRepository;
     private ModelMapper modelMapper;
 
     // Constructor với các phụ thuộc tùy chọn
     @Autowired
     public ChatServiceImpl(
-            // Nếu các repository chưa có, bạn có thể tạm thời comment chúng lại
+            // Nếu các repository chưa có, bạn có thể tạm thói comment chúng lại
             Optional<MessageRepository> messageRepository,
             Optional<ConversationRepository> conversationRepository,
             Optional<ConversationMemberRepository> conversationMemberRepository,
+            Optional<UserRepository> userRepository,
             Optional<ModelMapper> modelMapper) {
         this.messageRepository = messageRepository.orElse(null);
         this.conversationRepository = conversationRepository.orElse(null);
         this.conversationMemberRepository = conversationMemberRepository.orElse(null);
+        this.userRepository = userRepository.orElse(null);
         this.modelMapper = modelMapper.orElse(null);
     }
 
@@ -91,6 +94,7 @@ public class ChatServiceImpl implements ChatService {
         // Giữ lại triển khai hiện tại
         messages.add(message);
     }
+
     @Override
     public void validateUserInConversation(Long conversationId, Long userId) {
         if (!conversationMemberRepository.existsByUserIdAndConversationId(userId, conversationId)) {
@@ -118,10 +122,7 @@ public class ChatServiceImpl implements ChatService {
             System.err.println("[CHAT_SERVICE] Lỗi: Repository chưa được cấu hình đầy đủ");
             throw new IllegalStateException("Repository chưa được cấu hình đầy đủ");
         }
-
         try {
-            // Tìm cuộc hội thoại riêng tư giữa hai người dùng
-            System.out.println("[CHAT_SERVICE] Đang tìm cuộc hội thoại giữa: " + user1.getId() + " và " + user2.getId());
             Optional<Conversation> existingConversation = conversationRepository
                     .findPrivateConversationBetween(user1.getId(), user2.getId());
 
@@ -130,28 +131,32 @@ public class ChatServiceImpl implements ChatService {
                 return existingConversation.get();
             }
 
+            // Lấy lại User từ database để đảm bảo managed entity
+            User managedUser1 = userRepository.findById(user1.getId()).orElseThrow();
+            User managedUser2 = userRepository.findById(user2.getId()).orElseThrow();
+
             // Tạo cuộc hội thoại mới
             System.out.println("[CHAT_SERVICE] Không tìm thấy cuộc hội thoại, tạo mới");
-            Conversation newConversation = new Conversation();
-            newConversation.setName(user1.getUsername() + " & " + user2.getUsername());
-            newConversation.setIsGroup(false);
-            newConversation.setCreatedAt(LocalDateTime.now());
-
-            Conversation savedConversation = conversationRepository.save(newConversation);
+            Conversation conversation = new Conversation();
+            conversation.setIsGroup(false);
+            conversation.setCreatedAt(LocalDateTime.now());
+            // Đặt tên cuộc hội thoại (bắt buộc, không được null)
+            conversation.setName(managedUser1.getUsername() + " & " + managedUser2.getUsername());
+            Conversation savedConversation = conversationRepository.save(conversation);
             System.out.println("[CHAT_SERVICE] Đã tạo cuộc hội thoại mới với ID: " + savedConversation.getId());
 
-            // Thêm thành viên
+            // Thêm thành viên vào cuộc hội thoại (phải dùng managed entity)
             System.out.println("[CHAT_SERVICE] Thêm user1 vào cuộc hội thoại");
             ConversationMember member1 = new ConversationMember();
             member1.setConversation(savedConversation);
-            member1.setUser(user1);
+            member1.setUser(managedUser1);
             member1.setRole("member");
             conversationMemberRepository.save(member1);
 
             System.out.println("[CHAT_SERVICE] Thêm user2 vào cuộc hội thoại");
             ConversationMember member2 = new ConversationMember();
             member2.setConversation(savedConversation);
-            member2.setUser(user2);
+            member2.setUser(managedUser2);
             member2.setRole("member");
             conversationMemberRepository.save(member2);
 
@@ -181,5 +186,15 @@ public class ChatServiceImpl implements ChatService {
                 messageRepository.save(message);
             }
         });
+    }
+
+    @Override
+    public Conversation getGroupConversationById(Long groupId) {
+        return conversationRepository.findById(groupId).orElse(null);
+    }
+
+    @Override
+    public List<ConversationMember> getGroupMembers(Long groupId) {
+        return conversationMemberRepository.findAllByConversationId(groupId);
     }
 }
