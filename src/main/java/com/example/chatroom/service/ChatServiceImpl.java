@@ -110,38 +110,58 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional
     public Conversation findOrCreatePrivateConversation(User user1, User user2) {
+        System.out.println("=== [CHAT_SERVICE] Tìm hoặc tạo cuộc hội thoại riêng tư ===");
+        System.out.println("[CHAT_SERVICE] User1 ID: " + user1.getId() + ", username: " + user1.getUsername());
+        System.out.println("[CHAT_SERVICE] User2 ID: " + user2.getId() + ", username: " + user2.getUsername());
+
         if (conversationRepository == null || conversationMemberRepository == null) {
+            System.err.println("[CHAT_SERVICE] Lỗi: Repository chưa được cấu hình đầy đủ");
             throw new IllegalStateException("Repository chưa được cấu hình đầy đủ");
         }
 
-        // Tìm cuộc hội thoại riêng tư giữa hai người dùng
-        Optional<Conversation> existingConversation = conversationRepository
-                .findPrivateConversationBetween(user1.getId(), user2.getId());
+        try {
+            // Tìm cuộc hội thoại riêng tư giữa hai người dùng
+            System.out.println("[CHAT_SERVICE] Đang tìm cuộc hội thoại giữa: " + user1.getId() + " và " + user2.getId());
+            Optional<Conversation> existingConversation = conversationRepository
+                    .findPrivateConversationBetween(user1.getId(), user2.getId());
 
-        if (existingConversation.isPresent()) {
-            return existingConversation.get();
+            if (existingConversation.isPresent()) {
+                System.out.println("[CHAT_SERVICE] Đã tìm thấy cuộc hội thoại: " + existingConversation.get().getId());
+                return existingConversation.get();
+            }
+
+            // Tạo cuộc hội thoại mới
+            System.out.println("[CHAT_SERVICE] Không tìm thấy cuộc hội thoại, tạo mới");
+            Conversation newConversation = new Conversation();
+            newConversation.setName(user1.getUsername() + " & " + user2.getUsername());
+            newConversation.setIsGroup(false);
+            newConversation.setCreatedAt(LocalDateTime.now());
+
+            Conversation savedConversation = conversationRepository.save(newConversation);
+            System.out.println("[CHAT_SERVICE] Đã tạo cuộc hội thoại mới với ID: " + savedConversation.getId());
+
+            // Thêm thành viên
+            System.out.println("[CHAT_SERVICE] Thêm user1 vào cuộc hội thoại");
+            ConversationMember member1 = new ConversationMember();
+            member1.setConversation(savedConversation);
+            member1.setUser(user1);
+            member1.setRole("member");
+            conversationMemberRepository.save(member1);
+
+            System.out.println("[CHAT_SERVICE] Thêm user2 vào cuộc hội thoại");
+            ConversationMember member2 = new ConversationMember();
+            member2.setConversation(savedConversation);
+            member2.setUser(user2);
+            member2.setRole("member");
+            conversationMemberRepository.save(member2);
+
+            System.out.println("[CHAT_SERVICE] Hoàn tất tạo cuộc hội thoại và thêm thành viên");
+            return savedConversation;
+        } catch (Exception e) {
+            System.err.println("[CHAT_SERVICE] Lỗi khi tìm/tạo cuộc hội thoại: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
-
-        // Tạo cuộc hội thoại mới
-        Conversation newConversation = new Conversation();
-        newConversation.setName(user1.getUsername() + " & " + user2.getUsername());
-        newConversation.setIsGroup(false);
-        newConversation.setCreatedAt(LocalDateTime.now());
-
-        Conversation savedConversation = conversationRepository.save(newConversation);
-
-        // Thêm thành viên
-        ConversationMember member1 = new ConversationMember();
-        member1.setConversation(savedConversation);
-        member1.setUser(user1);
-        conversationMemberRepository.save(member1);
-
-        ConversationMember member2 = new ConversationMember();
-        member2.setConversation(savedConversation);
-        member2.setUser(user2);
-        conversationMemberRepository.save(member2);
-
-        return savedConversation;
     }
 
     @Override

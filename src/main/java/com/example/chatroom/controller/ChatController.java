@@ -78,72 +78,62 @@ public class ChatController {
         return chatMessage; // Trả về cho client để hiển thị
     }
 
-
-// tin nhắn 1-1
+    //Gửi tin nhắn 1-1 (private)
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.private.{recipient}")
-    @SendTo("/topic/private.{recipient}")
-    public ChatMessage sendPrivateMessage(@Payload ChatMessage chatMessage,
-                                          @DestinationVariable String recipient) {
-        // Tìm người gửi và người nhận
+    public void sendPrivateMessage(@Payload ChatMessage chatMessage,
+                                   @DestinationVariable String recipient) {
+        System.out.println("=== [CHAT_CONTROLLER] Bắt đầu xử lý tin nhắn riêng tư ===");
+        System.out.println("[CHAT_CONTROLLER] Người gửi: " + chatMessage.getSender());
+        System.out.println("[CHAT_CONTROLLER] Người nhận: " + recipient);
+        System.out.println("[CHAT_CONTROLLER] Nội dung: " + chatMessage.getContent());
+        System.out.println("[CHAT_CONTROLLER] Loại tin nhắn: " + chatMessage.getType());
+
         Optional<User> sender = userRepository.findByUsername(chatMessage.getSender());
         Optional<User> recipientUser = userRepository.findByUsername(recipient);
+        System.out.println("[CHAT_CONTROLLER] Người gửi tồn tại: " + sender.isPresent());
+        System.out.println("[CHAT_CONTROLLER] Người nhận tồn tại: " + recipientUser.isPresent());
 
         if (sender.isPresent() && recipientUser.isPresent()) {
-            // Tìm hoặc tạo cuộc hội thoại riêng tư giữa hai người
-            Conversation conversation = chatService.findOrCreatePrivateConversation(
-                    sender.get(), recipientUser.get());
-
-            // Tạo entity Message để lưu
+            Conversation conversation = chatService.findOrCreatePrivateConversation(sender.get(), recipientUser.get());
             Message message = new Message();
             message.setMessageText(chatMessage.getContent());
             message.setSender(sender.get());
             message.setConversation(conversation);
             message.setCreatedAt(LocalDateTime.now());
             message.setIsRead(false);
-
-            // Lưu tin nhắn vào DB
             chatService.saveMessage(message);
-            // Gửi trực tiếp cho user nhận (dùng /user/queue/private)
+            // Gửi trực tiếp cho user nhận (chuẩn STOMP /user/queue/private)
             messagingTemplate.convertAndSendToUser(
-                    recipient, "/queue/private", chatMessage
+                recipient, "/queue/private", chatMessage
             );
         }
-        System.out.println("Recipient: " + recipient);
-        System.out.println("Sender: " + chatMessage.getSender());
-        System.out.println("Gửi tới /user/" + recipient + "/queue/private");
-
-        return chatMessage;
     }
 
-//gửi tin nhắn nhóm
+    //Gửi tin nhắn nhóm (group)
     @MessageMapping("/chat.group.{groupId}")
-    @SendTo("/topic/group.{groupId}")
-    public ChatMessage sendGroupMessage(@Payload ChatMessage chatMessage,
-                                        @DestinationVariable Long groupId) {
+    public void sendGroupMessage(@Payload ChatMessage chatMessage,
+                                 @DestinationVariable Long groupId) {
         Optional<User> sender = userRepository.findByUsername(chatMessage.getSender());
         Optional<Conversation> conversation = conversationRepository.findById(groupId);
-
         if (sender.isPresent() && conversation.isPresent() && conversation.get().getIsGroup()) {
-            // Kiểm tra quyền
             boolean isMember = conversationMemberRepository
-                    .existsByUserIdAndConversationId(sender.get().getId(), groupId);
+                .existsByUserIdAndConversationId(sender.get().getId(), groupId);
             if (!isMember) throw new RuntimeException("Bạn không thuộc nhóm này!");
-
-            // Tạo entity Message để lưu
             Message message = new Message();
             message.setMessageText(chatMessage.getContent());
             message.setSender(sender.get());
             message.setConversation(conversation.get());
             message.setCreatedAt(LocalDateTime.now());
             message.setIsRead(false);
-
-            // Lưu tin nhắn vào DB
             chatService.saveMessage(message);
+            // Gửi tới tất cả thành viên nhóm
+            messagingTemplate.convertAndSend(
+                "/topic/group." + groupId, chatMessage
+            );
         }
-        return chatMessage;
     }
 
     /**
