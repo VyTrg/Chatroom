@@ -20,10 +20,14 @@ public interface ChatService {
      */
     List<ChatMessage> loadMessages(int page, int size);
 
+    List<ChatMessage> loadMessages(Long conversationId, Long userId, int page, int size);
+
     /**
      * Thêm tin nhắn DTO vào bộ nhớ tạm
      */
     void addMessage(ChatMessage message);
+
+    void validateUserInConversation(Long conversationId, Long userId);
 
     /**
      * Lưu tin nhắn entity vào database
@@ -35,8 +39,7 @@ public interface ChatService {
      */
     Conversation findOrCreatePrivateConversation(User user1, User user2);
 
-    /**
-     * Đánh dấu tin nhắn đã đọc
-     */
+
+//     Đánh dấu tin nhắn đã đọc
     void markMessageAsRead(Long messageId, Long userId);
 }

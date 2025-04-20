@@ -8,6 +8,7 @@ import com.example.chatroom.dto.UserDto;
 import com.example.chatroom.service.UserServiceRegister;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
+@Slf4j
 public class AuthController {
 
     private final JwtUtil jwtUtil;
@@ -49,6 +51,7 @@ public class AuthController {
 
         token = token.substring(7); // Cắt bỏ "Bearer " ở đầu
         System.out.println(" Đang logout với token: " + token);
+        log.info(" Đang logout với token: " + token);
 
         jwtBlacklistService.addToBlacklist(token);
 
@@ -60,12 +63,18 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
         String username = request.get("username");
         String password = request.get("password");
-
+        log.info("Đang đăng nhập: " + username);
         Optional<User> user = userRepository.findByUsername(username);
 
         if (user.isEmpty()) {
             System.out.println("User không tồn tại: " + username);
+            log.info("User không tồn tại: " + username);
             return ResponseEntity.status(401).body("Tài khoản không tồn tại.");
+        }
+        if (password == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Lỗi: Mật khẩu không được để trống");
         }
 
         User foundUser = user.get();
@@ -118,7 +127,7 @@ public class AuthController {
 
         if(result.equals("Tài khoản đã được xác minh thành công!")){
             try{
-                response.sendRedirect("http://localhost:8080/login");
+                response.sendRedirect("http://localhost:8080/api/auth/login");
             }
             catch(Exception e){
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

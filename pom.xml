@@ -123,6 +123,10 @@
 			<artifactId>spring-security-crypto</artifactId>
 			<version>6.4.2</version> <!-- or latest available -->
 		</dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
     </dependencies>
 
 	<build>

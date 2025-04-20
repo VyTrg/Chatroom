@@ -1,5 +1,7 @@
 package com.example.chatroom.config;
 
+import com.example.chatroom.repository.UserRepository;
+import com.example.chatroom.security.CustomUserDetailsService;
 import com.example.chatroom.security.JwtFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -41,11 +43,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        // Bạn có thể thay đổi cách lấy user từ cơ sở dữ liệu nếu cần
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(User.withUsername("admin").password("{noop}password").roles("USER").build());
-        return manager;
+//    public UserDetailsService userDetailsService() {
+//        // Bạn có thể thay đổi cách lấy user từ cơ sở dữ liệu nếu cần
+//        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+//        manager.createUser(User.withUsername("admin").password("{noop}password").roles("USER").build());
+//        return manager;
+//    }
+
+    public UserDetailsService userDetailsService(UserRepository userRepository) {
+        return new CustomUserDetailsService(userRepository);
     }
 
     @Bean
@@ -73,11 +79,13 @@ public class SecurityConfig {
                                 "/static/**" ,
                                 "/api/auth/forgot-password",
                                 "/api/auth/reset-password",
-                                "/ws/info/**",
-                                "/ws/**",
+                                // Cho phép truy cập các endpoint WebSocket mà không cần xác thực trong security filter
+                                // Việc xác thực sẽ được xử lý bởi WebSocketConfig
+                                "/ws/**",         
                                 "/ws-plans/**",
                                 "/ws-plans",
-                                "/ws-plans/info/**"
+                                "/ws-plans/info/**",
+                                "/ws/info/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                         

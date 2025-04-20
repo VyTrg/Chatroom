@@ -10,6 +10,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+import java.util.Map;
 import java.util.Objects;
 
 @Component
@@ -24,7 +25,18 @@ public class WebSocketEventListener {
             SessionDisconnectEvent event
     ) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String username = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("username").toString();
+//        String username = Objects.requireNonNull(headerAccessor.getSessionAttributes()).get("username").toString();
+        Map<String, Object> sessionAttributes = headerAccessor.getSessionAttributes();
+        if (sessionAttributes == null) {
+            // Có thể log hoặc bỏ qua, hoặc return
+            return;
+        }
+        Object usernameObj = sessionAttributes.get("username");
+        if (usernameObj == null) {
+            // Có thể log hoặc bỏ qua, hoặc return
+            return;
+        }
+        String username = usernameObj.toString();
         if (username != null) {
             log.info("Disconnected from {}", username);
             var chatMessage = ChatMessage.builder()
