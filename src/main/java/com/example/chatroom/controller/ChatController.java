@@ -149,4 +149,10 @@ public class ChatController {
 
         return chatMessage;
     }
+
+    @MessageMapping("/chat.send")
+    @SendTo("/topic/public")
+    public String sendMessage(@Payload String message) {
+        return message;
+    }
 }
