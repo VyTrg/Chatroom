@@ -16,4 +16,13 @@ public class ChatMessage {
     private String content;
     private String sender;
     private String recipient;
+    private String recipientId;
+
+    public String getRecipientId() {
+        return recipientId;
+    }
+
+    public void setRecipientId(String recipientId) {
+        this.recipientId = recipientId;
+    }
 }
