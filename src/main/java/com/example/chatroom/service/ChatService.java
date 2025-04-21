@@ -2,6 +2,7 @@ package com.example.chatroom.service;
 
 import com.example.chatroom.chat.ChatMessage;
 import com.example.chatroom.model.Conversation;
+import com.example.chatroom.model.ConversationMember;
 import com.example.chatroom.model.Message;
 import com.example.chatroom.model.User;
 
@@ -39,6 +40,9 @@ public interface ChatService {
      */
     Conversation findOrCreatePrivateConversation(User user1, User user2);
 
+    Conversation getGroupConversationById(Long groupId);
+
+    List<ConversationMember> getGroupMembers(Long groupId);
 
 //     Đánh dấu tin nhắn đã đọc
     void markMessageAsRead(Long messageId, Long userId);

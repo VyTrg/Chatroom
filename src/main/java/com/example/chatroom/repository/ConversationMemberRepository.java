@@ -37,4 +37,7 @@ public interface ConversationMemberRepository extends JpaRepository<Conversation
             "WHERE cm1.conversation = cm2.conversation " +
             "AND cm1.user.id = :userId1 AND cm2.user.id = :userId2")
     boolean haveSharedConversation(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
+
+    // Lấy thành viên nhóm
+    List<ConversationMember> findAllByConversationId(Long conversationId);
 }

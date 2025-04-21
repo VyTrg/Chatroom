@@ -19,11 +19,13 @@ public class ConversationMember {
     private Long id;
 
     @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "conversation_id",insertable=false, updatable=false)
+//    @JoinColumn(name = "conversation_id",insertable=false, updatable=false)
+    @JoinColumn(name = "conversation_id") // bỏ insertable=false, updatable=false
     private Conversation conversation;
 
     @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "user_id",insertable=false, updatable=false)
+//    @JoinColumn(name = "user_id",insertable=false, updatable=false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Column(nullable = false, name = "role")
