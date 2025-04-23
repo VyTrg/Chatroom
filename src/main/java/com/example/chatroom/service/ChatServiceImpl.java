@@ -197,4 +197,11 @@ public class ChatServiceImpl implements ChatService {
     public List<ConversationMember> getGroupMembers(Long groupId) {
         return conversationMemberRepository.findAllByConversationId(groupId);
     }
+
+    @Override
+    public boolean isUserInGroup(User user, Conversation group) {
+        if (user == null || group == null) return false;
+        // Kiểm tra bằng conversationMemberRepository
+        return conversationMemberRepository.existsByUserIdAndConversationId(user.getId(), group.getId());
+    }
 }

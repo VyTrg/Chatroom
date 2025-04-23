@@ -44,28 +44,42 @@
 <div class="container">
     <h2>Chatroom Multi-User Test</h2>
     <div class="user-actions" id="userConnectArea">
-        <input class="input" id="usernameInput" placeholder="Username">
         <input class="input" id="tokenInput" placeholder="JWT Token">
         <button class="btn" onclick="connectDynamicUser()">Connect User</button>
     </div>
     <div id="userChats"></div>
-    <div class="footer"> 2025 Chatroom Test UI. Powered by STOMP/WebSocket.</div>
 </div>
 <script>
     const clients = {};
+    function parseJwt (token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            return null;
+        }
+    }
     function connectDynamicUser() {
-        const username = document.getElementById('usernameInput').value.trim();
         const token = document.getElementById('tokenInput').value.trim();
-        if (!username || !token) {
-            alert('Vui lòng nhập username và token!');
+        if (!token) {
+            alert('Vui lòng nhập JWT token!');
             return;
         }
+        const payload = parseJwt(token);
+        if (!payload || !payload.sub) {
+            alert('Token không hợp lệ hoặc không chứa username!');
+            return;
+        }
+        const username = payload.sub;
         if (clients[username]) {
             alert(username + ' đã kết nối!');
             return;
         }
         addUserChatCard(username);
-        // Luôn dùng ws://localhost:8080/ws để tránh lỗi khi chạy frontend ở cổng khác
         let wsUrl = 'ws://localhost:8080/ws'; 
         const stompClient = new StompJs.Client({
             brokerURL: wsUrl,
@@ -76,21 +90,28 @@
             reconnectDelay: 5000,
             onConnect: function(frame) {
                 showSystemMsg(username, '<b>' + username + '</b> đã kết nối!');
-                console.log(`[${username}] Subscribing to /user/queue/private`);
-                // ĐĂNG KÝ NHẬN TIN NHẮN PRIVATE
+                // Subscribe PRIVATE
                 stompClient.subscribe('/user/queue/private', function(message) {
-                    console.log(`[${username}] Received private msg:`, message.body);
                     let msg;
-                    try { msg = JSON.parse(message.body); } catch { msg = {sender: message.headers['sender-id'] || 'unknown', content: message.body}; }
+                    try { msg = JSON.parse(message.body); } catch { msg = {sender: 'unknown', content: message.body}; }
                     addMsg(username, msg.sender, msg.content);
                 });
-                console.log(`[${username}] Subscribing to /topic/public`);
+                // Subscribe PUBLIC
                 stompClient.subscribe('/topic/public', function(message) {
-                    console.log(`[${username}] Received public msg:`, message.body);
                     let msg;
                     try { msg = JSON.parse(message.body); } catch { msg = {sender: 'public', content: message.body}; }
                     addMsg(username, msg.sender, msg.content, true);
                 });
+                // Subscribe GROUP (nếu nhập Group ID)
+                const groupInput = document.getElementById('groupid-' + username);
+                if (groupInput && groupInput.value.trim() !== '') {
+                    const groupId = groupInput.value.trim();
+                    stompClient.subscribe('/topic/group.' + groupId, function(message) {
+                        let msg;
+                        try { msg = JSON.parse(message.body); } catch { msg = {sender: 'group', content: message.body}; }
+                        addMsg(username, msg.sender, msg.content, false, true);
+                    });
+                }
             },
             onWebSocketError: function(e) {
                 alert('Lỗi kết nối WebSocket: ' + (e && e.message ? e.message : e));
@@ -124,10 +145,10 @@
         `;
         userChats.appendChild(card);
     }
-    function sendPrivateMsg(from) {
-        const toId = document.getElementById('toid-' + from).value.trim();
-        const content = document.getElementById('msg-' + from).value;
-        if (!clients[from]) {
+    function sendPrivateMsg(username) {
+        const toId = document.getElementById('toid-' + username).value.trim();
+        const content = document.getElementById('msg-' + username).value;
+        if (!clients[username]) {
             alert('User chưa kết nối!');
             return;
         }
@@ -135,61 +156,49 @@
             alert('Vui lòng nhập user ID người nhận và nội dung!');
             return;
         }
-        clients[from].publish({
+        clients[username].publish({
             destination: '/app/chat.private',
             body: JSON.stringify({
                 type: "CHAT",
                 content: content,
-                sender: from,
+                sender: username,
                 recipientId: toId
             })
         });
-        addMsg(from, from, content);
-        document.getElementById('msg-' + from).value = '';
+        addMsg(username, username, content);
+        document.getElementById('msg-' + username).value = '';
     }
-    function sendPublicMsg(from) {
-        const content = document.getElementById('msg-' + from).value;
-        if (!clients[from]) return;
+    function sendPublicMsg(username) {
+        const content = document.getElementById('msg-' + username).value;
+        if (!clients[username]) return;
         if (!content || content.trim() === '') return;
-        clients[from].publish({
+        clients[username].publish({
             destination: '/app/chat.sendMessage',
             body: JSON.stringify({
                 type: "CHAT",
                 content: content,
-                sender: from
+                sender: username
             })
         });
-        addMsg(from, from, content, true);
-        document.getElementById('msg-' + from).value = '';
+        addMsg(username, username, content, true);
+        document.getElementById('msg-' + username).value = '';
     }
-    function sendGroupMsg(from) {
-        const content = document.getElementById('msg-' + from).value;
-        const groupId = document.getElementById('groupid-' + from).value.trim();
-        if (!clients[from]) return;
-        if (!content || content.trim() === '' || !groupId) return;
-        clients[from].publish({
+    function sendGroupMsg(username) {
+        const groupId = document.getElementById('groupid-' + username).value.trim();
+        const content = document.getElementById('msg-' + username).value;
+        if (!clients[username]) return;
+        if (!groupId || !content || content.trim() === '') return;
+        clients[username].publish({
             destination: '/app/chat.group',
             body: JSON.stringify({
                 type: "CHAT",
                 content: content,
-                sender: from,
-                recipient: groupId
+                sender: username,
+                groupId: parseInt(groupId)
             })
         });
-        addMsg(from, from, content, false, true);
-        document.getElementById('msg-' + from).value = '';
-        subscribeToGroup(from, groupId);
-    }
-    function subscribeToGroup(username, groupId) {
-        if (!clients[username] || !groupId) return;
-        if (!clients[username].subscribedGroups) clients[username].subscribedGroups = new Set();
-        if (clients[username].subscribedGroups.has(groupId)) return;
-        clients[username].subscribedGroups.add(groupId);
-        clients[username].subscribe(`/topic/group.${groupId}`, function(message) {
-            let msg;
-            try { msg = JSON.parse(message.body); } catch { msg = {sender: 'group', content: message.body}; }
-            addMsg(username, msg.sender, msg.content, false, true);
-        });
+        addMsg(username, username, content, false, true);
+        document.getElementById('msg-' + username).value = '';
     }
     function addMsg(username, sender, content, isPublic=false, isGroup=false) {
         const chat = document.getElementById('chat-' + username);

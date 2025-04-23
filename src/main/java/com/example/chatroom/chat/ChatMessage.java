@@ -15,14 +15,8 @@ public class ChatMessage {
     private MessageType type;
     private String content;
     private String sender;
-    private String recipient;
+    private Long groupId;
     private String recipientId;
 
-    public String getRecipientId() {
-        return recipientId;
-    }
-
-    public void setRecipientId(String recipientId) {
-        this.recipientId = recipientId;
-    }
 }
+
