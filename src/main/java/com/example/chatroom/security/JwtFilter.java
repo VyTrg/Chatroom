@@ -31,23 +31,38 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        // Lấy URI của yêu cầu
         String requestURI = request.getRequestURI();
 
-        if (requestURI.startsWith("/ws")) {
+        // Gom các endpoint/public resource cần bỏ qua vào 1 mảng để dễ bảo trì
+        final String[] skipEndpoints = {
+                "/api/auth/login", "/api/auth/register", "/forgot-password", "/reset-password",
+                "/api/auth/verify", "/api/users", "/home", "/signup", "/login"
+        };
+
+        // Bỏ qua cho WebSocket và static resource
+        if (requestURI.startsWith("/ws") ||
+            requestURI.startsWith("/css/") || requestURI.startsWith("/js/") ||
+            requestURI.startsWith("/img/") || requestURI.startsWith("/fonts/") ||
+            java.util.Arrays.stream(skipEndpoints).anyMatch(requestURI::contains)) {
             chain.doFilter(request, response);
             return;
         }
 
-        // Bỏ qua yêu cầu cho các API không yêu cầu JWT, ví dụ như login, register, verify, và các endpoint công khai
-        if (requestURI.contains("/api/auth/login") || requestURI.contains("/api/auth/register")
-                || requestURI.contains("/forgot-password") || requestURI.contains("/reset-password")
-                || requestURI.contains("/api/auth/verify") || requestURI.contains("/api/users")
-                || requestURI.contains("/home") || requestURI.contains("/signup") || requestURI.contains("/login")
-                || requestURI.startsWith("/css/") || requestURI.startsWith("/js/") || requestURI.startsWith("/img/") || requestURI.startsWith("/fonts/")) {
-            chain.doFilter(request, response);
-            return;
-        }
+//        if (requestURI.startsWith("/ws")) {
+//            chain.doFilter(request, response);
+//            return;
+//        }
+//
+//        // Bỏ qua yêu cầu cho các API không yêu cầu JWT, ví dụ như login, register, verify, và các endpoint công khai
+//        if (requestURI.contains("/api/auth/login") || requestURI.contains("/api/auth/register")
+//                || requestURI.contains("/forgot-password") || requestURI.contains("/reset-password")
+//                || requestURI.contains("/api/auth/verify") || requestURI.contains("/api/users")
+//                || requestURI.contains("/home") || requestURI.contains("/signup") || requestURI.contains("/login")
+//                || requestURI.startsWith("/css/") || requestURI.startsWith("/js/") || requestURI.startsWith("/img/") || requestURI.startsWith("/fonts/")) {
+//            chain.doFilter(request, response);
+//            return;
+//        }
+
 
         // Lấy token từ header Authorization
         String token = jwtUtil.extractToken(request);

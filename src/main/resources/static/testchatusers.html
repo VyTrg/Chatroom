@@ -139,6 +139,7 @@
                 <button class="btn" onclick="sendPrivateMsg('${username}')">Send Private</button>
                 <button class="btn" onclick="sendPublicMsg('${username}')">Send Public</button>
                 <button class="btn" onclick="sendGroupMsg('${username}')">Send Group</button>
+                <button class="btn" onclick="joinGroup('${username}')">Join Group</button>
                 <button class="btn" style="background:#e1562f;" onclick="disconnectUser('${username}')">Disconnect</button>
             </div>
             <div class="chat-area" id="chat-${username}"></div>
@@ -184,22 +185,64 @@
         document.getElementById('msg-' + username).value = '';
     }
     function sendGroupMsg(username) {
-        const groupId = document.getElementById('groupid-' + username).value.trim();
-        const content = document.getElementById('msg-' + username).value;
-        if (!clients[username]) return;
-        if (!groupId || !content || content.trim() === '') return;
+        const groupInput = document.getElementById('groupid-' + username);
+        const msgInput = document.getElementById('msg-' + username);
+        if (!groupInput || !msgInput || groupInput.value.trim() === '' || msgInput.value.trim() === '') {
+            alert('Vui lòng nhập Group ID và nội dung tin nhắn!');
+            return;
+        }
+        const groupId = groupInput.value.trim();
+        const content = msgInput.value.trim();
+        if (!clients[username]) {
+            alert('User chưa kết nối!');
+            return;
+        }
         clients[username].publish({
             destination: '/app/chat.group',
-            body: JSON.stringify({
-                type: "CHAT",
-                content: content,
-                sender: username,
-                groupId: parseInt(groupId)
-            })
+            body: JSON.stringify({ sender: username, content: content, groupId: groupId })
         });
-        addMsg(username, username, content, false, true);
-        document.getElementById('msg-' + username).value = '';
+        // --- OLD CODE: Hiển thị luôn tin nhắn cho người gửi gây double ---
+        // addMsg(username, username, content, false, true);
+        // --- END OLD CODE ---
+        msgInput.value = '';
     }
+    // --- OLD joinGroup code bị trùng subscription ---
+    /*
+    function joinGroup(username) {
+        const groupInput = document.getElementById('groupid-' + username);
+        if (groupInput && groupInput.value.trim() !== '') {
+            const groupId = groupInput.value.trim();
+            if (clients[username]) {
+                clients[username].subscribe('/topic/group.' + groupId, function(message) {
+                    let msg;
+                    try { msg = JSON.parse(message.body); } catch { msg = {sender: 'group', content: message.body}; }
+                    addMsg(username, msg.sender, msg.content, false, true);
+                });
+                showSystemMsg(username, 'Đã join group ' + groupId);
+            }
+        }
+    }
+    */
+    // --- END OLD CODE ---
+    // --- FIX: Chỉ subscribe 1 lần cho mỗi group mỗi user ---
+    function joinGroup(username) {
+        const groupInput = document.getElementById('groupid-' + username);
+        if (groupInput && groupInput.value.trim() !== '') {
+            const groupId = groupInput.value.trim();
+            if (!clients[username].groupSubscriptions) clients[username].groupSubscriptions = {};
+            if (clients[username].groupSubscriptions[groupId]) {
+                showSystemMsg(username, 'Đã join group này rồi!');
+                return;
+            }
+            clients[username].groupSubscriptions[groupId] = clients[username].subscribe('/topic/group.' + groupId, function(message) {
+                let msg;
+                try { msg = JSON.parse(message.body); } catch { msg = {sender: 'group', content: message.body}; }
+                addMsg(username, msg.sender, msg.content, false, true);
+            });
+            showSystemMsg(username, 'Đã join group ' + groupId);
+        }
+    }
+    // --- END FIX ---
     function addMsg(username, sender, content, isPublic=false, isGroup=false) {
         const chat = document.getElementById('chat-' + username);
         const msgDiv = document.createElement('div');

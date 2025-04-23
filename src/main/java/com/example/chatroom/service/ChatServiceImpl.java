@@ -200,8 +200,12 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public boolean isUserInGroup(User user, Conversation group) {
-        if (user == null || group == null) return false;
-        // Kiểm tra bằng conversationMemberRepository
-        return conversationMemberRepository.existsByUserIdAndConversationId(user.getId(), group.getId());
+        if (user == null || group == null) {
+            System.out.println("[isUserInGroup] user or group is null! user=" + user + ", group=" + group);
+            return false;
+        }
+        boolean result = conversationMemberRepository.existsByUserIdAndConversationId(user.getId(), group.getId());
+        System.out.println("[isUserInGroup] userId=" + user.getId() + ", groupId=" + group.getId() + ", exists=" + result);
+        return result;
     }
 }
