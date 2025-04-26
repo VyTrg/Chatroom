@@ -850,21 +850,21 @@
         fetch('/api/contacts', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
                 contactOne: { id: window.currentUserId },
                 contactTwo: { id: userObj.id }
             })
         })
-        .then(async res => {
-            if (res.ok) {
+        .then(async r => {
+            if (r.ok) {
                 errorDiv.style.color = 'green';
                 errorDiv.textContent = 'Đã gửi yêu cầu kết bạn!';
-                loadConversations(); // Cập nhật lại danh sách hội thoại
+                loadConversations();
             } else {
-                let msg = await res.text();
+                let msg = await r.text();
                 errorDiv.textContent = msg || 'Gửi yêu cầu thất bại!';
             }
         })
@@ -1039,6 +1039,22 @@
     if(notificationTab) notificationTab.addEventListener('click', loadFriendRequests);
 </script>
 <script>
+    $(document).ready(function() {
+        function showTab(tabId) {
+            $('.tab-pane').removeClass('show active');
+            $(tabId).addClass('show active');
+        }
+        // Map sidebar icon to tab content
+        $('#sidebar .nav-link').on('click', function(e) {
+            e.preventDefault();
+            const tab = $(this).data('tab');
+            if(tab) showTab(tab);
+        });
+        // Optionally, select default tab on load
+        showTab('#discussions');
+    });
+</script>
+<script>
     // Hàm kiểm tra trạng thái bạn bè và render nút phù hợp
     function renderFriendActionButton(targetUserId, isFriend) {
         if (targetUserId == window.currentUserId) return '';
@@ -1049,32 +1065,25 @@
         }
     }
 
-    // Gửi yêu cầu kết bạn đúng chuẩn API backend
+    // Gửi yêu cầu kết bạn
     function sendFriendRequest(targetUserId) {
-        // Lấy userId hiện tại từ biến toàn cục hoặc từ backend render ra (ví dụ: window.currentUserId)
-        const fromUserId = window.currentUserId || window.userId || null;
-        if (!fromUserId) {
-            alert('Không xác định được userId của bạn!');
-            return;
-        }
         fetch('/api/contacts', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
             body: JSON.stringify({
-                contactOne: { id: fromUserId },
+                contactOne: { id: window.currentUserId },
                 contactTwo: { id: targetUserId }
             })
-        })
-        .then(res => {
-            if (!res.ok) return res.text().then(t => { throw new Error(t); });
-            return res.json();
-        })
-        .then(data => {
-            alert('Kết bạn thành công!');
-            loadConversations(); // Cập nhật lại danh sách hội thoại
-        })
-        .catch(e => {
-            alert('Lỗi kết bạn: ' + e.message);
+        }).then(res => {
+            if (res.ok) {
+                alert('Đã gửi lời mời kết bạn!');
+                // Có thể reload lại danh sách bạn bè hoặc cập nhật nút
+            } else {
+                res.text().then(txt=>alert('Kết bạn thất bại: '+txt));
+            }
         });
     }
 
