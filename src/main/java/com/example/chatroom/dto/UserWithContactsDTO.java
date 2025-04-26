@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,11 +13,14 @@ import java.util.List;
 @NoArgsConstructor
 //@Getter
 //@Setter
+
 public class UserWithContactsDTO {
     private Long userId;
     private String firstName;
     private String lastName;
     private String profilePicture;
+    private String email;
+    private String username;
     private Boolean status;
     private Boolean enabled;
     private List<ContactDTO> contacts;
@@ -30,6 +34,8 @@ public class UserWithContactsDTO {
         private String contactFirstName;
         private String contactLastName;
         private String contactProfilePicture;
+        private String contactEmail;
+        private String contactUsername;
         private Boolean contactStatus;
         private Boolean contactEnabled;
         private LocalDateTime createdAt;
@@ -98,6 +104,22 @@ public class UserWithContactsDTO {
         public void setDeletedAt(LocalDateTime deletedAt) {
             this.deletedAt = deletedAt;
         }
+
+        public String getContactUsername() {
+            return contactUsername;
+        }
+
+        public void setContactUsername(String contactUsername) {
+            this.contactUsername = contactUsername;
+        }
+
+        public String getContactEmail() {
+            return contactEmail;
+        }
+
+        public void setContactEmail(String contactEmail) {
+            this.contactEmail = contactEmail;
+        }
     }
 
     public Long getUserId() {
@@ -154,5 +176,21 @@ public class UserWithContactsDTO {
 
     public void setContacts(List<ContactDTO> contacts) {
         this.contacts = contacts;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

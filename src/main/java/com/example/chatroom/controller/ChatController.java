@@ -53,14 +53,14 @@ public class ChatController {
     public void sendPrivate(@Payload ChatMessage chatMessage) {
         User sender = userRepository.findByUsername(chatMessage.getSender()).orElse(null);
         User recipient = null;
-//        if (chatMessage.getRecipientId() != null) {
-//            try {
-//                Long recipientId = Long.parseLong(chatMessage.getRecipientId());
-//                recipient = userRepository.findById(recipientId).orElse(null);
-//            } catch (Exception e) {
-//                recipient = null;
-//            }
-//        }
+        if (chatMessage.getRecipientId() != null) {
+            try {
+                Long recipientId = Long.parseLong(chatMessage.getRecipientId());
+                recipient = userRepository.findById(recipientId).orElse(null);
+            } catch (Exception e) {
+                recipient = null;
+            }
+        }
         if (sender != null && recipient != null) {
             Conversation conversation = chatService.findOrCreatePrivateConversation(sender, recipient);
             Message message = new Message();
@@ -69,7 +69,7 @@ public class ChatController {
             message.setMessageText(chatMessage.getContent());
             message.setCreatedAt(LocalDateTime.now());
             message.setIsRead(false);
-            chatService.saveMessage(message);
+//            chatService.saveMessage(message);
         }
         String recipientUsername = (recipient != null) ? recipient.getUsername() : chatMessage.getRecipient();
         System.out.println("[PRIVATE] Sending from " + chatMessage.getSender() + " to " + recipientUsername);

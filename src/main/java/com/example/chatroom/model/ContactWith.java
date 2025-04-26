@@ -16,11 +16,11 @@ public class ContactWith {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional=false, fetch=FetchType.LAZY)
+    @ManyToOne(cascade=CascadeType.ALL, optional=false, fetch=FetchType.EAGER)
     @JoinColumn(name = "contact_one_id")
     private User contactOne;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional=false, fetch=FetchType.LAZY)
+    @ManyToOne(cascade=CascadeType.ALL, optional=false, fetch=FetchType.EAGER)
     @JoinColumn(name = "contact_two_id")
     private User contactTwo;
 

@@ -920,13 +920,15 @@
             console.error("No username found in localStorage.");
             return;
         }
+        console.log(username);
         fetchUserIdByUsername(username);
     });
 
     function fetchUserIdByUsername(username) {
         const token = localStorage.getItem("token");
-
+        console.log(username);
         fetch(`${baseURL}/users/username/${username}`, {
+            method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`
             }
@@ -935,10 +937,11 @@
                 if (!response.ok) {
                     throw new Error("Failed to fetch user ID");
                 }
+                console.log(response);
                 return response.json();
             })
             .then(user => {
-                if (!user || !user.id) {
+                if (!user || !user.userId) {
                     console.error("User not found or invalid response");
                     return;
                 }
@@ -967,8 +970,11 @@
         const token = localStorage.getItem("token");
 
         fetch(`${baseURL}/users/id/${userId}`, {
+            method: "GET",
             headers: {
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${token}`,
+                // "Content-Type": "application/json",
+                // "Accept": "application/json"
             }
         })
             .then(response => {

@@ -44,9 +44,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserWithContactsDTO getUserWithContactsDTOById(Long id) {
         UserWithContactsDTO userWithContactsDTO = new UserWithContactsDTO();
-        User user = userRepository.findById(id).get();
+        Optional<User> user = userRepository.findById(id);
         List<ContactWith> contactList = userRepository.findAllContacts(id);
-        userWithContactsDTO = userWithContactsMapper.toUserWithContactsDTO(user, contactList);
+        userWithContactsDTO = userWithContactsMapper.toUserWithContactsDTO(user.orElse(null), contactList);
+        System.out.println(userWithContactsDTO.getFirstName() + " " + userWithContactsDTO.getLastName());
         return userWithContactsDTO;
     }
 
@@ -54,4 +55,14 @@ public class UserServiceImpl implements UserService {
     public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
+
+        @Override
+        public UserWithContactsDTO getUserWithContactsDTOByUsername(String username) {
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+            List<ContactWith> contactList = userRepository.findAllContactsByUsername(username);
+            return userWithContactsMapper.toUserWithContactsDTO(user, contactList);
+        }
+
 }
