@@ -1,6 +1,7 @@
 package com.example.chatroom.service;
 
 import com.example.chatroom.dto.UserWithContactsDTO;
+import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.User;
 
 import java.util.List;
@@ -18,4 +19,7 @@ public interface UserService {
     UserWithContactsDTO getUserWithContactsDTOById(Long id);
 
     Optional<User> getUserByUsername(String username);
+
+    // Lấy tất cả conversation mà user tham gia
+    List<Conversation> getConversationsOfUser(Long userId);
 }

@@ -38,6 +38,7 @@
             min-height: 120px; 
             max-height: 180px; 
         }
+        .contact-item { margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -112,6 +113,7 @@
                         addMsg(username, msg.sender, msg.content, false, true);
                     });
                 }
+                loadConversations(username, payload.sub); // Gọi hàm loadConversations sau khi connect thành công
             },
             onWebSocketError: function(e) {
                 alert('Lỗi kết nối WebSocket: ' + (e && e.message ? e.message : e));
@@ -132,6 +134,7 @@
         card.id = 'card-' + username;
         card.innerHTML = `
             <h3 style="color:#1976d2;">${username}</h3>
+            <div id='contact-list-${username}' style='margin-bottom:10px;'></div>
             <div class="user-actions">
                 <input class="input" id="toid-${username}" placeholder="To (user ID)">
                 <input class="input" id="msg-${username}" placeholder="Tin nhắn...">
@@ -145,6 +148,50 @@
             <div class="chat-area" id="chat-${username}"></div>
         `;
         userChats.appendChild(card);
+    }
+    // Thêm hàm loadConversations để lấy danh sách hội thoại từ API mới
+    function loadConversations(username, userId) {
+        fetch(`/api/users/conversations/${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                const listDiv = document.getElementById('contact-list-' + username);
+                if (listDiv) {
+                    listDiv.innerHTML = '<b>Conversations:</b><br>';
+                    if (Array.isArray(data) && data.length > 0) {
+                        data.forEach(c => {
+                            const convName = c.name || `Conversation #${c.id}`;
+                            listDiv.innerHTML += `<div class='contact-item' onclick='loadHistory("${username}", ${c.id})' style='cursor:pointer;'>${convName}</div>`;
+                        });
+                    } else {
+                        listDiv.innerHTML += '<i>Không có cuộc trò chuyện nào</i>';
+                    }
+                }
+            });
+    }
+    // Thêm hàm gửi lời mời kết bạn đúng chuẩn API backend
+    function sendFriendRequest(fromUserId, toUserId) {
+        fetch('/api/contacts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contactOne: { id: fromUserId },
+                contactTwo: { id: toUserId }
+            })
+        })
+        .then(res => {
+            if (!res.ok) return res.text().then(t => { throw new Error(t); });
+            return res.json();
+        })
+        .then(data => {
+            alert('Kết bạn thành công!');
+            // Gọi lại loadConversations để cập nhật hội thoại mới
+            if (window.currentUser && window.currentUserId) {
+                loadConversations(window.currentUser, window.currentUserId);
+            }
+        })
+        .catch(e => {
+            alert('Lỗi kết bạn: ' + e.message);
+        });
     }
     function sendPrivateMsg(username) {
         const toId = document.getElementById('toid-' + username).value.trim();
@@ -270,6 +317,26 @@
             alert('User ' + username + ' đã disconnect!');
         }
     }
+
+    // Thêm hàm loadHistory để gọi API lấy lịch sử tin nhắn
+    function loadHistory(username, conversationId) {
+        fetch(`/api/conversations/${conversationId}/messages`)
+            .then(res => res.json())
+            .then(messages => {
+                const chatArea = document.getElementById('chat-' + username);
+                if (chatArea) {
+                    chatArea.innerHTML = '';
+                    messages.reverse().forEach(msg => {
+                        const sender = msg.sender && msg.sender.username ? msg.sender.username : 'Unknown';
+                        const content = msg.messageText || '';
+                        chatArea.innerHTML += `<div class='msg${sender===username ? ' me':' other'}'><div class='bubble'>${sender}: ${content}</div></div>`;
+                    });
+                }
+            });
+    }
+
+    // Ví dụ: Gọi hàm này khi user chọn cuộc hội thoại hoặc sau khi connect
+    // loadHistory('mikkideptrai', 1); // 1 là conversationId, thay bằng id thực tế
 </script>
 </body>
 </html>

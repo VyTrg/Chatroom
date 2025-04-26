@@ -208,4 +208,14 @@ public class ChatServiceImpl implements ChatService {
         System.out.println("[isUserInGroup] userId=" + user.getId() + ", groupId=" + group.getId() + ", exists=" + result);
         return result;
     }
+
+    @Override
+    public List<Message> getMessagesByConversationId(Long conversationId) {
+        if (messageRepository == null) {
+            // Nếu repository chưa được cấu hình, trả về rỗng
+            return new ArrayList<>();
+        }
+        // Lấy tất cả tin nhắn theo conversationId, sắp xếp theo thời gian tăng dần
+        return messageRepository.findByConversationIdOrderByCreatedAtDesc(conversationId, Pageable.unpaged()).getContent();
+    }
 }

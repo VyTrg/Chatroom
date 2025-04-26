@@ -51,4 +51,9 @@ public interface ChatService {
 
 //     Đánh dấu tin nhắn đã đọc
     void markMessageAsRead(Long messageId, Long userId);
+
+    /**
+     * Lấy tất cả tin nhắn theo conversationId
+     */
+    List<Message> getMessagesByConversationId(Long conversationId);
 }

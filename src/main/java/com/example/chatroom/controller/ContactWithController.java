@@ -14,38 +14,52 @@ public class ContactWithController {
     @Autowired
     private ContactWithServiceImpl contactWithService;
 
+    // Lấy tất cả liên hệ
     @GetMapping
-    public List<ContactWith> getContacts() {
-        return contactWithService.getAllContactsWith();
+    public ResponseEntity<List<ContactWith>> getContacts() {
+        return ResponseEntity.ok(contactWithService.getAllContactsWith());
     }
 
+    // Lấy liên hệ theo ID
     @GetMapping("/{id}")
-    public ContactWith getContactByUserId(@PathVariable("id") Long id) {
+    public ResponseEntity<ContactWith> getContactByUserId(@PathVariable("id") Long id) {
         ContactWith contactWith = contactWithService.getContactWithByUserId(id);
-        return ResponseEntity.ok().body(contactWith).getBody();
+        if (contactWith == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(contactWith);
     }
 
+    // Tạo liên hệ mới (gửi lời mời kết bạn)
     @PostMapping
-    public ContactWith createContact(@RequestBody ContactWith contactWith) {
-        return contactWithService.saveContactWith(contactWith);
+    public ResponseEntity<ContactWith> createContact(@RequestBody ContactWith contactWith) {
+        ContactWith saved = contactWithService.saveContactWith(contactWith);
+        return ResponseEntity.ok(saved);
     }
 
+    // Cập nhật liên hệ
     @PutMapping("/{id}")
-    public ContactWith updateContact(@PathVariable("id") Long id, @RequestBody ContactWith contactWith) {
-        ContactWith contact = contactWithService.getContactWithById(id);
-
-//        contact.setContactOne(contactWith.getContactOne());
-//        contact.setContactTwo(contactWith.getContactTwo());
-//        contact.setCreatedAt(contactWith.getCreatedAt());
-//        contact.setDeletedAt(contactWith.getDeletedAt());
-        final ContactWith updatedContact = contactWithService.updateContactWith(contact);
-        return ResponseEntity.ok().body(updatedContact).getBody();
+    public ResponseEntity<ContactWith> updateContact(@PathVariable("id") Long id, @RequestBody ContactWith contactWith) {
+        ContactWith existing = contactWithService.getContactWithById(id);
+        if (existing == null) {
+            return ResponseEntity.notFound().build();
+        }
+        // Cập nhật các trường cần thiết
+        existing.setContactOne(contactWith.getContactOne());
+        existing.setContactTwo(contactWith.getContactTwo());
+        existing.setCreatedAt(contactWith.getCreatedAt());
+        existing.setDeletedAt(contactWith.getDeletedAt());
+        ContactWith updated = contactWithService.updateContactWith(existing);
+        return ResponseEntity.ok(updated);
     }
 
+    // Xóa liên hệ
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContact(@PathVariable("id") Long id) {
         ContactWith contact = contactWithService.getContactWithById(id);
-//        contact.setDeletedAt();
+        if (contact == null) {
+            return ResponseEntity.notFound().build();
+        }
         contactWithService.deleteContactWith(contact);
         return ResponseEntity.ok().build();
     }

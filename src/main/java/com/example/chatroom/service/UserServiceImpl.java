@@ -1,10 +1,11 @@
 package com.example.chatroom.service;
 
-
 import com.example.chatroom.dto.UserWithContactsDTO;
 import com.example.chatroom.mapper.UserWithContactsMapper;
 import com.example.chatroom.model.ContactWith;
+import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.User;
+import com.example.chatroom.repository.ConversationRepository;
 import com.example.chatroom.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ConversationRepository conversationRepository;
 
     private final UserWithContactsMapper userWithContactsMapper = new UserWithContactsMapper();
 
@@ -40,7 +44,6 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
-
     @Override
     public UserWithContactsDTO getUserWithContactsDTOById(Long id) {
         UserWithContactsDTO userWithContactsDTO = new UserWithContactsDTO();
@@ -53,5 +56,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    @Override
+    public List<Conversation> getConversationsOfUser(Long userId) {
+        // Gọi repository để lấy tất cả conversation mà user là thành viên
+        return userRepository == null ? List.of() :
+            conversationRepository.findAllConversationsForUser(userId);
     }
 }

@@ -14,10 +14,13 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -78,6 +81,10 @@ public class ChatController {
                 log.warn("[PRIVATE] Người gửi và người nhận là một! Không gửi tin nhắn cho chính mình.");
                 return;
             }
+//            if (!contactWithService.areFriends(sender, recipient)) {
+//                log.warn("[PRIVATE] Hai người chưa là bạn bè, không thể nhắn tin.");
+//                return;
+//            }
             log.info("[PRIVATE] Sender: {} (id={}), Recipient: {} (id={})", sender.getUsername(), sender.getId(), recipient.getUsername(), recipient.getId());
             Conversation conversation = chatService.findOrCreatePrivateConversation(sender, recipient);
             Message message = new Message();
@@ -149,5 +156,12 @@ public class ChatController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Lỗi khi nhận tin nhắn: " + e.getMessage());
         }
+    }
+
+    // API lấy tất cả tin nhắn của một cuộc hội thoại (giữa 2 user hoặc theo conversationId)
+    @GetMapping("/api/conversations/{conversationId}/messages")
+    public ResponseEntity<List<Message>> getMessagesByConversation(@PathVariable Long conversationId) {
+        List<Message> messages = chatService.getMessagesByConversationId(conversationId);
+        return ResponseEntity.ok(messages);
     }
 }
