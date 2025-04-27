@@ -14,13 +14,10 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Controller
 @Slf4j
@@ -37,9 +34,9 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.sendMessage")
-    @SendTo({"/topic/public", "/topic/private"})
+    @SendTo("/topic/public")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-        log.info("[PUBLIC] Nhận yêu cầu gửi public: {}", chatMessage);
+        // Lưu tin nhắn public vào DB nếu muốn
         User sender = userRepository.findByUsername(chatMessage.getSender()).orElse(null);
         if (sender != null) {
             Message message = new Message();
@@ -49,43 +46,22 @@ public class ChatController {
             message.setIsRead(false);
             chatService.saveMessage(message);
         }
-        log.info("[PUBLIC] Sending to /topic/public: {}", chatMessage);
         return chatMessage;
     }
 
     @MessageMapping("/chat.private")
     public void sendPrivate(@Payload ChatMessage chatMessage) {
-        log.info("[PRIVATE] Nhận yêu cầu gửi private: {}", chatMessage);
         User sender = userRepository.findByUsername(chatMessage.getSender()).orElse(null);
-        if (sender == null) {
-            log.error("[PRIVATE] Không tìm thấy sender: {}", chatMessage.getSender());
-            return;
-        }
         User recipient = null;
         if (chatMessage.getRecipientId() != null) {
             try {
                 Long recipientId = Long.parseLong(chatMessage.getRecipientId());
                 recipient = userRepository.findById(recipientId).orElse(null);
-                if (recipient == null) {
-                    log.error("[PRIVATE] Không tìm thấy recipient với recipientId: {}", recipientId);
-                }
             } catch (Exception e) {
-                log.error("[PRIVATE] recipientId không hợp lệ: {}", chatMessage.getRecipientId(), e);
+                recipient = null;
             }
-        } else {
-            log.error("[PRIVATE] recipientId bị null!");
         }
-        // NGĂN KHÔNG CHO TỰ NHẮN CHO CHÍNH MÌNH
         if (sender != null && recipient != null) {
-            if (sender.getId().equals(recipient.getId())) {
-                log.warn("[PRIVATE] Người gửi và người nhận là một! Không gửi tin nhắn cho chính mình.");
-                return;
-            }
-//            if (!contactWithService.areFriends(sender, recipient)) {
-//                log.warn("[PRIVATE] Hai người chưa là bạn bè, không thể nhắn tin.");
-//                return;
-//            }
-            log.info("[PRIVATE] Sender: {} (id={}), Recipient: {} (id={})", sender.getUsername(), sender.getId(), recipient.getUsername(), recipient.getId());
             Conversation conversation = chatService.findOrCreatePrivateConversation(sender, recipient);
             Message message = new Message();
             message.setSender(sender);
@@ -93,45 +69,36 @@ public class ChatController {
             message.setMessageText(chatMessage.getContent());
             message.setCreatedAt(LocalDateTime.now());
             message.setIsRead(false);
-            chatService.saveMessage(message);
+//            chatService.saveMessage(message);
         }
-        String recipientUsername = (recipient != null) ? recipient.getUsername() : chatMessage.getRecipientId();
-        log.info("[PRIVATE] Sending from {} to {} (recipientUsername) với content: {}", chatMessage.getSender(), recipientUsername, chatMessage.getContent());
+        String recipientUsername = (recipient != null) ? recipient.getUsername() : chatMessage.getRecipient();
+        System.out.println("[PRIVATE] Sending from " + chatMessage.getSender() + " to " + recipientUsername);
+        log.info("[PRIVATE] Sending from {} to {} with content: {}",
+                chatMessage.getSender(),
+                recipientUsername,
+                chatMessage.getContent());
         messagingTemplate.convertAndSendToUser(recipientUsername, "/queue/private", chatMessage);
     }
 
     @MessageMapping("/chat.group")
     public void sendGroup(@Payload ChatMessage chatMessage) {
-        log.info("[GROUP] Nhận yêu cầu gửi group: {}", chatMessage);
+        // groupId truyền qua recipient
         try {
-            Long groupId = chatMessage.getGroupId();
+            Long groupId = Long.parseLong(chatMessage.getRecipient());
             Conversation group = chatService.getGroupConversationById(groupId);
             User sender = userRepository.findByUsername(chatMessage.getSender()).orElse(null);
-            if (group == null) {
-                log.error("[GROUP] Không tìm thấy group với groupId: {}", groupId);
-                return;
+            if (group != null && sender != null) {
+                Message message = new Message();
+                message.setSender(sender);
+                message.setConversation(group);
+                message.setMessageText(chatMessage.getContent());
+                message.setCreatedAt(LocalDateTime.now());
+                message.setIsRead(false);
+                chatService.saveMessage(message);
             }
-            if (sender == null) {
-                log.error("[GROUP] Không tìm thấy sender: {}", chatMessage.getSender());
-                return;
-            }
-            // Kiểm tra sender có phải thành viên group không
-            if (!chatService.isUserInGroup(sender, group)) {
-                log.error("[GROUP] Sender {} không phải thành viên group {}", sender.getUsername(), groupId);
-                return;
-            }
-            Message message = new Message();
-            message.setSender(sender);
-            message.setConversation(group);
-            message.setMessageText(chatMessage.getContent());
-            message.setCreatedAt(LocalDateTime.now());
-            message.setIsRead(false);
-            chatService.saveMessage(message);
-            log.info("[GROUP] Đã lưu message vào group {}: {}", groupId, chatMessage.getContent());
-            log.info("[GROUP] Sending to /topic/group.{}: {}", groupId, chatMessage);
             messagingTemplate.convertAndSend("/topic/group." + groupId, chatMessage);
         } catch (Exception e) {
-            log.error("[GROUP] recipient (groupId) không hợp lệ: {}", chatMessage.getGroupId(), e);
+            // log lỗi nếu recipient không phải là groupId hợp lệ
         }
     }
 
@@ -156,12 +123,5 @@ public class ChatController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Lỗi khi nhận tin nhắn: " + e.getMessage());
         }
-    }
-
-    // API lấy tất cả tin nhắn của một cuộc hội thoại (giữa 2 user hoặc theo conversationId)
-    @GetMapping("/api/conversations/{conversationId}/messages")
-    public ResponseEntity<List<Message>> getMessagesByConversation(@PathVariable Long conversationId) {
-        List<Message> messages = chatService.getMessagesByConversationId(conversationId);
-        return ResponseEntity.ok(messages);
     }
 }

@@ -23,20 +23,20 @@
         .system-msg { color: #888; font-style: italic; margin-bottom: 8px; text-align: center; }
         .footer { text-align: center; font-size: 13px; color: #aaa; margin-top: 10px; }
         .user-chat-card {
-            margin: 18px 0; 
-            background: #f9fbfd; 
-            border-radius: 10px; 
-            box-shadow: 0 2px 8px #e4eaf2; 
-            padding: 18px; 
+            margin: 18px 0;
+            background: #f9fbfd;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #e4eaf2;
+            padding: 18px;
             max-width: 650px;
         }
-        .user-chat-card h3 { 
-            margin-top: 0; 
-            margin-bottom: 8px; 
+        .user-chat-card h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
         }
-        .user-chat-card .chat-area { 
-            min-height: 120px; 
-            max-height: 180px; 
+        .user-chat-card .chat-area {
+            min-height: 120px;
+            max-height: 180px;
         }
         .contact-item { margin-bottom: 5px; }
     </style>
@@ -51,6 +51,7 @@
     <div id="userChats"></div>
 </div>
 <script>
+
     const clients = {};
     function parseJwt (token) {
         try {
@@ -81,11 +82,17 @@
             return;
         }
         addUserChatCard(username);
+<<<<<<< HEAD
         let wsUrl = 'ws://localhost:8080/ws'; 
+=======
+        // Luôn dùng ws://localhost:8080/ws để tránh lỗi khi chạy frontend ở cổng khác
+        let wsUrl = 'ws://localhost:8080/ws';
+>>>>>>> origin/vy1
         const stompClient = new StompJs.Client({
             brokerURL: wsUrl,
+            // webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
             connectHeaders: {
-                Authorization: 'Bearer ' + token 
+                Authorization: 'Bearer ' + token
             },
             debug: function(str) { console.log('[STOMP DEBUG]', str); },
             reconnectDelay: 5000,

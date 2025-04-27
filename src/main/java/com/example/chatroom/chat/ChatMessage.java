@@ -16,7 +16,12 @@ public class ChatMessage {
     private String content;
     private String sender;
     private Long groupId;
+    @Setter
+    @Getter
     private String recipientId;
 
+    public String getRecipient() {
+        return "";
+    }
 }
 

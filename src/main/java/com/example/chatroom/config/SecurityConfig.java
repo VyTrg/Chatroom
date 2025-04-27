@@ -3,6 +3,7 @@ package com.example.chatroom.config;
 import com.example.chatroom.repository.UserRepository;
 import com.example.chatroom.security.CustomUserDetailsService;
 import com.example.chatroom.security.JwtFilter;
+import io.jsonwebtoken.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Configuration
@@ -87,9 +92,8 @@ public class SecurityConfig {
                                 "/testchatusers.html"
                         ).permitAll()
                         .anyRequest().authenticated()
-                        
                 )
-//                .csrf(AbstractHttpConfigurer::disable)
+//
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -99,7 +103,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+
+//        config.setAllowedOrigins(List.of("*")); // Cho phép tất cả origin truy cập API
+//        config.setAllowedOrigins(List.of("http://localhost:8080"));
+
         config.setAllowedOriginPatterns(List.of("*")); // Cho phép tất cả origin truy cập API và WebSocket
+
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -113,5 +122,6 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
 
 }

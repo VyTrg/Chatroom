@@ -609,6 +609,7 @@
             document.getElementById('searchResults').innerHTML = '';
             return;
         }
+<<<<<<< HEAD
         Promise.all([
             fetch(`/api/users/username/${encodeURIComponent(query)}`, { headers: { "Authorization": `Bearer ${token}` }}).then(r => r.json()),
             fetch(`/api/groups/search?name=${encodeURIComponent(query)}`, { headers: { "Authorization": `Bearer ${token}` }}).then(r => r.json())
@@ -807,12 +808,59 @@
             staticMessageInput.value = '';
         }
         return false;
+=======
+        console.log(username);
+        fetchUserIdByUsername(username);
+    });
+
+    function fetchUserIdByUsername(username) {
+        const token = localStorage.getItem("token");
+        console.log(username);
+        fetch(`${baseURL}/users/username/${username}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch user ID");
+                }
+                console.log(response);
+                return response.json();
+            })
+            .then(user => {
+                if (!user || !user.userId) {
+                    console.error("User not found or invalid response");
+                    return;
+                }
+                document.getElementById("firstName").value = user.firstName;
+                document.getElementById("lastName").value = user.lastName;
+                document.getElementById("email").value = user.email;
+                document.getElementById("username").value = user.username;
+                document.getElementById("password").value = "";
+
+                const profileName = `${user.firstName} ${user.lastName}`;
+                const profileNameElement = document.querySelector(".profile h1");
+                if (profileNameElement) {
+                    profileNameElement.textContent = profileName;
+                }
+                const userImage = user.image ? user.image : "img/avatars/default-avatar.png";
+                const avatarImages = document.querySelectorAll("img.avatar-xl");
+                avatarImages.forEach(img => {
+                    img.src = userImage;
+                });
+                fetchUserData(user.id);
+            })
+            .catch(error => console.error("Error fetching user ID:", error));
+>>>>>>> origin/vy1
     }
 
     document.getElementById('btnAddFriend').onclick = function() {
         document.getElementById('addFriendModal').style.display = 'block';
     };
 
+<<<<<<< HEAD
     const addFriendUsername = document.getElementById('addFriendUsername');
     const addFriendUserBox = document.getElementById('addFriendUserBox');
     let selectedUserAddFriend = null;
@@ -872,6 +920,14 @@
             } else {
                 let msg = await r.text();
                 errorDiv.textContent = msg || 'Gửi yêu cầu thất bại!';
+=======
+        fetch(`${baseURL}/users/id/${userId}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                // "Content-Type": "application/json",
+                // "Accept": "application/json"
+>>>>>>> origin/vy1
             }
         })
         .catch(() => {

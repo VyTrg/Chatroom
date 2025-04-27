@@ -2,6 +2,7 @@ package com.example.chatroom.controller;
 
 import com.example.chatroom.dto.UserWithContactsDTO;
 import com.example.chatroom.model.Conversation;
+import com.example.chatroom.model.ContactWith;
 import com.example.chatroom.model.User;
 
 import com.example.chatroom.service.UserServiceImpl;
