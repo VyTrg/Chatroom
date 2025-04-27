@@ -515,14 +515,16 @@
         <div id="addFriendModal" class="modal">
           <div class="modal-content">
             <span class="close" onclick="closeAddFriendModal()">&times;</span>
-            <h2 style="font-size:22px;font-weight:700;margin-bottom:18px;">Add your friends</h2>
-            <label for="addFriendUsername">USERNAME:</label>
-            <div id="addFriendUserBox"></div>
-            <input id="addFriendUsername" class="form-control" placeholder="Nhập username..." autocomplete="off" style="margin-bottom:4px;">
-            <div id="addFriendError"></div>
-            <label for="addFriendMsg">MESSAGE:</label>
-            <textarea id="addFriendMsg" disabled>Hi, I'd like to add you as a contact.</textarea>
-            <button class="btn" onclick="submitAddFriend()">Send Friend Request</button>
+            <h2 style="margin-bottom:14px;">Add your friends</h2>
+            <form id="addFriendForm" onsubmit="submitAddFriend();return false;">
+              <label for="addFriendUsername">USERNAME:</label>
+              <input id="addFriendUsername" type="text" placeholder="Enter username..." autocomplete="off" required>
+              <div id="addFriendUserBox" class="selected-user" style="display:none;"></div>
+              <label for="addFriendMsg">MESSAGE:</label>
+              <textarea id="addFriendMsg" placeholder="Send your welcome message...">Hi, I'd like to add you as a contact.</textarea>
+              <div id="addFriendError"></div>
+              <button type="submit" class="btn">Send Friend Request</button>
+            </form>
           </div>
         </div>
         <!-- End of Add Friends -->
@@ -817,6 +819,7 @@
     addFriendUsername.oninput = function() {
       const username = addFriendUsername.value.trim();
       addFriendUserBox.innerHTML = '';
+      addFriendUserBox.style.display = 'none';
       selectedUserAddFriend = null;
       if (!username) return;
       fetch(`/api/users/username/${encodeURIComponent(username)}`, {
@@ -827,15 +830,18 @@
           if (!user || !user.id || isNaN(Number(user.id))) {
               selectedUserAddFriend = null;
               addFriendUserBox.innerHTML = '';
+              addFriendUserBox.style.display = 'none';
               return;
           }
           selectedUserAddFriend = user;
-          addFriendUserBox.innerHTML = `<div class='selected-user'><img src='${user.avatarUrl||''}'><span style='font-weight:500;'>${user.username}</span><span class='remove-user' onclick='removeSelectedAddFriend()'>&times;</span></div>`;
+          addFriendUserBox.innerHTML = `<img src='${user.avatarUrl||''}'><span style='font-weight:500;'>${user.username}</span><span class='remove-user' onclick='removeSelectedAddFriend()'>&times;</span>`;
+          addFriendUserBox.style.display = '';
       });
     };
     window.removeSelectedAddFriend = function() {
       selectedUserAddFriend = null;
       addFriendUserBox.innerHTML = '';
+      addFriendUserBox.style.display = 'none';
       addFriendUsername.value = '';
     };
     function submitAddFriend() {
@@ -876,6 +882,7 @@
         document.getElementById('addFriendModal').style.display = 'none';
         // Reset UI
         addFriendUserBox.innerHTML = '';
+        addFriendUserBox.style.display = 'none';
         addFriendUsername.value = '';
         document.getElementById('addFriendError').textContent = '';
     }

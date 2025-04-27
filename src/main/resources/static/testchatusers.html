@@ -168,31 +168,6 @@
                 }
             });
     }
-    // Thêm hàm gửi lời mời kết bạn đúng chuẩn API backend
-    function sendFriendRequest(fromUserId, toUserId) {
-        fetch('/api/contacts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contactOne: { id: fromUserId },
-                contactTwo: { id: toUserId }
-            })
-        })
-        .then(res => {
-            if (!res.ok) return res.text().then(t => { throw new Error(t); });
-            return res.json();
-        })
-        .then(data => {
-            alert('Kết bạn thành công!');
-            // Gọi lại loadConversations để cập nhật hội thoại mới
-            if (window.currentUser && window.currentUserId) {
-                loadConversations(window.currentUser, window.currentUserId);
-            }
-        })
-        .catch(e => {
-            alert('Lỗi kết bạn: ' + e.message);
-        });
-    }
     function sendPrivateMsg(username) {
         const toId = document.getElementById('toid-' + username).value.trim();
         const content = document.getElementById('msg-' + username).value;
