@@ -31,12 +31,17 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     // Tìm tin nhắn theo nội dung (tìm kiếm đơn giản)
     List<Message> findByMessageTextContainingIgnoreCaseOrderByCreatedAtDesc(String keyword);
 
+    @Query(value = "SELECT m.* FROM dbo.message m " +
+            "INNER JOIN [user] u ON m.user_id = u.id " +
+            "WHERE m.conversation_id = :conversationId " +
+            "ORDER BY m.created_at ASC",
+            nativeQuery = true)
+    List<Message> findMessagesByConversationId(@Param("conversationId") Long conversationId);
 
-    @Query("SELECT m FROM Message m " +
-            "WHERE m.conversation.id IN " +
-            "(SELECT cm.conversation.id FROM ConversationMember cm WHERE cm.user.id = :userId) " +
-            "AND m.createdAt = " +
-            "(SELECT MAX(m2.createdAt) FROM Message m2 WHERE m2.conversation.id = m.conversation.id) " +
-            "ORDER BY m.createdAt DESC")
+    @Query(value = "SELECT m.* FROM dbo.message m " +
+            "WHERE m.conversation_id IN (SELECT cm.conversation_id FROM dbo.conversation_member cm WHERE cm.user_id = :userId) " +
+            "AND m.created_at = (SELECT MAX(m2.created_at) FROM dbo.message m2 WHERE m2.conversation_id = m.conversation_id) " +
+            "ORDER BY m.created_at DESC",
+            nativeQuery = true)
     List<Message> findLatestMessagesForUser(@Param("userId") Long userId);
 }
