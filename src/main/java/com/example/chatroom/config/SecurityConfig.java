@@ -89,7 +89,8 @@ public class SecurityConfig {
                                 "/ws",
                                 "/ws/**",
                                 "/ws/info/**",
-                                "/testchatusers.html"
+                                "/testchatusers.html",
+                                "conversations/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

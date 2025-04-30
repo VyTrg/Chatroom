@@ -11,31 +11,37 @@ import java.util.Optional;
 
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation, Long> {
-    // Tìm cuộc hội thoại riêng tư giữa hai người dùng
-    @Query("SELECT c FROM Conversation c " +
-            "WHERE c.isGroup = false " +
-            "AND EXISTS (SELECT cm1 FROM ConversationMember cm1 WHERE cm1.conversation = c AND cm1.user.id = :userId1) " +
-            "AND EXISTS (SELECT cm2 FROM ConversationMember cm2 WHERE cm2.conversation = c AND cm2.user.id = :userId2) " +
-            "AND (SELECT COUNT(cm) FROM ConversationMember cm WHERE cm.conversation = c) = 2")
+    // Tìm cuộc hội thoại riêng tư giữa hai người dùng (native query)
+    @Query(value = "SELECT * FROM conversation c " +
+            "WHERE c.is_group = 0 " +
+            "AND EXISTS (SELECT 1 FROM conversation_member cm1 WHERE cm1.conversation_id = c.id AND cm1.user_id = :userId1) " +
+            "AND EXISTS (SELECT 1 FROM conversation_member cm2 WHERE cm2.conversation_id = c.id AND cm2.user_id = :userId2) " +
+            "AND (SELECT COUNT(*) FROM conversation_member cm WHERE cm.conversation_id = c.id) = 2",
+            nativeQuery = true)
     Optional<Conversation> findPrivateConversationBetween(
             @Param("userId1") Long userId1,
             @Param("userId2") Long userId2);
 
-    // Tìm tất cả cuộc hội thoại mà một người dùng tham gia
-    @Query("SELECT c FROM Conversation c JOIN c.conversationMembers cm " +
-            "WHERE cm.user.id = :userId ORDER BY c.createdAt DESC")
+    // Tìm tất cả cuộc hội thoại mà một người dùng tham gia (native query)
+    @Query(value = "SELECT c.* FROM conversation c JOIN conversation_member cm ON cm.conversation_id = c.id " +
+            "WHERE cm.user_id = :userId ORDER BY c.created_at DESC",
+            nativeQuery = true)
     List<Conversation> findAllConversationsForUser(@Param("userId") Long userId);
 
-    // Tìm các cuộc hội thoại nhóm mà một người dùng tham gia
-    @Query("SELECT c FROM Conversation c JOIN c.conversationMembers cm " +
-            "WHERE cm.user.id = :userId AND c.isGroup = true ORDER BY c.createdAt DESC")
+    // Tìm các cuộc hội thoại nhóm mà một người dùng tham gia (native query)
+    @Query(value = "SELECT c.* FROM conversation c JOIN conversation_member cm ON cm.conversation_id = c.id " +
+            "WHERE cm.user_id = :userId AND c.is_group = 1 ORDER BY c.created_at DESC",
+            nativeQuery = true)
     List<Conversation> findGroupConversationsForUser(@Param("userId") Long userId);
 
-    // Tìm các cuộc hội thoại riêng tư mà một người dùng tham gia
-    @Query("SELECT c FROM Conversation c JOIN c.conversationMembers cm " +
-            "WHERE cm.user.id = :userId AND c.isGroup = false ORDER BY c.createdAt DESC")
+    // Tìm các cuộc hội thoại riêng tư mà một người dùng tham gia (native query)
+    @Query(value = "SELECT c.* FROM conversation c JOIN conversation_member cm ON cm.conversation_id = c.id " +
+            "WHERE cm.user_id = :userId AND c.is_group = 0 ORDER BY c.created_at DESC",
+            nativeQuery = true)
     List<Conversation> findPrivateConversationsForUser(@Param("userId") Long userId);
 
-    // Tìm cuộc hội thoại theo tên (tìm kiếm)
-    List<Conversation> findByNameContainingIgnoreCase(String keyword);
+    // Tìm cuộc hội thoại theo tên (native query)
+    @Query(value = "SELECT * FROM conversation WHERE LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%'))",
+            nativeQuery = true)
+    List<Conversation> findByNameContainingIgnoreCase(@Param("keyword") String keyword);
 }
