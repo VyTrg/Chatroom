@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" >
 
 <head>
     <meta charset="utf-8">
@@ -7,104 +7,19 @@
     <meta name="description" content="#">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap core CSS -->
-    <!--		<link href="css/lib" type="text/css" rel="stylesheet">-->
+<!--    		<link href="css/lib" type="text/css" rel="stylesheet">-->
     <!-- Swipe core CSS -->
-    <link href="css/swipe.min.css" type="text/css" rel="stylesheet">
+<!--    <link href="/css/swipe.min.css" type="text/css" rel="stylesheet">-->
     <!-- Favicon -->
-    <link href="img/favicon.png" type="image/png" rel="icon">
+    <link rel="stylesheet" href="/css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/swipe.min.css">
+<!--    <link href="img/favicon.png" type="image/png" rel="icon">-->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <style>
-        .chat-container-custom { display: flex; flex-direction: column; height: 100vh; min-height: 0; }
-        .chat-body { flex: 1 1 auto; display: flex; flex-direction: column; gap: 16px; padding: 24px 20px 0 20px; overflow-y: auto; background: #fafbfc; min-height: 0; }
-        .msg-row { display: flex; flex-direction: column; align-items: flex-start; }
-        .msg-row.me { align-items: flex-end; }
-        .msg-bubble { max-width: 320px; padding: 10px 18px; border-radius: 16px; background: #f5f5f5; font-size: 15px; margin-bottom: 2px; }
-        .msg-row.me .msg-bubble { background: #7d8cff; color: #fff; }
-        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; margin-bottom: 2px; }
-        .msg-time { font-size: 12px; color: #999; margin-top: 2px; }
-        .chat-input-custom { border-top: 1px solid #eee; background: #fff; padding: 10px 16px 10px 16px; position: sticky; bottom: 0; z-index: 2; }
-        .chat-input-custom form { display: flex; align-items: center; gap: 8px; }
-        .chat-input-custom textarea { flex: 1; border: none; border-radius: 8px; padding: 10px; resize: none; font-size: 15px; }
-        .chat-input-custom button { background: #3578ff; border: none; color: #fff; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-    </style>
-    <style>
-        #addFriendModal.modal {
-          display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.10);
-        }
-        #addFriendModal .modal-content {
-          background: #fff; border-radius: 18px; box-shadow: 0 8px 32px rgba(60,60,60,0.14); max-width: 410px; width: 95%; margin: 70px auto 0 auto; padding: 32px 28px 28px 28px; position: relative;
-        }
-        #addFriendModal .close {
-          position: absolute; right: 18px; top: 16px; font-size: 28px; color: #888; cursor: pointer;
-        }
-        #addFriendModal label {
-          font-weight: 600; font-size: 14px; color: #222; margin-bottom: 4px; display: block;
-        }
-        #addFriendModal .selected-user {
-          display: flex; align-items: center; gap: 10px; background: #f7f8fa; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px;
-        }
-        #addFriendModal .selected-user img {
-          width: 36px; height: 36px; border-radius: 50%; background: #eee;
-        }
-        #addFriendModal .selected-user .remove-user { margin-left: 8px; color: #f44336; font-weight: bold; cursor: pointer; }
-        #addFriendModal input, #addFriendModal textarea {
-          width: 100%; border-radius: 8px; border: 1px solid #ddd; padding: 9px 12px; font-size: 15px; margin-bottom: 14px;
-        }
-        #addFriendModal textarea { resize: none; min-height: 50px; }
-        #addFriendModal .btn {
-          width: 100%; background: #1976d2; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; padding: 10px 0; margin-top: 8px; transition: background .2s;
-        }
-        #addFriendModal .btn:hover { background: #1356a2; }
-        #addFriendError { color: red; font-size: 13px; margin-top: 4px; min-height: 18px; }
-        .search { position: relative; }
-        .search-row-flex {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .search-row-flex input[type="search"] {
-          flex: 1;
-          min-width: 0;
-        }
-        #btnAddFriend {
-          position: static !important;
-          transform: none !important;
-          margin-left: 4px;
-        }
-    </style>
-    <style>
-        #notificationTab {
-          position: relative;
-        }
-        #notificationBadge {
-          position: absolute;
-          top: -2px;
-          right: -2px;
-          background: #f44336;
-          color: #fff;
-          font-size: 12px;
-          min-width: 18px;
-          height: 18px;
-          border-radius: 9px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 2;
-        }
-        .conv-item .unread-badge {
-          background: #f44336;
-          color: #fff;
-          font-size: 11px;
-          min-width: 16px;
-          height: 16px;
-          border-radius: 8px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          margin-left: 6px;
-          padding: 0 5px;
+        p, a, i, h5, span, h1, h2, h3, h4, h5, h6 {
+            text-decoration: none;
         }
     </style>
 </head>
@@ -114,16 +29,14 @@
         <div class="navigation">
             <div class="container">
                 <div class="inside">
-                    <!--                    menu-->
+<!--                    menu-->
                     <div class="nav nav-tab menu">
                         <button class="btn"><img class="avatar-xl" alt="avatar"></button>
-                        <a href="#members" data-toggle="tab" class="nav-link" data-tab="#members"><i class="material-icons">account_circle</i></a>
-                        <a href="#discussions" data-toggle="tab" class="nav-link active" data-tab="#discussions"><i class="material-icons active">chat_bubble_outline</i></a>
-                        <a href="#notifications" data-toggle="tab" class="nav-link f-grow1" data-tab="#notifications" style="position:relative;">
-                          <i class="material-icons">notifications_none</i>
-                          <span id="notificationBadge" style="display:none;position:absolute;top:-2px;right:-2px;background:#f44336;color:#fff;font-size:12px;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;z-index:2;">0</span>
-                        </a>
-                        <a href="#settings" data-toggle="tab" class="nav-link" data-tab="#settings"><i class="material-icons">settings</i></a>
+                        <a href="#members" data-toggle="tab"><i class="material-icons">account_circle</i></a>
+                        <a href="#discussions" data-toggle="tab" class="active"><i class="material-icons active">chat_bubble_outline</i></a>
+                        <a href="#notifications" data-toggle="tab" class="f-grow1"><i class="material-icons">notifications_none</i></a>
+<!--                        <button class="btn mode"><i class="material-icons">brightness_2</i></button>-->
+                        <a href="#settings" data-toggle="tab"><i class="material-icons">settings</i></a>
                         <button class="btn power" onclick="visitPage();"><i class="material-icons">power_settings_new</i></button>
                     </div>
                 </div>
@@ -134,30 +47,41 @@
                 <div class="col-md-12">
                     <div class="tab-content">
                         <div class="tab-pane fade" id="members">
-                            <div class="search-row-flex" style="margin-bottom:10px;">
-                                <input type="search" class="form-control" id="people" placeholder="Search for people...">
-                                <button type="button" class="btn btn-link loop"><i class="material-icons">search</i></button>
-                                <button id="btnAddFriend" class="btn" title="Add friend">
-                                    <i class="material-icons">person_add</i>
-                                </button>
+                            <div class="search">
+                                <form class="form-inline position-relative">
+                                    <input type="search" class="form-control" id="people" placeholder="Search for people...">
+                                    <button type="button" class="btn btn-link loop"><i class="material-icons">search</i></button>
+                                </form>
+                                <button class="btn create" data-toggle="modal" data-target="#exampleModalCenter"><i class="material-icons">person_add</i></button>
                             </div>
                             <div class="list-group sort">
                                 <button class="btn filterMembersBtn active show" data-toggle="list" data-filter="all" style="border: none">All</button>
                                 <button class="btn filterMembersBtn" data-toggle="list" data-filter="online" style="border: none">Online</button>
                                 <button class="btn filterMembersBtn" data-toggle="list" data-filter="offline" style="border: none">Offline</button>
                             </div>
-                            <!--                            contact list-->
+<!--                            contact list-->
                             <div class="contacts">
                                 <h1>Contacts</h1>
-                                <div id="conversationList"></div>
+                                <div class="list-group" id="contacts" role="tablist">
+<!--                                    <a href="#" class="filterMembers all online contact" data-toggle="list">-->
+<!--                                        <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">-->
+<!--                                        <div class="status">-->
+<!--                                            <i class="material-icons online">fiber_manual_record</i>-->
+<!--                                        </div>-->
+<!--                                        <div class="data">-->
+<!--                                            <h5>Janette Dalton</h5>-->
+<!--                                        </div>-->
+<!--                                    </a>-->
+                                </div>
                             </div>
-                            <div id="userList"></div>
                         </div>
-                        <!--                        discussions-->
+<!--                        discussions-->
                         <div id="discussions" class="tab-pane fade active show">
-                            <div class="search-row-flex" style="margin-bottom:10px;">
-                                <input type="search" class="form-control" id="conversations" placeholder="Search for conversations...">
-                                <button type="button" class="btn btn-link loop"><i class="material-icons">search</i></button>
+                            <div class="search">
+                                <form class="form-inline position-relative">
+                                    <input type="search" class="form-control" id="conversations" placeholder="Search for conversations...">
+                                    <button type="button" class="btn btn-link loop"><i class="material-icons">search</i></button>
+                                </form>
                                 <button class="btn create" data-toggle="modal" data-target="#startnewchat"><i class="material-icons">create</i></button>
                             </div>
                             <div class="list-group sort">
@@ -168,28 +92,31 @@
                             <div class="discussions">
                                 <h1>Discussions</h1>
                                 <div class="list-group" id="chats" role="tablist">
-                                    <div th:each="discussion : ${discussions}">
-                                        <a href="#" class="filterDiscussions all single" th:classappend="${discussion.unread} ? 'unread' : 'read'">
-                                            <img class="avatar-md" th:src="@{'img/avatars/' + ${discussion.avatar}}" alt="avatar">
-                                            <div class="status">
-                                                <i class="material-icons" th:text="${discussion.online} ? 'fiber_manual_record' : 'fiber_manual_record'" th:classappend="${discussion.online} ? 'online' : 'offline'"></i>
-                                            </div>
-                                            <div class="data">
-                                                <h5 th:text="${discussion.name}">Tên</h5>
-                                                <span th:text="${discussion.time}">Time</span>
-                                                <p th:text="${discussion.lastMessage}">Tin nhắn cuối</p>
-                                            </div>
-                                        </a>
-                                    </div>
+<!--                                    <a href="#list-chat" class="filterDiscussions all unread single active" id="list-chat-list" data-toggle="list" role="tab">-->
+<!--                                        <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">-->
+<!--                                        <div class="status">-->
+<!--                                            <i class="material-icons online">fiber_manual_record</i>-->
+<!--                                        </div>-->
+<!--                                        <div class="new bg-yellow">-->
+<!--                                             <span>+7</span>-->
+<!--                                        </div>-->
+<!--                                        <div class="data">-->
+<!--                                            <h5>Name</h5>-->
+<!--                                            <span>Latest time here(format time & day: 11:00am 1/1/24)</span>-->
+<!--                                            <p>Newest message here...</p>-->
+<!--                                        </div>-->
+<!--                                    </a>-->
                                 </div>
                             </div>
                         </div>
                         <!-- End of Discussions -->
                         <!-- Start of Notifications -->
                         <div id="notifications" class="tab-pane fade">
-                            <div class="search-row-flex" style="margin-bottom:10px;">
-                                <input type="search" class="form-control" id="notice" placeholder="Filter notifications...">
-                                <button type="button" class="btn btn-link loop"><i class="material-icons filter-list">filter_list</i></button>
+                            <div class="search">
+                                <form class="form-inline position-relative">
+                                    <input type="search" class="form-control" id="notice" placeholder="Filter notifications...">
+                                    <button type="button" class="btn btn-link loop"><i class="material-icons filter-list">filter_list</i></button>
+                                </form>
                             </div>
                             <div class="list-group sort">
                                 <button class="btn filterNotificationsBtn active show" data-toggle="list" data-filter="all">All</button>
@@ -199,7 +126,27 @@
                             <div class="notifications">
                                 <h1>Notifications</h1>
                                 <div class="list-group" id="alerts" role="tablist">
-                                    <!-- Danh sách lời mời kết bạn sẽ được render ở đây -->
+                                    <a href="#" class="filterNotifications all latest notification" data-toggle="list">
+                                        <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
+                                        <div class="status">
+                                            <i class="material-icons online">fiber_manual_record</i>
+                                        </div>
+                                        <div class="data">
+                                            <p>Janette has accepted your friend request on Swipe.</p>
+                                            <span>Oct 17, 2018</span>
+                                        </div>
+                                    </a>
+                                    <a href="#" class="filterNotifications all latest notification" data-toggle="list">
+                                        <img class="avatar-md" src="img/avatars/avatar-male-1.jpg" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar">
+                                        <div class="status">
+                                            <i class="material-icons online">fiber_manual_record</i>
+                                        </div>
+                                        <div class="data">
+                                            <p>Michael, you have a new friend suggestion today.</p>
+                                            <span>Jun 21, 2018</span>
+                                        </div>
+                                    </a>
+
                                 </div>
                             </div>
                         </div>
@@ -209,22 +156,22 @@
                             <div class="settings">
                                 <div class="profile">
                                     <img class="avatar-xl" alt="avatar">
-                                    <h1 th:text="${username}">Tên người dùng</h1>
-                                    <!--                                    <span>Helena, Montana</span>-->
-                                    <!--                                    <div class="stats">-->
-                                    <!--                                        <div class="item">-->
-                                    <!--                                            <h2>122</h2>-->
-                                    <!--                                            <h3>Fellas</h3>-->
-                                    <!--                                        </div>-->
-                                    <!--                                        <div class="item">-->
-                                    <!--                                            <h2>305</h2>-->
-                                    <!--                                            <h3>Chats</h3>-->
-                                    <!--                                        </div>-->
-                                    <!--                                        <div class="item">-->
-                                    <!--                                            <h2>1538</h2>-->
-                                    <!--                                            <h3>Posts</h3>-->
-                                    <!--                                        </div>-->
-                                    <!--                                    </div>-->
+                                    <h1>Michael Knudsen</h1>
+<!--                                    <span>Helena, Montana</span>-->
+<!--                                    <div class="stats">-->
+<!--                                        <div class="item">-->
+<!--                                            <h2>122</h2>-->
+<!--                                            <h3>Fellas</h3>-->
+<!--                                        </div>-->
+<!--                                        <div class="item">-->
+<!--                                            <h2>305</h2>-->
+<!--                                            <h3>Chats</h3>-->
+<!--                                        </div>-->
+<!--                                        <div class="item">-->
+<!--                                            <h2>1538</h2>-->
+<!--                                            <h3>Posts</h3>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
                                 </div>
                                 <div class="categories" id="accordionSettings">
                                     <h1>Settings</h1>
@@ -273,10 +220,10 @@
                                                         <label for="password">Password</label>
                                                         <input type="password" class="form-control" id="password" placeholder="Enter a new password" required>
                                                     </div>
-                                                    <!--                                                    <div class="field">-->
-                                                    <!--                                                        <label for="location">Location</label>-->
-                                                    <!--                                                        <input type="text" class="form-control" id="location" placeholder="Enter your location" value="Helena, Montana" required>-->
-                                                    <!--                                                    </div>-->
+<!--                                                    <div class="field">-->
+<!--                                                        <label for="location">Location</label>-->
+<!--                                                        <input type="text" class="form-control" id="location" placeholder="Enter your location" value="Helena, Montana" required>-->
+<!--                                                    </div>-->
                                                     <button class="btn btn-link w-100">Delete Account</button>
                                                     <button type="submit" class="btn button w-100">Apply</button>
                                                 </form>
@@ -285,110 +232,194 @@
                                     </div>
                                     <!-- End of My Account -->
                                     <!-- Start of Chat History -->
-                                    <!--                                    <div class="category">-->
-                                    <!--                                        <a href="#" class="title collapsed" id="headingTwo" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">-->
-                                    <!--                                            <i class="material-icons md-30 online">mail_outline</i>-->
-                                    <!--                                            <div class="data">-->
-                                    <!--                                                <h5>Chats</h5>-->
-                                    <!--                                                <p>Check your chat history</p>-->
-                                    <!--                                            </div>-->
-                                    <!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
-                                    <!--                                        </a>-->
-                                    <!--                                        <div class="collapse" id="collapseTwo" aria-labelledby="headingTwo" data-parent="#accordionSettings">-->
-                                    <!--                                            <div class="content layer">-->
-                                    <!--                                                <div class="history">-->
-                                    <!--                                                    <p>When you clear your conversation history, the messages will be deleted from your own device.</p>-->
-                                    <!--                                                    <p>The messages won't be deleted or cleared on the devices of the people you chatted with.</p>-->
-                                    <!--                                                    <div class="custom-control custom-checkbox">-->
-                                    <!--                                                        <input type="checkbox" class="custom-control-input" id="same-address">-->
-                                    <!--                                                        <label class="custom-control-label" for="same-address">Hide will remove your chat history from the recent list.</label>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <div class="custom-control custom-checkbox">-->
-                                    <!--                                                        <input type="checkbox" class="custom-control-input" id="save-info">-->
-                                    <!--                                                        <label class="custom-control-label" for="save-info">Delete will remove your chat history from the device.</label>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <button type="submit" class="btn button w-100">Clear blah-blah</button>-->
-                                    <!--                                                </div>-->
-                                    <!--                                            </div>-->
-                                    <!--                                        </div>-->
-                                    <!--                                    </div>-->
+<!--                                    <div class="category">-->
+<!--                                        <a href="#" class="title collapsed" id="headingTwo" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">-->
+<!--                                            <i class="material-icons md-30 online">mail_outline</i>-->
+<!--                                            <div class="data">-->
+<!--                                                <h5>Chats</h5>-->
+<!--                                                <p>Check your chat history</p>-->
+<!--                                            </div>-->
+<!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
+<!--                                        </a>-->
+<!--                                        <div class="collapse" id="collapseTwo" aria-labelledby="headingTwo" data-parent="#accordionSettings">-->
+<!--                                            <div class="content layer">-->
+<!--                                                <div class="history">-->
+<!--                                                    <p>When you clear your conversation history, the messages will be deleted from your own device.</p>-->
+<!--                                                    <p>The messages won't be deleted or cleared on the devices of the people you chatted with.</p>-->
+<!--                                                    <div class="custom-control custom-checkbox">-->
+<!--                                                        <input type="checkbox" class="custom-control-input" id="same-address">-->
+<!--                                                        <label class="custom-control-label" for="same-address">Hide will remove your chat history from the recent list.</label>-->
+<!--                                                    </div>-->
+<!--                                                    <div class="custom-control custom-checkbox">-->
+<!--                                                        <input type="checkbox" class="custom-control-input" id="save-info">-->
+<!--                                                        <label class="custom-control-label" for="save-info">Delete will remove your chat history from the device.</label>-->
+<!--                                                    </div>-->
+<!--                                                    <button type="submit" class="btn button w-100">Clear blah-blah</button>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
                                     <!-- End of Chat History -->
                                     <!-- Start of Notifications Settings -->
-                                    <!--                                    <div class="category">-->
-                                    <!--                                        <a href="#" class="title collapsed" id="headingThree" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">-->
-                                    <!--                                            <i class="material-icons md-30 online">notifications_none</i>-->
-                                    <!--                                            <div class="data">-->
-                                    <!--                                                <h5>Notifications</h5>-->
-                                    <!--                                                <p>Turn notifications on or off</p>-->
-                                    <!--                                            </div>-->
-                                    <!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
-                                    <!--                                        </a>-->
-                                    <!--                                        <div class="collapse" id="collapseThree" aria-labelledby="headingThree" data-parent="#accordionSettings">-->
-                                    <!--                                            <div class="content no-layer">-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>Desktop Notifications</h5>-->
-                                    <!--                                                        <p>You can set up Swipe to receive notifications when you have new messages.</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox" checked>-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>Unread Message Badge</h5>-->
-                                    <!--                                                        <p>If enabled shows a red badge on the Swipe app icon when you have unread messages.</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox" checked>-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>Taskbar Flashing</h5>-->
-                                    <!--                                                        <p>Flashes the Swipe app on mobile in your taskbar when you have new notifications.</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox">-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>Notification Sound</h5>-->
-                                    <!--                                                        <p>Set the app to alert you via notification sound when you have unread messages.</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox" checked>-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>Vibrate</h5>-->
-                                    <!--                                                        <p>Vibrate when receiving new messages (Ensure system vibration is also enabled).</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox">-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>Turn On Lights</h5>-->
-                                    <!--                                                        <p>When someone send you a text message you will receive alert via notification light.</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox">-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                            </div>-->
-                                    <!--                                        </div>-->
-                                    <!--                                    </div>-->
-                                    <!-- End of Notifications Settings -->
+<!--                                    <div class="category">-->
+<!--                                        <a href="#" class="title collapsed" id="headingThree" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">-->
+<!--                                            <i class="material-icons md-30 online">notifications_none</i>-->
+<!--                                            <div class="data">-->
+<!--                                                <h5>Notifications</h5>-->
+<!--                                                <p>Turn notifications on or off</p>-->
+<!--                                            </div>-->
+<!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
+<!--                                        </a>-->
+<!--                                        <div class="collapse" id="collapseThree" aria-labelledby="headingThree" data-parent="#accordionSettings">-->
+<!--                                            <div class="content no-layer">-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Desktop Notifications</h5>-->
+<!--                                                        <p>You can set up Swipe to receive notifications when you have new messages.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox" checked>-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Unread Message Badge</h5>-->
+<!--                                                        <p>If enabled shows a red badge on the Swipe app icon when you have unread messages.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox" checked>-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Taskbar Flashing</h5>-->
+<!--                                                        <p>Flashes the Swipe app on mobile in your taskbar when you have new notifications.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox">-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Notification Sound</h5>-->
+<!--                                                        <p>Set the app to alert you via notification sound when you have unread messages.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox" checked>-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Vibrate</h5>-->
+<!--                                                        <p>Vibrate when receiving new messages (Ensure system vibration is also enabled).</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox">-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Turn On Lights</h5>-->
+<!--                                                        <p>When someone send you a text message you will receive alert via notification light.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox">-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="category">-->
+<!--                                        <a href="#" class="title collapsed" id="headingFour" data-toggle="collapse" data-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">-->
+<!--                                            <i class="material-icons md-30 online">sync</i>-->
+<!--                                            <div class="data">-->
+<!--                                                <h5>Connections</h5>-->
+<!--                                                <p>Sync your social accounts</p>-->
+<!--                                            </div>-->
+<!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
+<!--                                        </a>-->
+<!--                                        <div class="collapse" id="collapseFour" aria-labelledby="headingFour" data-parent="#accordionSettings">-->
+<!--                                            <div class="content">-->
+<!--                                                <div class="app">-->
+<!--                                                    <img src="img/integrations/slack.svg" alt="app">-->
+<!--                                                    <div class="permissions">-->
+<!--                                                        <h5>Skrill</h5>-->
+<!--                                                        <p>Read, Write, Comment</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox" checked>-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="app">-->
+<!--                                                    <img src="img/integrations/dropbox.svg" alt="app">-->
+<!--                                                    <div class="permissions">-->
+<!--                                                        <h5>Dropbox</h5>-->
+<!--                                                        <p>Read, Write, Upload</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox" checked>-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="app">-->
+<!--                                                    <img src="img/integrations/drive.svg" alt="app">-->
+<!--                                                    <div class="permissions">-->
+<!--                                                        <h5>Google Drive</h5>-->
+<!--                                                        <p>No permissions set</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox">-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="app">-->
+<!--                                                    <img src="img/integrations/trello.svg" alt="app">-->
+<!--                                                    <div class="permissions">-->
+<!--                                                        <h5>Trello</h5>-->
+<!--                                                        <p>No permissions set</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox">-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+                                    <!-- End of Connections -->
+                                    <!-- Start of Appearance Settings -->
+<!--                                    <div class="category">-->
+<!--                                        <a href="#" class="title collapsed" id="headingFive" data-toggle="collapse" data-target="#collapseFive" aria-expanded="true" aria-controls="collapseFive">-->
+<!--                                            <i class="material-icons md-30 online">colorize</i>-->
+<!--                                            <div class="data">-->
+<!--                                                <h5>Appearance</h5>-->
+<!--                                                <p>Customize the look of Swipe</p>-->
+<!--                                            </div>-->
+<!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
+<!--                                        </a>-->
+<!--                                        <div class="collapse" id="collapseFive" aria-labelledby="headingFive" data-parent="#accordionSettings">-->
+<!--                                            <div class="content no-layer">-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Turn Off Lights</h5>-->
+<!--                                                        <p>The dark mode is applied to core areas of the app that are normally displayed as light.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox">-->
+<!--                                                        <span class="slider round mode"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+                                    <!-- End of Appearance Settings -->
                                     <!-- Start of Language -->
                                     <div class="category">
                                         <a href="#" class="title collapsed" id="headingSix" data-toggle="collapse" data-target="#collapseSix" aria-expanded="true" aria-controls="collapseSix">
@@ -405,7 +436,7 @@
                                                     <label>Language</label>
                                                     <select class="custom-select" required>
                                                         <option value="English">English</option>
-                                                        <!--                                                        <option>English</option>-->
+<!--                                                        <option>English</option>-->
                                                         <option>Vietnamese</option>
                                                     </select>
                                                 </div>
@@ -414,80 +445,80 @@
                                     </div>
                                     <!-- End of Language -->
                                     <!-- Start of Privacy & Safety -->
-                                    <!--                                    <div class="category">-->
-                                    <!--                                        <a href="#" class="title collapsed" id="headingSeven" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="true" aria-controls="collapseSeven">-->
-                                    <!--                                            <i class="material-icons md-30 online">lock_outline</i>-->
-                                    <!--                                            <div class="data">-->
-                                    <!--                                                <h5>Privacy & Safety</h5>-->
-                                    <!--                                                <p>Control your privacy settings</p>-->
-                                    <!--                                            </div>-->
-                                    <!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
-                                    <!--                                        </a>-->
-                                    <!--                                        <div class="collapse" id="collapseSeven" aria-labelledby="headingSeven" data-parent="#accordionSettings">-->
-                                    <!--                                            <div class="content no-layer">-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>Keep Me Safe</h5>-->
-                                    <!--                                                        <p>Automatically scan and delete direct messages you receive from everyone that contain explict content.</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox">-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>My Friends Are Nice</h5>-->
-                                    <!--                                                        <p>If enabled scans direct messages from everyone unless they are listed as your friend.</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox" checked>-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>Everyone can add me</h5>-->
-                                    <!--                                                        <p>If enabled anyone in or out your friends of friends list can send you a friend request.</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox" checked>-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>Friends of Friends</h5>-->
-                                    <!--                                                        <p>Only your friends or your mutual friends will be able to send you a friend reuqest.</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox" checked>-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>Data to Improve</h5>-->
-                                    <!--                                                        <p>This settings allows us to use and process information for analytical purposes.</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox">-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                                <div class="set">-->
-                                    <!--                                                    <div class="details">-->
-                                    <!--                                                        <h5>Data to Customize</h5>-->
-                                    <!--                                                        <p>This settings allows us to use your information to customize Swipe for you.</p>-->
-                                    <!--                                                    </div>-->
-                                    <!--                                                    <label class="switch">-->
-                                    <!--                                                        <input type="checkbox">-->
-                                    <!--                                                        <span class="slider round"></span>-->
-                                    <!--                                                    </label>-->
-                                    <!--                                                </div>-->
-                                    <!--                                            </div>-->
-                                    <!--                                        </div>-->
-                                    <!--                                    </div>-->
+<!--                                    <div class="category">-->
+<!--                                        <a href="#" class="title collapsed" id="headingSeven" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="true" aria-controls="collapseSeven">-->
+<!--                                            <i class="material-icons md-30 online">lock_outline</i>-->
+<!--                                            <div class="data">-->
+<!--                                                <h5>Privacy & Safety</h5>-->
+<!--                                                <p>Control your privacy settings</p>-->
+<!--                                            </div>-->
+<!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
+<!--                                        </a>-->
+<!--                                        <div class="collapse" id="collapseSeven" aria-labelledby="headingSeven" data-parent="#accordionSettings">-->
+<!--                                            <div class="content no-layer">-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Keep Me Safe</h5>-->
+<!--                                                        <p>Automatically scan and delete direct messages you receive from everyone that contain explict content.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox">-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>My Friends Are Nice</h5>-->
+<!--                                                        <p>If enabled scans direct messages from everyone unless they are listed as your friend.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox" checked>-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Everyone can add me</h5>-->
+<!--                                                        <p>If enabled anyone in or out your friends of friends list can send you a friend request.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox" checked>-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Friends of Friends</h5>-->
+<!--                                                        <p>Only your friends or your mutual friends will be able to send you a friend reuqest.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox" checked>-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Data to Improve</h5>-->
+<!--                                                        <p>This settings allows us to use and process information for analytical purposes.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox">-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                                <div class="set">-->
+<!--                                                    <div class="details">-->
+<!--                                                        <h5>Data to Customize</h5>-->
+<!--                                                        <p>This settings allows us to use your information to customize Swipe for you.</p>-->
+<!--                                                    </div>-->
+<!--                                                    <label class="switch">-->
+<!--                                                        <input type="checkbox">-->
+<!--                                                        <span class="slider round"></span>-->
+<!--                                                    </label>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
                                     <!-- End of Privacy & Safety -->
                                     <!-- Start of Logout -->
                                     <div class="category">
@@ -511,21 +542,33 @@
         </div>
         <!-- End of Sidebar -->
         <!-- Start of Add Friends -->
-        <!-- Modal Add Friend UI mới theo Figma -->
-        <div id="addFriendModal" class="modal">
-          <div class="modal-content">
-            <span class="close" onclick="closeAddFriendModal()">&times;</span>
-            <h2 style="margin-bottom:14px;">Add your friends</h2>
-            <form id="addFriendForm" onsubmit="submitAddFriend();return false;">
-              <label for="addFriendUsername">USERNAME:</label>
-              <input id="addFriendUsername" type="text" placeholder="Enter username..." autocomplete="off" required>
-              <div id="addFriendUserBox" class="selected-user" style="display:none;"></div>
-              <label for="addFriendMsg">MESSAGE:</label>
-              <textarea id="addFriendMsg" placeholder="Send your welcome message...">Hi, I'd like to add you as a contact.</textarea>
-              <div id="addFriendError"></div>
-              <button type="submit" class="btn">Send Friend Request</button>
-            </form>
-          </div>
+        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="requests">
+                    <div class="title">
+                        <h1>Add your friends</h1>
+                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+                    </div>
+                    <div class="content">
+                        <form>
+                            <div class="form-group">
+                                <label for="user">Email:</label>
+                                <input type="text" class="form-control" id="user" placeholder="Add recipient..." required>
+<!--                                <div class="user" id="contact">-->
+<!--                                    <img class="avatar-sm" src="img/avatars/avatar-female-5.jpg" alt="avatar">-->
+<!--                                    <h5>Keith Morris</h5>-->
+<!--                                    <button class="btn"><i class="material-icons">close</i></button>-->
+<!--                                </div>-->
+                            </div>
+                            <div class="form-group">
+                                <label for="welcome">Message:</label>
+                                <textarea class="text-control" id="welcome" placeholder="Send your welcome message...">Hi Keith, I'd like to add you as a contact.</textarea>
+                            </div>
+                            <button type="submit" class="btn button w-100">Send Friend Request</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- End of Add Friends -->
         <!-- Start of Create Chat -->
@@ -566,20 +609,207 @@
             <div class="tab-content" id="nav-tabContent">
                 <!-- Start of Babble -->
                 <div class="babble tab-pane fade active show" id="list-chat" role="tabpanel" aria-labelledby="list-chat-list">
-                    <div class="chat-container-custom">
-                        <!-- Thêm header hiển thị tên + avatar người nhận -->
-                        <div class="chat-header" id="chatHeader" style="display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-bottom: 1px solid #eee; min-height: 56px;"></div>
-                        <div class="chat-body" id="chatBody">
-                            <!-- Tin nhắn sẽ được render tại đây -->
+                    <!-- Start of Chat -->
+                    <div class="chat" id="chat">
+                        <div class="top" id="top">
                         </div>
-                        <div class="chat-input-custom">
-                            <form class="position-relative w-100" id="staticChatForm">
-                                <textarea class="form-control" id="staticMessageInput" placeholder="Start typing for reply..." rows="1"></textarea>
-                                <button type="submit"><i class="material-icons">send</i></button>
-                            </form>
+                        <div class="content" id="content">
+                            <div class="container">
+                            <div class="col-md-12" id="show-message" ></div>
+                            </div>
+                        </div>
+                        <div class="container">
+                            <div class="col-md-12">
+                                <div class="bottom" id="send-message">
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <!-- End of Chat -->
+                    <!-- Start of Call -->
+<!--                    <div class="call" id="call1">-->
+<!--                        <div class="content">-->
+<!--                            <div class="container">-->
+<!--                                <div class="col-md-12">-->
+<!--                                    <div class="inside">-->
+<!--                                        <div class="panel">-->
+<!--                                            <div class="participant">-->
+<!--                                                <img class="avatar-xxl" src="img/avatars/avatar-female-5.jpg" alt="avatar">-->
+<!--                                                <span>Connecting</span>-->
+<!--                                            </div>-->
+<!--                                            <div class="options">-->
+<!--                                                <button class="btn option"><i class="material-icons md-30">mic</i></button>-->
+<!--                                                <button class="btn option"><i class="material-icons md-30">videocam</i></button>-->
+<!--                                                <button class="btn option call-end"><i class="material-icons md-30">call_end</i></button>-->
+<!--                                                <button class="btn option"><i class="material-icons md-30">person_add</i></button>-->
+<!--                                                <button class="btn option"><i class="material-icons md-30">volume_up</i></button>-->
+<!--                                            </div>-->
+<!--                                            <button class="btn back" name="1"><i class="material-icons md-24">chat</i></button>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <!-- End of Call -->
                 </div>
+                <!-- End of Babble -->
+                <!-- Start of Babble -->
+                <div class="babble tab-pane fade" id="list-empty" role="tabpanel" aria-labelledby="list-empty-list">
+                    <!-- Start of Chat -->
+<!--                    <div class="chat" id="chat2">-->
+<!--                        <div class="top">-->
+<!--                            <div class="container">-->
+<!--                                <div class="col-md-12">-->
+<!--                                    <div class="inside">-->
+<!--                                        <a href="#"><img class="avatar-md" src="img/avatars/avatar-female-2.jpg" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar"></a>-->
+<!--                                        <div class="status">-->
+<!--                                            <i class="material-icons offline">fiber_manual_record</i>-->
+<!--                                        </div>-->
+<!--                                        <div class="data">-->
+<!--                                            <h5><a href="#">Lean Avent</a></h5>-->
+<!--                                            <span>Inactive</span>-->
+<!--                                        </div>-->
+<!--                                        <button class="btn connect d-md-block d-none" name="2"><i class="material-icons md-30">phone_in_talk</i></button>-->
+<!--                                        <button class="btn connect d-md-block d-none" name="2"><i class="material-icons md-36">videocam</i></button>-->
+<!--                                        <button class="btn d-md-block d-none"><i class="material-icons md-30">info</i></button>-->
+<!--                                        <div class="dropdown">-->
+<!--                                            <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>-->
+<!--                                            <div class="dropdown-menu dropdown-menu-right">-->
+<!--                                                <button class="dropdown-item connect" name="2"><i class="material-icons">phone_in_talk</i>Voice Call</button>-->
+<!--                                                <button class="dropdown-item connect" name="2"><i class="material-icons">videocam</i>Video Call</button>-->
+<!--                                                <hr>-->
+<!--                                                <button class="dropdown-item"><i class="material-icons">clear</i>Clear History</button>-->
+<!--                                                <button class="dropdown-item"><i class="material-icons">block</i>Block Contact</button>-->
+<!--                                                <button class="dropdown-item"><i class="material-icons">delete</i>Delete Contact</button>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="content empty">-->
+<!--                            <div class="container">-->
+<!--                                <div class="col-md-12">-->
+<!--                                    <div class="no-messages">-->
+<!--                                        <i class="material-icons md-48">forum</i>-->
+<!--                                        <p>Seems people are shy to start the chat. Break the ice send the first message.</p>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="container">-->
+<!--                            <div class="col-md-12">-->
+<!--                                <div class="bottom">-->
+<!--                                    <form class="position-relative w-100">-->
+<!--                                        <textarea class="form-control" placeholder="Start typing for reply..." rows="1"></textarea>-->
+<!--&lt;!&ndash;                                        <button class="btn emoticons"><i class="material-icons">insert_emoticon</i></button>&ndash;&gt;-->
+<!--                                        <button type="submit" class="btn send"><i class="material-icons">send</i></button>-->
+<!--                                    </form>-->
+<!--                                    <label>-->
+<!--                                        <input type="file">-->
+<!--                                        <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>-->
+<!--                                    </label>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <!-- End of Chat -->
+                    <!-- Start of Call -->
+<!--                    <div class="call" id="call2">-->
+<!--                        <div class="content">-->
+<!--                            <div class="container">-->
+<!--                                <div class="col-md-12">-->
+<!--                                    <div class="inside">-->
+<!--                                        <div class="panel">-->
+<!--                                            <div class="participant">-->
+<!--                                                <img class="avatar-xxl" src="img/avatars/avatar-female-2.jpg" alt="avatar">-->
+<!--                                                <span>Connecting</span>-->
+<!--                                            </div>-->
+<!--                                            <div class="options">-->
+<!--                                                <button class="btn option"><i class="material-icons md-30">mic</i></button>-->
+<!--                                                <button class="btn option"><i class="material-icons md-30">videocam</i></button>-->
+<!--                                                <button class="btn option call-end"><i class="material-icons md-30">call_end</i></button>-->
+<!--                                                <button class="btn option"><i class="material-icons md-30">person_add</i></button>-->
+<!--                                                <button class="btn option"><i class="material-icons md-30">volume_up</i></button>-->
+<!--                                            </div>-->
+<!--                                            <button class="btn back" name="2"><i class="material-icons md-24">chat</i></button>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <!-- End of Call -->
+                </div>
+                <!-- End of Babble -->
+                <!-- Start of Babble -->
+                <div class="babble tab-pane fade" id="list-request" role="tabpanel" aria-labelledby="list-request-list">
+                    <!-- Start of Chat -->
+<!--                    <div class="chat" id="chat3">-->
+<!--                        <div class="top">-->
+<!--                            <div class="container">-->
+<!--                                <div class="col-md-12">-->
+<!--                                    <div class="inside">-->
+<!--                                        <a href="#"><img class="avatar-md" src="img/avatars/avatar-female-6.jpg" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar"></a>-->
+<!--                                        <div class="status">-->
+<!--                                            <i class="material-icons offline">fiber_manual_record</i>-->
+<!--                                        </div>-->
+<!--                                        <div class="data">-->
+<!--                                            <h5><a href="#">Louis Martinez</a></h5>-->
+<!--                                            <span>Inactive</span>-->
+<!--                                        </div>-->
+<!--                                        <button class="btn disabled d-md-block d-none" disabled><i class="material-icons md-30">phone_in_talk</i></button>-->
+<!--                                        <button class="btn disabled d-md-block d-none" disabled><i class="material-icons md-36">videocam</i></button>-->
+<!--                                        <button class="btn d-md-block disabled d-none" disabled><i class="material-icons md-30">info</i></button>-->
+<!--                                        <div class="dropdown">-->
+<!--                                            <button class="btn disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled><i class="material-icons md-30">more_vert</i></button>-->
+<!--                                            <div class="dropdown-menu dropdown-menu-right">-->
+<!--                                                <button class="dropdown-item"><i class="material-icons">phone_in_talk</i>Voice Call</button>-->
+<!--                                                <button class="dropdown-item"><i class="material-icons">videocam</i>Video Call</button>-->
+<!--                                                <hr>-->
+<!--                                                <button class="dropdown-item"><i class="material-icons">clear</i>Clear History</button>-->
+<!--                                                <button class="dropdown-item"><i class="material-icons">block</i>Block Contact</button>-->
+<!--                                                <button class="dropdown-item"><i class="material-icons">delete</i>Delete Contact</button>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="content empty">-->
+<!--                            <div class="container">-->
+<!--                                <div class="col-md-12">-->
+<!--                                    <div class="no-messages request">-->
+<!--                                        <a href="#"><img class="avatar-xl" src="img/avatars/avatar-female-6.jpg" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar"></a>-->
+<!--                                        <h5>Louis Martinez would like to add you as a contact. <span>Hi Keith, I'd like to add you as a contact.</span></h5>-->
+<!--                                        <div class="options">-->
+<!--                                            <button class="btn button"><i class="material-icons">check</i></button>-->
+<!--                                            <button class="btn button"><i class="material-icons">close</i></button>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="container">-->
+<!--                            <div class="col-md-12">-->
+<!--                                <div class="bottom">-->
+<!--                                    <form class="position-relative w-100">-->
+<!--                                        <textarea class="form-control" placeholder="Messaging unavailable" rows="1" disabled></textarea>-->
+<!--                                        <button class="btn emoticons disabled" disabled><i class="material-icons">insert_emoticon</i></button>-->
+<!--                                        <button class="btn send disabled" disabled><i class="material-icons">send</i></button>-->
+<!--                                    </form>-->
+<!--                                    <label>-->
+<!--                                        <input type="file" disabled>-->
+<!--                                        <span class="btn attach disabled d-sm-block d-none"><i class="material-icons">attach_file</i></span>-->
+<!--                                    </label>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <!-- End of Chat -->
+                </div>
+                <!-- End of Babble -->
             </div>
         </div>
     </div> <!-- Layout -->
@@ -592,223 +822,25 @@
 <script src="js/vendor/popper.min.js"></script>
 <script src="js/swipe.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
-<script th:inline="javascript">
-    window.currentUserId = /*[[${user != null and user.id != null}]]*/ 0;
-    window.currentUsername = /*[['${user != null ? user.username : ""}']]*/ "";
-</script>
 <script>
-    const token = localStorage.getItem("token");
-    // window.currentUserId đã được gán ở trên
-    let selectedUser = null;
-    let selectedGroup = null;
-    let currentMessages = [];
+    function scrollToBottom(el) { el.scrollTop = el.scrollHeight; }
+    scrollToBottom(document.getElementById('content'));
+</script>
+</body>
+<script>
+    const baseURL = "http://localhost:8080/api";
 
-    function searchAll(query) {
-        if (query.length < 2) {
-            document.getElementById('searchResults').innerHTML = '';
+    document.addEventListener("DOMContentLoaded", function () {
+        let username = localStorage.getItem("username");
+
+        // if (username) {
+        //     username = decodeURIComponent(username);
+        // }
+
+        if (!username) {
+            console.error("No username found in localStorage.");
             return;
         }
-<<<<<<< HEAD
-        Promise.all([
-            fetch(`/api/users/username/${encodeURIComponent(query)}`, { headers: { "Authorization": `Bearer ${token}` }}).then(r => r.json()),
-            fetch(`/api/groups/search?name=${encodeURIComponent(query)}`, { headers: { "Authorization": `Bearer ${token}` }}).then(r => r.json())
-        ]).then(([user, groups]) => {
-            console.log('Kết quả search user:', user);
-            console.log('Kết quả search group:', groups);
-            let users = [];
-            if (user && user.username) users = [user];
-            renderUserAndGroupSearchResults(users, groups);
-        }).catch(err => {
-            console.error('Lỗi search user/group:', err);
-            document.getElementById('searchResults').innerHTML = '<div style="padding:8px;color:#aaa;">Không tìm thấy user/group</div>';
-        });
-    }
-
-    function renderUserAndGroupSearchResults(users, groups) {
-        let html = '';
-        if (Array.isArray(users) && users.length > 0) {
-            html += '<div style="font-weight:600;padding:4px 8px 2px 8px;">User</div>';
-            html += users.map(u => `<div class="search-result-item" style="display:flex;align-items:center;gap:10px;padding:7px 10px;cursor:pointer;border-radius:6px;" onclick="startPrivateChat('${u.username}','${u.avatarUrl}')"><img src="${u.avatarUrl}" style="width:32px;height:32px;border-radius:50%;background:#eee;"><span style="font-weight:500;">${u.username}</span></div>`).join('');
-        }
-        if (Array.isArray(groups) && groups.length > 0) {
-            html += '<div style="font-weight:600;padding:8px 8px 2px 8px;">Group</div>';
-            html += groups.map(g => `<div class="search-result-item" style="display:flex;align-items:center;gap:10px;padding:7px 10px;cursor:pointer;border-radius:6px;" onclick="startGroupChat('${g.id}','${g.name}')"><span class="material-icons" style="color:#1976d2;">groups</span><span style="font-weight:500;">${g.name}</span></div>`).join('');
-        }
-        if (!html) html = '<div style="padding:8px;color:#aaa;">Không tìm thấy user/group</div>';
-        document.getElementById('searchResults').innerHTML = html;
-    }
-
-    window.startPrivateChat = function(username, avatarUrl) {
-        selectedUser = {username, avatarUrl};
-        selectedGroup = null;
-        document.getElementById('searchResults').innerHTML = '';
-        renderChatHeader();
-        fetchAndRenderMessages();
-    };
-
-    window.startGroupChat = function(groupId, groupName) {
-        selectedUser = null;
-        selectedGroup = {groupId, groupName};
-        subscribeGroup(groupId);
-        renderChatHeader();
-        fetchAndRenderMessages();
-    };
-
-    function sendPrivateMsg(toUsername, content) {
-        if (!toUsername || !content) return;
-        stompClient.publish({
-            destination: '/app/chat.sendToUser',
-            body: JSON.stringify({recipient: toUsername, content})
-        });
-        addMsgToChat('me', content, true);
-    }
-
-    function sendGroupMsg(groupId, content) {
-        if (!groupId || !content) return;
-        stompClient.publish({
-            destination: '/app/chat.sendToGroup',
-            body: JSON.stringify({ groupId, content })
-        });
-        addMsgToChat('me', content, true);
-    }
-
-    function subscribeGroup(groupId) {
-        if (!window._groupSubs) window._groupSubs = {};
-        if (window._groupSubs[groupId]) return; // đã subscribe rồi
-        window._groupSubs[groupId] = stompClient.subscribe(`/topic/group.${groupId}`, function(message) {
-            let msg = JSON.parse(message.body);
-            if (selectedGroup && msg.groupId === selectedGroup.groupId) {
-                addMsgToChat(msg.sender, msg.content, false);
-            }
-        });
-    }
-
-    let stompClient = null;
-    function connectStomp() {
-        if (stompClient) return;
-        stompClient = new StompJs.Client({
-            brokerURL: 'ws://localhost:8080/ws',
-            connectHeaders: { Authorization: 'Bearer ' + token },
-            debug: function(str) { console.log('[STOMP DEBUG]', str); },
-            reconnectDelay: 5000,
-            onConnect: function(frame) {
-                stompClient.subscribe('/user/queue/private', function(message) {
-                    let msg;
-                    try { msg = JSON.parse(message.body); } catch { msg = {sender: 'unknown', content: message.body}; }
-                    if (selectedUser && msg.sender === selectedUser.username) {
-                        addMsgToChat(msg.sender, msg.content, false);
-                    } else {
-                        // Có thể thêm thông báo ở sidebar nếu muốn
-                    }
-                });
-            }
-        });
-        stompClient.activate();
-    }
-    connectStomp();
-
-    function addMsgToChat(sender, content, isMe) {
-        const chatBody = document.getElementById('chatBody');
-        chatBody.innerHTML += `
-            <div class="msg-row${isMe ? ' me' : ''}">
-                <img class="msg-avatar" src="${isMe ? 'img/avatars/avatar-female-5.jpg' : (selectedUser ? selectedUser.avatarUrl : '')}" alt="avatar">
-                <div class="msg-bubble">${content}</div>
-                <span class="msg-time">${new Date().toLocaleTimeString()}</span>
-            </div>
-        `;
-        chatBody.scrollTop = chatBody.scrollHeight;
-    }
-
-    function renderChatHeader() {
-        const header = document.getElementById('chatHeader');
-        if (selectedUser) {
-            header.innerHTML = `
-                <div style="display:flex;align-items:center;gap:14px;width:100%;padding:0 6px;">
-                    <img src="${selectedUser.avatarUrl}" style="width:44px;height:44px;border-radius:50%;border:2px solid #eee;background:#fff;">
-                    <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
-                        <span style="font-weight:600;font-size:18px;line-height:1.1;">${selectedUser.username}</span>
-                        <span style="font-size:13px;color:#3bbf3b;font-weight:500;">Active now</span>
-                    </div>
-                    <button class="btn" style="background:none;border:none;padding:4px 6px;outline:none;"><i class="material-icons">more_vert</i></button>
-                </div>
-            `;
-        } else if (selectedGroup) {
-            header.innerHTML = `
-                <div style="display:flex;align-items:center;gap:14px;width:100%;padding:0 6px;">
-                    <span class="material-icons" style="font-size:44px;color:#1976d2;background:#e3f0ff;border-radius:50%;padding:4px;">groups</span>
-                    <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
-                        <span style="font-weight:600;font-size:18px;line-height:1.1;">${selectedGroup.groupName}</span>
-                        <span style="font-size:13px;color:#1976d2;font-weight:500;">Group chat</span>
-                    </div>
-                    <button class="btn" style="background:none;border:none;padding:4px 6px;outline:none;"><i class="material-icons">more_vert</i></button>
-                </div>
-            `;
-        } else {
-            header.innerHTML = "";
-        }
-    }
-
-    function fetchAndRenderMessages() {
-        const chatBox = document.getElementById('chatBody');
-        chatBox.innerHTML = '<div style="color:#aaa;text-align:center;padding:16px;">Đang tải tin nhắn...</div>';
-        let url = null;
-        if (selectedUser) {
-            url = `/api/messages/private/${selectedUser.username}`;
-        } else if (selectedGroup) {
-            url = `/api/messages/group/${selectedGroup.groupId}`;
-        }
-        if (!url) return;
-        fetch(url, { headers: { "Authorization": `Bearer ${token}` } })
-            .then(r => r.json())
-            .then(messages => {
-                currentMessages = messages;
-                renderMessages();
-            });
-    }
-
-    function renderMessages() {
-        const chatBox = document.getElementById('chatBody');
-        if (!currentMessages || currentMessages.length === 0) {
-            chatBox.innerHTML = '<div style="color:#aaa;text-align:center;padding:16px;">Chưa có tin nhắn nào</div>';
-            return;
-        }
-        chatBox.innerHTML = currentMessages.map(msg => `
-            <div class="message-row" style="display:flex;justify-content:${msg.mine?'flex-end':'flex-start'};margin-bottom:8px;">
-                <div style="max-width:70%;background:${msg.mine?'#1976d2':'#f1f1f1'};color:${msg.mine?'#fff':'#222'};padding:9px 14px;border-radius:14px;${msg.mine?'border-bottom-right-radius:3px;':'border-bottom-left-radius:3px;'}">
-                    <div style="font-size:14px;">${msg.content}</div>
-                    <div style="font-size:11px;color:#999;text-align:right;">${msg.time||''}</div>
-                </div>
-            </div>
-        `).join('');
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    let localMessages = [
-        {from: "other", text: "Welcome! You can chat here.", time: new Date().toLocaleTimeString()}
-    ];
-
-    document.getElementById('participant').addEventListener('input', function(e) {
-        searchAll(e.target.value.trim());
-    });
-
-    const staticChatForm = document.getElementById('staticChatForm');
-    const staticMessageInput = document.getElementById('staticMessageInput');
-    staticChatForm.onsubmit = function(e) {
-        e.preventDefault();
-        const val = staticMessageInput.value.trim();
-        if(val) {
-            if(selectedUser) {
-                sendPrivateMsg(selectedUser.username, val);
-            } else if(selectedGroup) {
-                sendGroupMsg(selectedGroup.groupId, val);
-            } else {
-                addMsgToChat('me', val, true);
-            }
-            staticMessageInput.value = '';
-        }
-        return false;
-=======
         console.log(username);
         fetchUserIdByUsername(username);
     });
@@ -850,329 +882,277 @@
                 avatarImages.forEach(img => {
                     img.src = userImage;
                 });
-                fetchUserData(user.id);
+                fetchUserData(user.userId);
+                fetchConversations(user.userId);
+                // loadMessages(user.userId);
             })
             .catch(error => console.error("Error fetching user ID:", error));
->>>>>>> origin/vy1
     }
 
-    document.getElementById('btnAddFriend').onclick = function() {
-        document.getElementById('addFriendModal').style.display = 'block';
-    };
-
-<<<<<<< HEAD
-    const addFriendUsername = document.getElementById('addFriendUsername');
-    const addFriendUserBox = document.getElementById('addFriendUserBox');
-    let selectedUserAddFriend = null;
-    addFriendUsername.oninput = function() {
-      const username = addFriendUsername.value.trim();
-      addFriendUserBox.innerHTML = '';
-      addFriendUserBox.style.display = 'none';
-      selectedUserAddFriend = null;
-      if (!username) return;
-      fetch(`/api/users/username/${encodeURIComponent(username)}`, {
-          headers: { "Authorization": `Bearer ${token}` }
-      })
-      .then(r => r.json())
-      .then(user => {
-          if (!user || !user.id || isNaN(Number(user.id))) {
-              selectedUserAddFriend = null;
-              addFriendUserBox.innerHTML = '';
-              addFriendUserBox.style.display = 'none';
-              return;
-          }
-          selectedUserAddFriend = user;
-          addFriendUserBox.innerHTML = `<img src='${user.avatarUrl||''}'><span style='font-weight:500;'>${user.username}</span><span class='remove-user' onclick='removeSelectedAddFriend()'>&times;</span>`;
-          addFriendUserBox.style.display = '';
-      });
-    };
-    window.removeSelectedAddFriend = function() {
-      selectedUserAddFriend = null;
-      addFriendUserBox.innerHTML = '';
-      addFriendUserBox.style.display = 'none';
-      addFriendUsername.value = '';
-    };
-    function submitAddFriend() {
-        const userObj = selectedUserAddFriend;
-        const errorDiv = document.getElementById('addFriendError');
-        errorDiv.style.color = 'red';
-        errorDiv.textContent = '';
-        if (!userObj || !userObj.id || isNaN(Number(userObj.id))) {
-            errorDiv.textContent = 'Vui lòng nhập username hợp lệ!';
-            return;
-        }
-        fetch('/api/contacts', {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                contactOne: { id: window.currentUserId },
-                contactTwo: { id: userObj.id }
-            })
-        })
-        .then(async r => {
-            if (r.ok) {
-                errorDiv.style.color = 'green';
-                errorDiv.textContent = 'Đã gửi yêu cầu kết bạn!';
-                loadConversations();
-            } else {
-                let msg = await r.text();
-                errorDiv.textContent = msg || 'Gửi yêu cầu thất bại!';
-=======
+    function fetchUserData(userId) {
+        const token = localStorage.getItem("token");
+        console.log(userId);
+        console.log(token);
         fetch(`${baseURL}/users/id/${userId}`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`,
-                // "Content-Type": "application/json",
-                // "Accept": "application/json"
->>>>>>> origin/vy1
             }
         })
-        .catch(() => {
-            errorDiv.textContent = 'Có lỗi khi gửi yêu cầu!';
-        });
-    }
-    function closeAddFriendModal() {
-        document.getElementById('addFriendModal').style.display = 'none';
-        // Reset UI
-        addFriendUserBox.innerHTML = '';
-        addFriendUserBox.style.display = 'none';
-        addFriendUsername.value = '';
-        document.getElementById('addFriendError').textContent = '';
-    }
-
-    function loadConversations() {
-      // Gọi song song friends và groups
-      Promise.all([
-        fetch('/api/friends', { headers: { "Authorization": `Bearer ${token}` } }).then(r => r.ok ? r.json() : []),
-        fetch('/api/groups/my', { headers: { "Authorization": `Bearer ${token}` } }).then(r => r.ok ? r.json() : [])
-      ]).then(([friends, groups]) => {
-        // Giả lập lastMessage/lastTime nếu backend chưa có API conversation
-        const friendConvs = (Array.isArray(friends) ? friends : []).map(u => ({
-          id: u.username,
-          type: 'private',
-          name: u.username,
-          avatar: u.avatarUrl||'',
-          online: u.online,
-          lastMessage: u.lastMessage?.content||'',
-          lastTime: u.lastMessage?.time||u.lastActive||'',
-        }));
-        const groupConvs = (Array.isArray(groups) ? groups : []).map(g => ({
-          id: g.id,
-          type: 'group',
-          name: g.name,
-          avatar: '',
-          online: true,
-          lastMessage: g.lastMessage?.content||'',
-          lastTime: g.lastMessage?.time||g.lastActive||'',
-        }));
-        // Gộp và sort theo lastTime giảm dần
-        const conversations = [...friendConvs, ...groupConvs].sort((a,b) => (b.lastTime||'').localeCompare(a.lastTime||''));
-        renderConversationList(conversations);
-      });
-    }
-    function renderConversationList(convs) {
-      const box = document.getElementById('conversationList');
-      if (!convs || convs.length === 0) {
-        box.innerHTML = '<div style="color:#aaa;padding:8px 0;">Không có cuộc trò chuyện nào</div>';
-        return;
-      }
-      box.innerHTML = convs.map(c => `
-        <div class="conv-item" style="display:flex;align-items:center;gap:10px;padding:7px 10px;cursor:pointer;border-radius:6px;margin-bottom:2px;" onclick="${c.type==='private' ? `startPrivateChat('${c.id}','${c.avatar}')` : `startGroupChat('${c.id}','${c.name}')`}">
-          ${c.type==='private'
-            ? `<img src='${c.avatar}' style='width:32px;height:32px;border-radius:50%;background:#eee;'>`
-            : `<span class='material-icons' style='color:#1976d2;'>groups</span>`}
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
-            <div style="font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.lastMessage||'<span style=\'color:#bbb;\'>Chưa có tin nhắn</span>'}</div>
-          </div>
-          <span style="width:8px;height:8px;border-radius:50%;background:${c.online?'#3bbf3b':'#bbb'};"></span>
-          ${unreadMap[c.type+':'+c.id]? `<span class='unread-badge'>${unreadMap[c.type+':'+c.id]}</span>` : ''}
-        </div>
-      `).join('');
-    }
-    // --- Notification badge & unread badge cho hội thoại ---
-    let unreadMap = {}; // {convId: số tin chưa đọc}
-    let notificationCount = 0;
-
-    function updateNotificationBadge() {
-      const badge = document.getElementById('notificationBadge');
-      badge.textContent = notificationCount;
-      badge.style.display = notificationCount > 0 ? '' : 'none';
-    }
-    function onNewMessage(convType, convId) {
-      const key = convType + ':' + convId;
-      if (!unreadMap[key]) unreadMap[key]=0;
-      unreadMap[key]++;
-      loadConversations();
-    }
-    function onFriendRequest() {
-      notificationCount++;
-      updateNotificationBadge();
-    }
-    function onGroupInvite() {
-      notificationCount++;
-      updateNotificationBadge();
-    }
-    // --- Khi user click vào hội thoại thì reset badge ---
-    window.startPrivateChat = function(username, avatarUrl) {
-      selectedUser = {username, avatarUrl};
-      selectedGroup = null;
-      unreadMap['private:'+username]=0;
-      renderChatHeader();
-      fetchAndRenderMessages();
-      loadConversations();
-    };
-    window.startGroupChat = function(groupId, groupName) {
-      selectedUser = null;
-      selectedGroup = {groupId, groupName};
-      unreadMap['group:'+groupId]=0;
-      subscribeGroup(groupId);
-      renderChatHeader();
-      fetchAndRenderMessages();
-      loadConversations();
-    };
-    // --- Giả lập nhận notification qua WebSocket (bạn thay bằng code thực tế) ---
-    // Ví dụ:
-    // socket.on('new_message', ({type, id})=>onNewMessage(type,id));
-    // socket.on('friend_request', onFriendRequest);
-    // socket.on('group_invite', onGroupInvite);
-
-    // Gọi khi load trang
-    window.addEventListener('DOMContentLoaded', function(){
-      loadConversations();
-      updateNotificationBadge();
-    });
-
-    function loadFriendRequests() {
-      fetch('/api/friends/requests', { headers: { "Authorization": `Bearer ${token}` } })
-        .then(r => r.json())
-        .then(requests => {
-          const box = document.getElementById('alerts');
-          if (!requests || requests.length === 0) {
-            box.innerHTML = '<div style="color:#aaa;padding:8px 0;">Không có lời mời kết bạn nào</div>';
-            return;
-          }
-          box.innerHTML = requests.map(u => `
-            <a href="#" class="filterNotifications all latest notification" data-toggle="list" style="display:flex;align-items:center;gap:10px;padding:10px 0;">
-              <img class="avatar-md" src="${u.avatarUrl||'img/avatars/avatar-female-1.jpg'}" data-toggle="tooltip" data-placement="top" title="${u.username}" alt="avatar">
-              <div class="status"><i class="material-icons online">fiber_manual_record</i></div>
-              <div class="data" style="flex:1;">
-                <b>${u.username}</b> đã gửi cho bạn một lời mời kết bạn.
-                <div style="margin-top:6px;display:flex;gap:10px;">
-                  <button class='btn btn-sm btn-success' title="Chấp nhận" onclick="acceptFriendRequest('${u.username}')"><i class="material-icons">check</i></button>
-                  <button class='btn btn-sm btn-danger' title="Từ chối" onclick="rejectFriendRequest('${u.username}')"><i class="material-icons">close</i></button>
-                </div>
-              </div>
-            </a>
-          `).join('');
-        });
-    }
-    function acceptFriendRequest(username) {
-      fetch('/api/friends/accept', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ username })
-      }).then(() => {
-        loadFriendRequests();
-        loadConversations(); // reload lại contact khi kết bạn thành công
-      });
-    }
-    function rejectFriendRequest(username) {
-      fetch('/api/friends/reject', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ username })
-      }).then(() => loadFriendRequests());
-    }
-    // Khi có sự kiện friend request mới
-    function onFriendRequest() {
-      notificationCount++;
-      updateNotificationBadge();
-      loadFriendRequests();
-    }
-    function onGroupInvite() {
-      notificationCount++;
-      updateNotificationBadge();
-    }
-    // Khi chuyển sang tab notification thì load lại
-    const notificationTab = document.querySelector('a[href="#notifications"]');
-    if(notificationTab) notificationTab.addEventListener('click', loadFriendRequests);
-</script>
-<script>
-    $(document).ready(function() {
-        function showTab(tabId) {
-            $('.tab-pane').removeClass('show active');
-            $(tabId).addClass('show active');
-        }
-        // Map sidebar icon to tab content
-        $('#sidebar .nav-link').on('click', function(e) {
-            e.preventDefault();
-            const tab = $(this).data('tab');
-            if(tab) showTab(tab);
-        });
-        // Optionally, select default tab on load
-        showTab('#discussions');
-    });
-</script>
-<script>
-    // Hàm kiểm tra trạng thái bạn bè và render nút phù hợp
-    function renderFriendActionButton(targetUserId, isFriend) {
-        if (targetUserId == window.currentUserId) return '';
-        if (isFriend) {
-            return `<button class="btn btn-primary btn-chat" onclick="startPrivateChatWithId(${targetUserId})">Nhắn tin</button>`;
-        } else {
-            return `<button class="btn btn-success btn-add-friend" onclick="sendFriendRequest(${targetUserId})">Kết bạn</button>`;
-        }
-    }
-
-    // Gửi yêu cầu kết bạn
-    function sendFriendRequest(targetUserId) {
-        fetch('/api/contacts', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
-            },
-            body: JSON.stringify({
-                contactOne: { id: window.currentUserId },
-                contactTwo: { id: targetUserId }
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch user data");
+                }
+                return response.json();
             })
-        }).then(res => {
-            if (res.ok) {
-                alert('Đã gửi lời mời kết bạn!');
-                // Có thể reload lại danh sách bạn bè hoặc cập nhật nút
-            } else {
-                res.text().then(txt=>alert('Kết bạn thất bại: '+txt));
+            .then(data => {
+                let contactsList = document.getElementById('contacts');
+                contactsList.innerHTML = '';
+
+                if (!data.contacts || data.contacts.length === 0) {
+                    contactsList.innerHTML = "<p>No contacts found</p>";
+                    return;
+                }
+                data.contacts.forEach(contact => {
+                    let status = contact.status ? "online" : "offline";
+                    let contactCard = `
+                <a href="#" class="filterMembers all ${status} contact" data-toggle="list">
+                    <img class="avatar-md" src="${contact.contactProfilePicture || 'img/avatars/default-avatar.png'}" data-toggle="tooltip" data-placement="top" title="${contact.contactFirstName}" alt="avatar">
+                    <div class="status">
+                        <i class="material-icons ${status}">fiber_manual_record</i>
+                    </div>
+                    <div class="data">
+                        <h5>${contact.contactFirstName} ${contact.contactLastName}</h5>
+                    </div>
+                </a>
+            `;
+                    contactsList.innerHTML += contactCard;
+                });
+            })
+            .catch(error => console.error("Error fetching user data:", error));
+    }
+
+    async function fetchConversations(userId) {
+        const token = localStorage.getItem("token");
+        console.log("Fetching conversations for user:", userId);
+        console.log("Token:", token);
+
+        try {
+            const [conversationsRes, latestMessagesRes] = await Promise.all([
+                fetch(`${baseURL}/conversations/user/${userId}`, {
+                    method: "GET",
+                    headers: { "Authorization": `Bearer ${token}` }
+                }),
+                fetch(`${baseURL}/messages/latest/${userId}`, {
+                    method: "GET",
+                    headers: { "Authorization": `Bearer ${token}` }
+                })
+            ]);
+
+            if (!conversationsRes.ok || !latestMessagesRes.ok) {
+                throw new Error("Failed to fetch conversations or messages");
             }
-        });
+
+            const conversations = await conversationsRes.json();
+            const latestMessages = await latestMessagesRes.json();
+
+            const chatsList = document.getElementById('chats');
+            chatsList.innerHTML = '';
+
+            if (!conversations || conversations.length === 0) {
+                chatsList.innerHTML = "<p>No conversations found</p>";
+                return;
+            }
+
+            const latestMessageMap = new Map();
+            latestMessages.forEach(msg => {
+                latestMessageMap.set(msg.conversation.id, msg);
+            });
+
+            conversations.forEach(conversation => {
+                const latestMessage = latestMessageMap.get(conversation.id) || null;
+                const latestTime = latestMessage ? formatTime(latestMessage.createdAt) : '';
+                const latestText = latestMessage ? truncateText(latestMessage.messageText) : 'No messages yet...';
+                const unreadCount = latestMessage && latestMessage.isRead === false && latestMessage.sender.id !== userId ? 1 : 0;
+                const imageUrl = conversation.imageUrl || 'img/avatars/default-avatar.png';
+
+                const chatCard = `
+                <a href="#list-chat" class="filterDiscussions all single" data-toggle="list" role="tab"
+                onclick="fetchMessages(${conversation.id}, ${userId}, '${conversation.name}'); console.log('${userId}')">
+                    <img class="avatar-md" src="${imageUrl}" data-toggle="tooltip" data-placement="top" title="${conversation.name}" alt="avatar">
+                    <div class="status">                        <i class="material-icons online">fiber_manual_record</i>
+                    </div>
+                    ${unreadCount > 0 ? `<div class="new bg-yellow"><span>+${unreadCount}</span></div>` : ''}
+                    <div class="data">
+                        <h5>${conversation.name}</h5>
+                        <span style="color: black">${latestTime}</span>
+                        <p style="color: black">${latestText}</p>
+                    </div>
+                </a>
+            `;
+
+                chatsList.insertAdjacentHTML('beforeend', chatCard);
+                // fetchMessages(conversations.id, userId, conversation.name);
+            });
+            // $('[data-toggle="tooltip"]').tooltip();
+            // if (conversations.length > 0) {
+            //     await fetchMessages(conversations[0].id, userId, conversations[0].name);
+            // }
+
+        } catch (error) {
+            console.error("Error fetching conversations or messages:", error);
+            const chatsList = document.getElementById('chats');
+            chatsList.innerHTML = "<p>Error loading conversations</p>";
+        }
     }
 
-    // Khi click Nhắn tin
-    function startPrivateChatWithId(targetUserId) {
-        // Tìm user trong danh sách, lấy username/avatar nếu cần rồi gọi startPrivateChat(username, avatarUrl)
-        // Hoặc gọi API lấy thông tin user
-        // Ví dụ đơn giản:
-        fetch('/api/users/' + targetUserId)
-          .then(r=>r.json())
-          .then(user=>startPrivateChat(user.username, user.profilePicture||''));
+
+    function formatTime(dateTimeString) {
+        const date = new Date(dateTimeString);
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'pm' : 'am';
+        const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
+        return `${formattedHours}:${minutes.toString().padStart(2, '0')}${ampm} ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear().toString().slice(-2)}`;
     }
 
-    // Khi render danh sách user, kiểm tra trạng thái bạn bè (giả sử đã có biến danh sách friendIds)
-    function renderUserList(users, friendIds) {
-        let html = '';
-        users.forEach(u => {
-            const isFriend = friendIds.includes(u.id);
-            html += `<div class="user-item">`
-                + `<img src="${u.profilePicture||'img/default-avatar.png'}" class="avatar"/> `
-                + `<span>${u.username}</span> `
-                + renderFriendActionButton(u.id, isFriend)
-                + `</div>`;
-        });
-        document.getElementById('userList').innerHTML = html;
+    function truncateText(text, maxLength = 25) {
+        if (!text) return '';
+        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
     }
+
+    function countUnreadMessages(messages, userId) {
+        return messages.filter(m => m.isRead === false && m.sender.id !== userId).length;
+    }
+
+    async function fetchMessages(conversationId, userId, conversationName) {
+        const token = localStorage.getItem("token");
+        const content = document.getElementById("show-message");
+        content.innerHTML = '';
+
+        try {
+            const response = await fetch(`${baseURL}/messages/conversation/${conversationId}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch messages");
+            }
+
+            const topConservation = document.getElementById("top");
+            topConservation.innerHTML = `<div class="container">
+                                <div class="col-md-12">
+                                    <div class="inside">
+                                        <div class="data">
+                                            <h5><a href="#">${conversationName}</a></h5>
+                                            <span>Active now</span>
+                                        </div>
+                                        <div class="dropdown">
+                                            <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <button class="dropdown-item"><i class="material-icons">clear</i>Clear History</button>
+                                                <button class="dropdown-item"><i class="material-icons">block</i>Block Contact</button>
+                                                <button class="dropdown-item"><i class="material-icons">delete</i>Delete Contact</button>
+                                                <button class="dropdown-item"><i class="material-icons">edit</i>Rename</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+            const sendMessage = document.getElementById("send-message");
+            sendMessage.innerHTML = `<form class="position-relative w-100">
+                                        <textarea class="form-control" placeholder="Start typing for reply..." rows="1"></textarea>
+
+                                        <button type="submit" class="btn send"><i class="material-icons">send</i></button>
+                                    </form>
+                                    <label>
+                                        <input type="file">
+                                        <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
+                                    </label>`;
+            const messages = await response.json();
+
+            if (!messages || messages.length === 0) {
+                content.innerHTML = "<p>No messages yet</p>";
+                return;
+            }
+
+            messages.forEach(message => {
+                const isOwnMessage = message.sender.id === userId;
+                const time = formatTime(message.createdAt);
+                console.log(message.sender.id, userId);
+                if (isOwnMessage) {
+
+                    //send message
+                    const messageHTML = `
+                                        <div class="message me" >
+												<div class="text-main">
+													<div class="text-group me align-items-center ml-2" >
+                                                        <div class="dropdown ml-2" >
+                                                            <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                <i class="material-icons md-30">more_vert</i>
+                                                            </button>
+                                                            <div class="dropdown-menu">
+                                                                <button class="dropdown-item">Update</button>
+                                                                <button class="dropdown-item">Delete</button>
+                                                            </div>
+                                                        </div>
+														<div class="text me">
+															<p>${escapeHtml(message.messageText)}</p>
+														</div>
+													</div>
+													<span>${message.isread ? '<i class="material-icons">check</i>' : ''}${time}</span>
+												</div>
+											</div>
+    `;
+                    content.insertAdjacentHTML('beforeend', messageHTML);
+                } else {
+                    // Received Message
+                    const messageHTML = `
+                                <div class="message" >
+												<div class="text-main">
+													    <div class="text-group d-flex align-items-center mr-2" >
+														<div class="text">
+															<p>${escapeHtml(message.messageText)}</p>
+														</div>
+                                                        <div class="dropdown ml-2" >
+                                                            <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                <i class="material-icons md-30">more_vert</i>
+                                                            </button>
+                                                            <div class="dropdown-menu">
+                                                                <button class="dropdown-item">Update</button>
+                                                                <button class="dropdown-item">Delete</button>
+                                                            </div>
+                                                        </div>
+													</div>
+													<span>${message.isread ? '<i class="material-icons">check</i>' : ''}${time}</span>
+												</div>
+											</div>
+`;
+                    content.insertAdjacentHTML('beforeend', messageHTML);
+                }
+            });
+
+            } catch (error) {
+            console.error("Error fetching messages:", error);
+            content.innerHTML = "<p>Error loading messages</p>";
+        }
+    }
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;',
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+
+
 </script>
-</body>
+
 </html>

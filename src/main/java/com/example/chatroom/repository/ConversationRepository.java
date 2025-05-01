@@ -11,20 +11,22 @@ import java.util.Optional;
 
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation, Long> {
-    // Tìm cuộc hội thoại riêng tư giữa hai người dùng (native query)
-    @Query(value = "SELECT * FROM conversation c " +
+    // Tìm cuộc hội thoại riêng tư giữa hai người dùng
+    @Query(value = "SELECT c.* FROM dbo.conversation c " +
             "WHERE c.is_group = 0 " +
-            "AND EXISTS (SELECT 1 FROM conversation_member cm1 WHERE cm1.conversation_id = c.id AND cm1.user_id = :userId1) " +
-            "AND EXISTS (SELECT 1 FROM conversation_member cm2 WHERE cm2.conversation_id = c.id AND cm2.user_id = :userId2) " +
-            "AND (SELECT COUNT(*) FROM conversation_member cm WHERE cm.conversation_id = c.id) = 2",
+            "AND EXISTS (SELECT 1 FROM dbo.conversation_member cm1 WHERE cm1.conversation_id = c.id AND cm1.user_id = :userId1) " +
+            "AND EXISTS (SELECT 1 FROM dbo.conversation_member cm2 WHERE cm2.conversation_id = c.id AND cm2.user_id = :userId2) " +
+            "AND (SELECT COUNT(*) FROM dbo.conversation_member cm WHERE cm.conversation_id = c.id) = 2",
             nativeQuery = true)
     Optional<Conversation> findPrivateConversationBetween(
             @Param("userId1") Long userId1,
             @Param("userId2") Long userId2);
 
-    // Tìm tất cả cuộc hội thoại mà một người dùng tham gia (native query)
-    @Query(value = "SELECT c.* FROM conversation c JOIN conversation_member cm ON cm.conversation_id = c.id " +
-            "WHERE cm.user_id = :userId ORDER BY c.created_at DESC",
+    // Tìm tất cả cuộc hội thoại mà một người dùng tham gia
+    @Query(value = "SELECT c.* FROM conversation c " +
+            "INNER JOIN conversation_member cm ON c.id = cm.conversation_id " +
+            "WHERE cm.user_id = :userId " +
+            "ORDER BY c.created_at DESC",
             nativeQuery = true)
     List<Conversation> findAllConversationsForUser(@Param("userId") Long userId);
 
