@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" >
-
+<!--<html lang="en" >-->
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>Chatroom</title>
     <meta name="description" content="#">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -49,19 +49,19 @@
                         <div class="tab-pane fade" id="members">
                             <div class="search">
                                 <form class="form-inline position-relative">
-                                    <input type="search" class="form-control" id="people" placeholder="Search for people...">
+                                    <input type="search" class="form-control" id="people">
                                     <button type="button" class="btn btn-link loop"><i class="material-icons">search</i></button>
                                 </form>
                                 <button class="btn create" data-toggle="modal" data-target="#exampleModalCenter"><i class="material-icons">person_add</i></button>
                             </div>
                             <div class="list-group sort">
-                                <button class="btn filterMembersBtn active show" data-toggle="list" data-filter="all" style="border: none">All</button>
-                                <button class="btn filterMembersBtn" data-toggle="list" data-filter="online" style="border: none">Online</button>
-                                <button class="btn filterMembersBtn" data-toggle="list" data-filter="offline" style="border: none">Offline</button>
+                                <button class="btn filterMembersBtn active show" data-toggle="list" data-filter="all" style="border: none" th:text="#{filter.all}">All</button>
+                                <button class="btn filterMembersBtn" data-toggle="list" data-filter="online" style="border: none" th:text="#{filter.online}">Online</button>
+                                <button class="btn filterMembersBtn" data-toggle="list" data-filter="offline" style="border: none" th:text="#{filter.offline}">Offline</button>
                             </div>
 <!--                            contact list-->
                             <div class="contacts">
-                                <h1>Contacts</h1>
+                                <h1 th:text="#{contacts}">Contacts</h1>
                                 <div class="list-group" id="contacts" role="tablist">
 <!--                                    <a href="#" class="filterMembers all online contact" data-toggle="list">-->
 <!--                                        <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">-->
@@ -79,18 +79,18 @@
                         <div id="discussions" class="tab-pane fade active show">
                             <div class="search">
                                 <form class="form-inline position-relative">
-                                    <input type="search" class="form-control" id="conversations" placeholder="Search for conversations...">
+                                    <input type="search" class="form-control" id="conversations">
                                     <button type="button" class="btn btn-link loop"><i class="material-icons">search</i></button>
                                 </form>
                                 <button class="btn create" data-toggle="modal" data-target="#startnewchat"><i class="material-icons">create</i></button>
                             </div>
                             <div class="list-group sort">
-                                <button class="btn filterDiscussionsBtn active show" data-toggle="list" data-filter="all">All</button>
-                                <button class="btn filterDiscussionsBtn" data-toggle="list" data-filter="read">Read</button>
-                                <button class="btn filterDiscussionsBtn" data-toggle="list" data-filter="unread">Unread</button>
+                                <button class="btn filterDiscussionsBtn active show" data-toggle="list" data-filter="all" th:text="#{filter.all}">All</button>
+                                <button class="btn filterDiscussionsBtn" data-toggle="list" data-filter="read" th:text="#{filter.read}">Read</button>
+                                <button class="btn filterDiscussionsBtn" data-toggle="list" data-filter="unread" th:text="#{filter.unread}">Unread</button>
                             </div>
                             <div class="discussions">
-                                <h1>Discussions</h1>
+                                <h1 th:text="#{discussions}">Discussions</h1>
                                 <div class="list-group" id="chats" role="tablist">
 <!--                                    <a href="#list-chat" class="filterDiscussions all unread single active" id="list-chat-list" data-toggle="list" role="tab">-->
 <!--                                        <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">-->
@@ -114,17 +114,17 @@
                         <div id="notifications" class="tab-pane fade">
                             <div class="search">
                                 <form class="form-inline position-relative">
-                                    <input type="search" class="form-control" id="notice" placeholder="Filter notifications...">
+                                    <input type="search" class="form-control" id="notice">
                                     <button type="button" class="btn btn-link loop"><i class="material-icons filter-list">filter_list</i></button>
                                 </form>
                             </div>
                             <div class="list-group sort">
-                                <button class="btn filterNotificationsBtn active show" data-toggle="list" data-filter="all">All</button>
-                                <button class="btn filterNotificationsBtn" data-toggle="list" data-filter="latest">Latest</button>
-                                <button class="btn filterNotificationsBtn" data-toggle="list" data-filter="oldest">Oldest</button>
+                                <button class="btn filterNotificationsBtn active show" data-toggle="list" data-filter="all" th:text="#{filter.all}">All</button>
+                                <button class="btn filterNotificationsBtn" data-toggle="list" data-filter="latest" th:text="#{filter.latest}">Latest</button>
+                                <button class="btn filterNotificationsBtn" data-toggle="list" data-filter="oldest" th:text="#{filter.oldest}">Oldest</button>
                             </div>
                             <div class="notifications">
-                                <h1>Notifications</h1>
+                                <h1 th:text="#{notifications}">Notifications</h1>
                                 <div class="list-group" id="alerts" role="tablist">
                                     <a href="#" class="filterNotifications all latest notification" data-toggle="list">
                                         <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
@@ -174,14 +174,14 @@
 <!--                                    </div>-->
                                 </div>
                                 <div class="categories" id="accordionSettings">
-                                    <h1>Settings</h1>
+                                    <h1 th:text="#{settings}">Settings</h1>
                                     <!-- Start of My Account -->
                                     <div class="category">
                                         <a href="#" class="title collapsed" id="headingOne" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                                             <i class="material-icons md-30 online">person_outline</i>
                                             <div class="data">
-                                                <h5>My Account</h5>
-                                                <p>Update your profile details</p>
+                                                <h5 th:text="#{myaccount}">My Account</h5>
+                                                <p th:text="#{myaccount.setting}">Update your profile details</p>
                                             </div>
                                             <i class="material-icons">keyboard_arrow_right</i>
                                         </a>
@@ -192,40 +192,40 @@
                                                         <img class="avatar-xl" alt="image">
                                                         <label>
                                                             <input type="file">
-                                                            <span class="btn button">Upload avatar</span>
+                                                            <span class="btn button" th:text="#{upload.avatar}">Upload avatar</span>
                                                         </label>
                                                     </div>
-                                                    <p>For best results, use an image at least 256px by 256px in either .jpg or .png format!</p>
+                                                    <p th:text="#{avatar.content}">For best results, use an image at least 256px by 256px in either .jpg or .png format!</p>
                                                 </div>
                                                 <form>
                                                     <div class="parent">
                                                         <div class="field">
-                                                            <label for="firstName">First name <span>*</span></label>
+                                                            <label for="firstName" th:text="#{first.name}">First name <span>*</span></label>
                                                             <input type="text" class="form-control" id="firstName" placeholder="First name" required>
                                                         </div>
                                                         <div class="field">
-                                                            <label for="lastName">Last name <span>*</span></label>
+                                                            <label for="lastName" th:text="#{last.name}">Last name <span>*</span></label>
                                                             <input type="text" class="form-control" id="lastName" placeholder="Last name" required>
                                                         </div>
                                                     </div>
                                                     <div class="field">
-                                                        <label for="email">Email <span>*</span></label>
+                                                        <label for="email" th:text="#{setting.email}">Email <span>*</span></label>
                                                         <input type="email" class="form-control" id="email" placeholder="Enter your email address" required>
                                                     </div>
                                                     <div class="field">
-                                                        <label for="username">Username <span>*</span></label>
+                                                        <label for="username" th:text="#{setting.username}">Username <span>*</span></label>
                                                         <input class="form-control" id="username" placeholder="Enter your username" required>
                                                     </div>
                                                     <div class="field">
-                                                        <label for="password">Password</label>
+                                                        <label for="password" th:text="#{setting.password}">Password</label>
                                                         <input type="password" class="form-control" id="password" placeholder="Enter a new password" required>
                                                     </div>
 <!--                                                    <div class="field">-->
 <!--                                                        <label for="location">Location</label>-->
 <!--                                                        <input type="text" class="form-control" id="location" placeholder="Enter your location" value="Helena, Montana" required>-->
 <!--                                                    </div>-->
-                                                    <button class="btn btn-link w-100">Delete Account</button>
-                                                    <button type="submit" class="btn button w-100">Apply</button>
+                                                    <button class="btn btn-link w-100" th:text="#{delete.account}">Delete Account</button>
+                                                    <button type="submit" class="btn button w-100" th:text="#{apply}">Apply</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -425,19 +425,18 @@
                                         <a href="#" class="title collapsed" id="headingSix" data-toggle="collapse" data-target="#collapseSix" aria-expanded="true" aria-controls="collapseSix">
                                             <i class="material-icons md-30 online">language</i>
                                             <div class="data">
-                                                <h5>Language</h5>
-                                                <p>Select preferred language</p>
+                                                <h5 th:text="#{language}">Language</h5>
+                                                <p th:text="#{language.setting}">Select preferred language</p>
                                             </div>
                                             <i class="material-icons">keyboard_arrow_right</i>
                                         </a>
                                         <div class="collapse" id="collapseSix" aria-labelledby="headingSix" data-parent="#accordionSettings">
                                             <div class="content layer">
                                                 <div class="language">
-                                                    <label>Language</label>
-                                                    <select class="custom-select" required>
-                                                        <option value="English">English</option>
-<!--                                                        <option>English</option>-->
-                                                        <option>Vietnamese</option>
+
+                                                    <select class="custom-select" id="langSelect" required>
+                                                        <option value="en" th:text="#{english}" th:selected="${#locale.language == 'en'}">English</option>
+                                                        <option value="vi" th:text="#{vietnamese}" th:selected="${#locale.language == 'vi'}">Vietnamese</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -546,25 +545,20 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="requests">
                     <div class="title">
-                        <h1>Add your friends</h1>
+                        <h1 th:text="#{add.friend.title}">Add your friends</h1>
                         <button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
                     </div>
                     <div class="content">
                         <form>
                             <div class="form-group">
-                                <label for="user">Email:</label>
-                                <input type="text" class="form-control" id="user" placeholder="Add recipient..." required>
-<!--                                <div class="user" id="contact">-->
-<!--                                    <img class="avatar-sm" src="img/avatars/avatar-female-5.jpg" alt="avatar">-->
-<!--                                    <h5>Keith Morris</h5>-->
-<!--                                    <button class="btn"><i class="material-icons">close</i></button>-->
-<!--                                </div>-->
+                                <label for="user" th:text="#{setting.email}">Email:</label>
+                                <input type="text" class="form-control" id="user" required>
                             </div>
                             <div class="form-group">
-                                <label for="welcome">Message:</label>
-                                <textarea class="text-control" id="welcome" placeholder="Send your welcome message...">Hi Keith, I'd like to add you as a contact.</textarea>
+                                <label for="welcome" th:text="#{add.friend.message}">Message:</label>
+                                <textarea class="text-control" id="welcome"></textarea>
                             </div>
-                            <button type="submit" class="btn button w-100">Send Friend Request</button>
+                            <button type="submit" class="btn button w-100" th:text="#{add.friend.send}">Send Friend Request</button>
                         </form>
                     </div>
                 </div>
@@ -576,14 +570,14 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="requests">
                     <div class="title">
-                        <h1>Start new chat</h1>
+                        <h1 th:text="#{converstaion.title}">Start new chat</h1>
                         <button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
                     </div>
                     <div class="content">
                         <form>
                             <div class="form-group">
-                                <label for="participant">Recipient:</label>
-                                <input type="text" class="form-control" id="participant" placeholder="Add recipient..." required>
+                                <label for="participant" th:text="#{recipient}">Recipients:</label>
+                                <input type="text" class="form-control" id="participant" required>
                                 <div class="user" id="recipient">
                                     <img class="avatar-sm" src="img/avatars/avatar-female-5.jpg" alt="avatar">
                                     <h5>Keith Morris</h5>
@@ -591,14 +585,14 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="topic">Topic:</label>
-                                <input type="text" class="form-control" id="topic" placeholder="What's the topic?" required>
+                                <label for="topic" th:text="#{topic}">Topic:</label>
+                                <input type="text" class="form-control" id="topic" required>
                             </div>
                             <div class="form-group">
-                                <label for="message">Message:</label>
-                                <textarea class="text-control" id="message" placeholder="Send your welcome message...">Hmm, are you friendly?</textarea>
+                                <label for="message" th:text="#{add.friend.message}">Message:</label>
+                                <textarea class="text-control" id="message"></textarea>
                             </div>
-                            <button type="submit" class="btn button w-100">Start New Chat</button>
+                            <button type="submit" class="btn button w-100" th:text="#{start.conversation}">Start New Chat</button>
                         </form>
                     </div>
                 </div>
@@ -829,7 +823,12 @@
 </body>
 <script>
     const baseURL = "http://localhost:8080/api";
-
+    document.getElementById("langSelect").addEventListener("change", function () {
+        const selectedLang = this.value;
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set("lang", selectedLang);
+        window.location.href = currentUrl.toString();
+    });
     document.addEventListener("DOMContentLoaded", function () {
         let username = localStorage.getItem("username");
 
@@ -1048,15 +1047,15 @@
                                     <div class="inside">
                                         <div class="data">
                                             <h5><a href="#">${conversationName}</a></h5>
-                                            <span>Active now</span>
+                                            <span th:text="#{status.online}">Active now</span>
                                         </div>
                                         <div class="dropdown">
                                             <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
                                             <div class="dropdown-menu dropdown-menu-right">
-                                                <button class="dropdown-item"><i class="material-icons">clear</i>Clear History</button>
-                                                <button class="dropdown-item"><i class="material-icons">block</i>Block Contact</button>
-                                                <button class="dropdown-item"><i class="material-icons">delete</i>Delete Contact</button>
-                                                <button class="dropdown-item"><i class="material-icons">edit</i>Rename</button>
+                                                <button class="dropdown-item" th:text="#{clear.history}"><i class="material-icons">clear</i>Clear History</button>
+                                                <button class="dropdown-item" th:text="#{block.contact}"><i class="material-icons">block</i>Block Contact</button>
+                                                <button class="dropdown-item" th:text="#{delete.contact}"><i class="material-icons">delete</i>Delete Contact</button>
+                                                <button class="dropdown-item" th:text="#{rename}"><i class="material-icons">edit</i>Rename</button>
                                             </div>
                                         </div>
                                     </div>
@@ -1064,7 +1063,7 @@
                             </div>`;
             const sendMessage = document.getElementById("send-message");
             sendMessage.innerHTML = `<form class="position-relative w-100">
-                                        <textarea class="form-control" placeholder="Start typing for reply..." rows="1"></textarea>
+                                        <textarea class="form-control" rows="1"></textarea>
 
                                         <button type="submit" class="btn send"><i class="material-icons">send</i></button>
                                     </form>
@@ -1095,8 +1094,8 @@
                                                                 <i class="material-icons md-30">more_vert</i>
                                                             </button>
                                                             <div class="dropdown-menu">
-                                                                <button class="dropdown-item">Update</button>
-                                                                <button class="dropdown-item">Delete</button>
+                                                                <button class="dropdown-item" th:text="#{message.update}">Update</button>
+                                                                <button class="dropdown-item" th:text="#{message.delete}">Delete</button>
                                                             </div>
                                                         </div>
 														<div class="text me">
@@ -1122,8 +1121,8 @@
                                                                 <i class="material-icons md-30">more_vert</i>
                                                             </button>
                                                             <div class="dropdown-menu">
-                                                                <button class="dropdown-item">Update</button>
-                                                                <button class="dropdown-item">Delete</button>
+                                                                <button class="dropdown-item" th:text="#{message.update}">Update</button>
+                                                                <button class="dropdown-item" th:text="#{message.delete}">Delete</button>
                                                             </div>
                                                         </div>
 													</div>
