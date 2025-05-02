@@ -74,4 +74,8 @@ public class UserServiceImpl implements UserService {
             return userWithContactsMapper.toUserWithContactsDTO(user, contactList);
         }
 
+    @Override
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
 }

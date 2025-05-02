@@ -24,4 +24,6 @@ public interface UserService {
     // Lấy tất cả conversation mà user tham gia
     List<Conversation> getConversationsOfUser(Long userId);
     UserWithContactsDTO getUserWithContactsDTOByUsername(String username);
+
+    Optional<User> getUserById(Long id);
 }
