@@ -53,7 +53,7 @@ public class UserController {
      */
     @GetMapping("/username/{username}")
     public Optional<User> getUserByUsername(@PathVariable(value = "username") String username) {
-        return userService.getUserByUsername(username);
+        return userService.getUserWithContactsDTOById(userid);
     }
 
     /**

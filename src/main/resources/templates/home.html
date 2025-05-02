@@ -17,6 +17,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stomp-websocket@2.3.4-next/lib/stomp.min.js"></script>
     <style>
         p, a, i, h5, span, h1, h2, h3, h4, h5, h6 {
             text-decoration: none;
@@ -826,7 +827,6 @@
     function scrollToBottom(el) { el.scrollTop = el.scrollHeight; }
     scrollToBottom(document.getElementById('content'));
 </script>
-</body>
 <script>
     const baseURL = "http://localhost:8080/api";
 
@@ -841,7 +841,7 @@
             console.error("No username found in localStorage.");
             return;
         }
-        console.log(username);
+        console.log("test: ",username);
         fetchUserIdByUsername(username);
     });
 
@@ -866,12 +866,13 @@
                     console.error("User not found or invalid response");
                     return;
                 }
+
                 document.getElementById("firstName").value = user.firstName;
                 document.getElementById("lastName").value = user.lastName;
                 document.getElementById("email").value = user.email;
                 document.getElementById("username").value = user.username;
                 document.getElementById("password").value = "";
-
+                console.log(user.userId);
                 const profileName = `${user.firstName} ${user.lastName}`;
                 const profileNameElement = document.querySelector(".profile h1");
                 if (profileNameElement) {
@@ -1153,6 +1154,364 @@
 
 
 
+
+    // Biến toàn cục cho WebSocket
+    let stompClient = null;
+    let currentUsername = null;
+    let currentUserId = null;
+    let currentConversationId = null;
+    let currentRecipientUsername = null;
+    let currentRecipientId = null;
+    let isConnected = false;
+    
+    // Kết nối WebSocket khi người dùng đã đăng nhập
+    function connectWebSocket() {
+        if (isConnected) {
+            console.log("WebSocket đã được kết nối trước đó");
+            return;
+        }
+        
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("Không tìm thấy token, không thể kết nối WebSocket");
+            return;
+        }
+        
+        console.log("Đang kết nối tới WebSocket server...");
+        // Kết nối WebSocket thuần theo cấu hình trong WebSocketConfig
+        const socket = new WebSocket('ws://localhost:8080/ws');
+        stompClient = Stomp.over(socket);
+        
+        // Tắt log debug của STOMP để không làm rối console
+        stompClient.debug = null;
+        
+        // Thêm header Authorization để server xác thực JWT token
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        };
+        
+        stompClient.connect(headers, onConnected, onError);
+    }
+    
+    // Xử lý khi kết nối thành công
+    function onConnected() {
+        console.log("Kết nối WebSocket thành công!");
+        isConnected = true;
+        
+        // Đăng ký nhận tin nhắn công khai (/topic/public)
+        stompClient.subscribe('/topic/public', onPublicMessageReceived);
+        
+        // Đăng ký nhận tin nhắn riêng tư (/user/queue/private)
+        stompClient.subscribe('/user/queue/private', onPrivateMessageReceived);
+        
+        // Lấy thông tin người dùng hiện tại từ localStorage
+        currentUsername = localStorage.getItem('username');
+        
+        // Gửi tin nhắn JOIN khi kết nối thành công
+        if (currentUsername) {
+            const chatMessage = {
+                sender: currentUsername,
+                type: 'JOIN'
+            };
+            stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(chatMessage));
+            console.log("Đã gửi tin nhắn JOIN cho: " + currentUsername);
+        }
+        
+        // Đăng ký nhận tin nhắn nhóm nếu đang trong cuộc trò chuyện nhóm
+        if (currentConversationId && currentConversationId !== 'public') {
+            // Kiểm tra xem có phải là nhóm không
+            const conversation = document.querySelector(`[data-conversation-id="${currentConversationId}"]`);
+            if (conversation && conversation.dataset.isGroup === "true") {
+                subscribeToGroupMessages(currentConversationId);
+            }
+        }
+    }
+    
+    // Đăng ký nhận tin nhắn cho một nhóm cụ thể
+    function subscribeToGroupMessages(groupId) {
+        if (!isConnected || !stompClient) return;
+        
+        const subscription = stompClient.subscribe(`/topic/group.${groupId}`, onGroupMessageReceived);
+        console.log(`Đã đăng ký nhận tin nhắn cho nhóm: ${groupId}`);
+        return subscription;
+    }
+    
+    // Xử lý khi có lỗi kết nối
+    function onError(error) {
+        console.error("Lỗi kết nối WebSocket:", error);
+        isConnected = false;
+        
+        // Thử kết nối lại sau 5 giây
+        setTimeout(function() {
+            if (!isConnected) {
+                console.log("Đang thử kết nối lại...");
+                connectWebSocket();
+            }
+        }, 5000);
+    }
+    
+    // Xử lý khi nhận tin nhắn công khai
+    function onPublicMessageReceived(payload) {
+        const message = JSON.parse(payload.body);
+        console.log("Nhận tin nhắn công khai:", message);
+        
+        // Hiển thị tin nhắn nếu đang xem kênh công khai
+        if (currentConversationId === 'public') {
+            displayMessage(message);
+        }
+    }
+    
+    // Xử lý khi nhận tin nhắn riêng tư
+    function onPrivateMessageReceived(payload) {
+        const message = JSON.parse(payload.body);
+        console.log("Nhận tin nhắn riêng tư:", message);
+        
+        // Hiển thị tin nhắn nếu đang chat với người gửi
+        if (message.sender === currentRecipientUsername) {
+            displayMessage(message);
+        }
+        
+        // Cập nhật số tin nhắn chưa đọc
+        updateUnreadMessageCount(message.sender);
+    }
+    
+    // Xử lý khi nhận tin nhắn nhóm
+    function onGroupMessageReceived(payload) {
+        const message = JSON.parse(payload.body);
+        console.log("Nhận tin nhắn nhóm:", message);
+        
+        // Hiển thị tin nhắn nếu đang xem cuộc trò chuyện nhóm này
+        const groupId = message.groupId || message.recipient; // Có thể lấy từ groupId hoặc recipient
+        if (currentConversationId && currentConversationId.toString() === groupId.toString()) {
+            displayMessage(message);
+        } else {
+            // Cập nhật số tin nhắn chưa đọc
+            updateUnreadMessageCount(null, groupId);
+        }
+    }
+    
+    // Gửi tin nhắn
+    function sendMessage(event) {
+        if (event) {
+            event.preventDefault();
+        }
+        
+        if (!stompClient || !isConnected) {
+            console.error("WebSocket chưa được kết nối. Đang kết nối lại...");
+            connectWebSocket();
+            setTimeout(sendMessage, 1000); // Thử lại sau 1 giây
+            return;
+        }
+        
+        const messageInput = document.getElementById('message-input');
+        if (!messageInput || !messageInput.value.trim()) {
+            return;
+        }
+        
+        const messageContent = messageInput.value.trim();
+        
+        // Xác định loại tin nhắn: công khai, riêng tư hoặc nhóm
+        let messageType = 'CHAT'; // Mặc định là công khai
+        let destination = '/app/chat.sendMessage';
+        
+        // Chuẩn bị đối tượng tin nhắn theo cấu trúc của ChatMessage trên server
+        const chatMessage = {
+            sender: currentUsername,
+            content: messageContent,
+            type: messageType
+        };
+        
+        // Tin nhắn riêng tư
+        if (currentRecipientId && currentConversationId !== 'public') {
+            messageType = 'PRIVATE';
+            destination = '/app/chat.private';
+            chatMessage.type = messageType;
+            chatMessage.recipientId = currentRecipientId.toString();
+        }
+        // Tin nhắn nhóm
+        else if (currentConversationId && currentConversationId !== 'public') {
+            const conversation = document.querySelector(`[data-conversation-id="${currentConversationId}"]`);
+            if (conversation && conversation.dataset.isGroup === "true") {
+                messageType = 'GROUP';
+                destination = '/app/chat.group';
+                chatMessage.type = messageType;
+                // Đặt recipient để server xử lý như groupId
+                chatMessage.recipient = currentConversationId.toString();
+                chatMessage.groupId = parseInt(currentConversationId);
+            }
+        }
+        
+        console.log(`Gửi tin nhắn ${messageType} tới ${destination}:`, chatMessage);
+        stompClient.send(destination, {}, JSON.stringify(chatMessage));
+        
+        // Hiển thị tin nhắn của mình ngay lập tức
+        displayMessage({
+            sender: currentUsername,
+            content: messageContent,
+            type: messageType,
+            isMe: true // Đánh dấu là tin nhắn của mình
+        });
+        
+        // Xóa nội dung input sau khi gửi
+        messageInput.value = '';
+    }
+    
+    // Hiển thị tin nhắn trên giao diện
+    function displayMessage(message) {
+        const messagesArea = document.getElementById('show-message');
+        if (!messagesArea) return;
+        
+        const isFromMe = message.sender === currentUsername || message.isMe;
+        
+        if (message.type === 'JOIN') {
+            // Hiển thị thông báo tham gia
+            const joinElement = document.createElement('div');
+            joinElement.className = 'message system';
+            joinElement.innerHTML = `<p>${escapeHtml(message.sender)} đã tham gia cuộc trò chuyện</p>`;
+            messagesArea.appendChild(joinElement);
+        } else if (message.type === 'LEAVE') {
+            // Hiển thị thông báo rời đi
+            const leaveElement = document.createElement('div');
+            leaveElement.className = 'message system';
+            leaveElement.innerHTML = `<p>${escapeHtml(message.sender)} đã rời khỏi cuộc trò chuyện</p>`;
+            messagesArea.appendChild(leaveElement);
+        } else {
+            // Hiển thị tin nhắn thông thường
+            const messageElement = document.createElement('div');
+            messageElement.className = isFromMe ? 'message me' : 'message';
+            
+            const now = new Date();
+            const formattedTime = now.getHours().toString().padStart(2, '0') + ':' + 
+                                now.getMinutes().toString().padStart(2, '0');
+            
+            messageElement.innerHTML = `
+                <div class="text-main">
+                    <div class="text-group ${isFromMe ? 'me' : ''}">
+                        <div class="text ${isFromMe ? 'me' : ''}">
+                            <p>${escapeHtml(message.content)}</p>
+                        </div>
+                    </div>
+                    <span>${formattedTime}</span>
+                </div>
+            `;
+            
+            messagesArea.appendChild(messageElement);
+        }
+        
+        // Cuộn xuống tin nhắn mới nhất
+        scrollToBottom(document.getElementById('content'));
+    }
+    
+    // Cập nhật số lượng tin nhắn chưa đọc
+    function updateUnreadMessageCount(username, groupId) {
+        // Tìm conversation element tương ứng trong danh sách
+        let conversationElement;
+        
+        if (username) {
+            // Tìm theo tên người dùng
+            conversationElement = document.querySelector(`.conversation[data-username="${username}"]`);
+        } else if (groupId) {
+            // Tìm theo ID nhóm
+            conversationElement = document.querySelector(`.conversation[data-conversation-id="${groupId}"][data-is-group="true"]`);
+        }
+        
+        if (conversationElement) {
+            const unreadBadge = conversationElement.querySelector('.unread');
+            if (unreadBadge) {
+                let count = parseInt(unreadBadge.textContent || '0');
+                count++;
+                unreadBadge.textContent = count;
+                unreadBadge.style.display = 'block';
+            } else {
+                // Tạo badge nếu chưa có
+                const newBadge = document.createElement('div');
+                newBadge.className = 'unread';
+                newBadge.textContent = '1';
+                conversationElement.querySelector('.data').appendChild(newBadge);
+            }
+        }
+    }
+    
+    // Khởi tạo giao diện chat
+    function initializeChatUI(conversationId, userId, name, isGroup = false) {
+        currentConversationId = conversationId;
+        currentRecipientId = isGroup ? null : userId;
+        currentRecipientUsername = isGroup ? null : name;
+        
+        // Đăng ký nhận tin nhắn nhóm nếu cần
+        if (isGroup && stompClient && isConnected) {
+            subscribeToGroupMessages(conversationId);
+        }
+        
+        // Khởi tạo UI chat
+        const topElement = document.getElementById('top');
+        if (topElement) {
+            topElement.innerHTML = `
+                <div class="container">
+                    <div class="col-md-12">
+                        <div class="inside">
+                            <div class="data">
+                                <h5><a href="#">${escapeHtml(name)}</a></h5>
+                                <span>${isGroup ? 'Nhóm chat' : 'Trực tuyến'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        const sendMessageElement = document.getElementById('send-message');
+        if (sendMessageElement) {
+            sendMessageElement.innerHTML = `
+                <form class="position-relative w-100" id="message-form">
+                    <textarea id="message-input" class="form-control" placeholder="Nhập tin nhắn..." rows="1"></textarea>
+                    <button type="submit" class="btn send"><i class="material-icons">send</i></button>
+                </form>
+                <label>
+                    <input type="file">
+                    <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
+                </label>
+            `;
+            
+            // Thêm event listener để gửi tin nhắn
+            const form = document.getElementById('message-form');
+            if (form) {
+                form.addEventListener('submit', sendMessage);
+            }
+        }
+    }
+    
+    // Cập nhật fetchMessages để kết nối với WebSocket khi chuyển đổi hội thoại
+    const originalFetchMessages = fetchMessages;
+    fetchMessages = function(conversationId, userId, conversationName) {
+        originalFetchMessages(conversationId, userId, conversationName);
+        
+        // Lưu thông tin người dùng và cuộc trò chuyện hiện tại
+        currentUserId = userId;
+        currentUsername = localStorage.getItem('username');
+        
+        // Khởi tạo giao diện chat
+        initializeChatUI(conversationId, userId, conversationName, false);
+        
+        // Kết nối WebSocket nếu chưa kết nối
+        if (!isConnected) {
+            connectWebSocket();
+        }
+    };
+    
+    // Kết nối WebSocket khi trang được tải
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lấy thông tin người dùng và kết nối WebSocket
+        const username = localStorage.getItem('username');
+        if (username) {
+            currentUsername = username;
+            // Trì hoãn kết nối WebSocket để đảm bảo đã lấy được thông tin người dùng
+            setTimeout(function() {
+                connectWebSocket();
+            }, 1000);
+        }
+    });
 </script>
 
+</body>
 </html>

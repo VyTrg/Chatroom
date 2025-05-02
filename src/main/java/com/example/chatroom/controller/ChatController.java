@@ -38,7 +38,7 @@ public class ChatController {
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
         // Lưu tin nhắn public vào DB nếu muốn
         User sender = userRepository.findByUsername(chatMessage.getSender()).orElse(null);
-        if (sender != null) {
+        if (sender != null && chatMessage.getContent() != null && !chatMessage.getContent().trim().isEmpty()) {
             Message message = new Message();
             message.setSender(sender);
             message.setMessageText(chatMessage.getContent());
