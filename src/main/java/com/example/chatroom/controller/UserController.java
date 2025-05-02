@@ -11,6 +11,8 @@ import com.example.chatroom.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +26,8 @@ public class UserController {
     @Autowired
     private UserServiceImpl userService;
 
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping
     public List<User> getAllUsers() {
@@ -51,27 +54,31 @@ public class UserController {
         return userService.saveUser(user);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable(value = "id")Long userId, @RequestBody User userDetails) {
-//        User user = userService.getUserById(userId);
-//        user.setFirstName(userDetails.getFirstName());
-//        user.setLastName(userDetails.getLastName());
-//        user.setEmail(userDetails.getEmail());
-//        user.setUsername(userDetails.getUsername());
-//        user.setHashPassword(userDetails.getHashPassword());
-//        user.setProfilePicture(userDetails.getProfilePicture());
-//
-//        final User updatedUser = userService.updateUser(user);
-//        return ResponseEntity.ok(updatedUser);
-        return null;
+    @PutMapping("/update/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable(value = "id") Long id, @RequestBody User userDetails) {
+        Optional<User> optionalUser = userService.getUserById(id);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = optionalUser.get();
+        user.setFirstName(userDetails.getFirstName());
+        user.setLastName(userDetails.getLastName());
+        user.setEmail(userDetails.getEmail());
+        user.setUsername(userDetails.getUsername());
+        if(StringUtils.hasText(userDetails.getHashPassword())){
+            user.setHashPassword(passwordEncoder.encode(userDetails.getHashPassword()));
+        }
+
+        // user.setProfilePicture(userDetails.getProfilePicture());
+
+        final User updatedUser = userService.updateUser(user);
+        return ResponseEntity.ok(updatedUser);
     }
 
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable(value = "id")Long userId) {
-//        User user = userService.getUserById(userId);
-//        userService.deleteUser(user);
-//        return ResponseEntity.ok().build();
         return null;
     }
 

@@ -21,4 +21,6 @@ public interface UserService {
     Optional<User> getUserByUsername(String username);
 
     UserWithContactsDTO getUserWithContactsDTOByUsername(String username);
+
+    Optional<User> getUserById(Long id);
 }

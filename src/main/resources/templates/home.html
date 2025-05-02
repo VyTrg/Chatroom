@@ -154,7 +154,7 @@
                         <!-- Start of Settings -->
                         <div class="tab-pane fade" id="settings">
                             <div class="settings">
-                                <div class="profile">
+                                <div class="profile">"
                                     <img class="avatar-xl" alt="avatar">
                                     <h1>Michael Knudsen</h1>
 <!--                                    <span>Helena, Montana</span>-->
@@ -197,7 +197,7 @@
                                                     </div>
                                                     <p th:text="#{avatar.content}">For best results, use an image at least 256px by 256px in either .jpg or .png format!</p>
                                                 </div>
-                                                <form>
+                                                <form id="change_profile" >
                                                     <div class="parent">
                                                         <div class="field">
                                                             <label for="firstName" th:text="#{first.name}">First name <span>*</span></label>
@@ -218,7 +218,7 @@
                                                     </div>
                                                     <div class="field">
                                                         <label for="password" th:text="#{setting.password}">Password</label>
-                                                        <input type="password" class="form-control" id="password" placeholder="Enter a new password" required>
+                                                        <input type="password" class="form-control" id="password" th:placeholder='#{password.content}'>
                                                     </div>
 <!--                                                    <div class="field">-->
 <!--                                                        <label for="location">Location</label>-->
@@ -865,6 +865,7 @@
                     console.error("User not found or invalid response");
                     return;
                 }
+                localStorage.setItem("userId", user.userId);
                 document.getElementById("firstName").value = user.firstName;
                 document.getElementById("lastName").value = user.lastName;
                 document.getElementById("email").value = user.email;
@@ -1150,8 +1151,60 @@
         return text.replace(/[&<>"']/g, m => map[m]);
     }
 
+    document.getElementById("change_profile").addEventListener("submit", function(event) {
+        console.log("changeProfile called");
+        event.preventDefault();
+        const token = localStorage.getItem("token");
+        const userId = localStorage.getItem("userId");
+        const username = document.getElementById('username').value.trim();
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const update = {
+            username,
+            firstName,
+            lastName,
+            email
+        };
+        if (password && password.length > 8) {
+            update.hashPassword = password;
+        }
+            fetch(`${baseURL}/users/update/${userId}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(update),
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            }).then(update => {
+                console.log(update);
+                  localStorage.setItem("user", JSON.stringify(update));
+                  updateProfileUI(update);
+                  // document.getElementById("change_profile").reset();
+                })
+                .catch(error => console.log(error));
+            console.log("this response from change profile");
+    });
 
-
+    function updateProfileUI(user) {
+        document.getElementById("firstName").value = user.firstName;
+        document.getElementById("lastName").value = user.lastName;
+        document.getElementById("email").value = user.email;
+        document.getElementById("username").value = user.username;
+        document.getElementById("password").value = "";
+        const profileHeader = document.querySelector(".profile h1");
+        if (profileHeader) {
+            profileHeader.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+        } else {
+            console.error("Profile h1 element not found");
+        }
+    }
 </script>
 
 </html>
