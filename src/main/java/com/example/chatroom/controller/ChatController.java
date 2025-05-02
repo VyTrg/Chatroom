@@ -62,6 +62,7 @@ public class ChatController {
             }
         }
         if (sender != null && recipient != null) {
+            // Lưu tin nhắn vào database
             Conversation conversation = chatService.findOrCreatePrivateConversation(sender, recipient);
             Message message = new Message();
             message.setSender(sender);
@@ -69,7 +70,7 @@ public class ChatController {
             message.setMessageText(chatMessage.getContent());
             message.setCreatedAt(LocalDateTime.now());
             message.setIsRead(false);
-//            chatService.saveMessage(message);
+            chatService.saveMessage(message);
         }
         String recipientUsername = (recipient != null) ? recipient.getUsername() : chatMessage.getRecipient();
         System.out.println("[PRIVATE] Sending from " + chatMessage.getSender() + " to " + recipientUsername);

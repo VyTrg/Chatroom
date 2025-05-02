@@ -2,7 +2,6 @@ package com.example.chatroom.controller;
 
 import com.example.chatroom.dto.UserWithContactsDTO;
 import com.example.chatroom.model.Conversation;
-import com.example.chatroom.model.ContactWith;
 import com.example.chatroom.model.User;
 
 import com.example.chatroom.service.UserServiceImpl;
@@ -12,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Controller for handling user-related operations.
@@ -52,8 +50,8 @@ public class UserController {
      * @return Optional User object.
      */
     @GetMapping("/username/{username}")
-    public Optional<User> getUserByUsername(@PathVariable(value = "username") String username) {
-        return userService.getUserWithContactsDTOById(userid);
+    public UserWithContactsDTO getUserByUsername(@PathVariable(value = "username") String username) {
+        return userService.getUserWithContactsDTOByUsername(username);
     }
 
     /**

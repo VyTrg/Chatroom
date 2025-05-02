@@ -1265,13 +1265,30 @@
         const message = JSON.parse(payload.body);
         console.log("Nhận tin nhắn riêng tư:", message);
         
-        // Hiển thị tin nhắn nếu đang chat với người gửi
-        if (message.sender === currentRecipientUsername) {
+        // Kiểm tra cả hai chiều tin nhắn
+        const isSenderCurrentRecipient = message.sender === currentRecipientUsername;
+        const isMessageForCurrentUser = message.recipientId === currentUserId?.toString() || message.recipient === currentUsername;
+        
+        if (isSenderCurrentRecipient || isMessageForCurrentUser) {
+            // Đánh dấu tin nhắn là từ người dùng hiện tại nếu sender là username hiện tại
+            if (message.sender === currentUsername) {
+                message.isMe = true;
+            }
             displayMessage(message);
+            
+            // Đánh dấu tin nhắn đã đọc nếu đang xem hội thoại
+            if (message.messageId) {
+                markMessageAsRead(message.messageId);
+            }
         }
         
-        // Cập nhật số tin nhắn chưa đọc
-        updateUnreadMessageCount(message.sender);
+        // Cập nhật UI khi nhận tin nhắn mới
+        updateConversationList(message.sender);
+        
+        // Cập nhật số tin nhắn chưa đọc nếu không phải tin nhắn của mình
+        if (message.sender !== currentUsername) {
+            updateUnreadMessageCount(message.sender);
+        }
     }
     
     // Xử lý khi nhận tin nhắn nhóm
@@ -1313,11 +1330,13 @@
         let messageType = 'CHAT'; // Mặc định là công khai
         let destination = '/app/chat.sendMessage';
         
-        // Chuẩn bị đối tượng tin nhắn theo cấu trúc của ChatMessage trên server
+        // Chuẩn bị đối tượng tin nhắn với thông tin đầy đủ
         const chatMessage = {
             sender: currentUsername,
+            senderId: currentUserId?.toString(),
             content: messageContent,
-            type: messageType
+            type: messageType,
+            timestamp: new Date().toISOString()
         };
         
         // Tin nhắn riêng tư
@@ -1326,6 +1345,7 @@
             destination = '/app/chat.private';
             chatMessage.type = messageType;
             chatMessage.recipientId = currentRecipientId.toString();
+            chatMessage.recipient = currentRecipientUsername;
         }
         // Tin nhắn nhóm
         else if (currentConversationId && currentConversationId !== 'public') {
@@ -1510,6 +1530,35 @@
             }, 1000);
         }
     });
+    
+    // Cập nhật UI khi nhận tin nhắn mới
+    function updateConversationList(senderUsername) {
+        // Nếu tin nhắn từ người dùng không có trong danh sách, thêm họ vào
+        const userId = currentUserId;
+        if (userId) {
+            // Cập nhật lại danh sách cuộc hội thoại để hiển thị tin nhắn mới nhất
+            fetchConversations(userId).then(() => {
+                console.log("Đã cập nhật danh sách cuộc hội thoại sau khi nhận tin nhắn mới");
+            });
+        }
+    }
+    
+    // Đánh dấu tin nhắn đã đọc
+    function markMessageAsRead(messageId) {
+        fetch(`${baseURL}/messages/${messageId}/read`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log(`Đã đánh dấu tin nhắn ${messageId} là đã đọc`);
+            }
+        })
+        .catch(error => console.error('Lỗi khi đánh dấu tin nhắn đã đọc:', error));
+    }
 </script>
 
 </body>
