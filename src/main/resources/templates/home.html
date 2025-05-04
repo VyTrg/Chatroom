@@ -830,7 +830,7 @@
         window.location.href = currentUrl.toString();
     });
     document.addEventListener("DOMContentLoaded", function () {
-        let username = localStorage.getItem("username");
+        let username = sessionStorage.getItem("username");
 
         // if (username) {
         //     username = decodeURIComponent(username);
@@ -845,7 +845,7 @@
     });
 
     function fetchUserIdByUsername(username) {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         console.log(username);
         fetch(`${baseURL}/users/username/${username}`, {
             method: "GET",
@@ -865,7 +865,7 @@
                     console.error("User not found or invalid response");
                     return;
                 }
-                localStorage.setItem("userId", user.userId);
+                sessionStorage.setItem("userId", user.userId);
                 document.getElementById("firstName").value = user.firstName;
                 document.getElementById("lastName").value = user.lastName;
                 document.getElementById("email").value = user.email;
@@ -890,7 +890,7 @@
     }
 
     function fetchUserData(userId) {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         console.log(userId);
         console.log(token);
         fetch(`${baseURL}/users/id/${userId}`, {
@@ -933,7 +933,7 @@
     }
 
     async function fetchConversations(userId) {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         console.log("Fetching conversations for user:", userId);
         console.log("Token:", token);
 
@@ -1026,7 +1026,7 @@
     }
 
     async function fetchMessages(conversationId, userId, conversationName) {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const content = document.getElementById("show-message");
         content.innerHTML = '';
 
@@ -1154,8 +1154,8 @@
     document.getElementById("change_profile").addEventListener("submit", function(event) {
         console.log("changeProfile called");
         event.preventDefault();
-        const token = localStorage.getItem("token");
-        const userId = localStorage.getItem("userId");
+        const token = sessionStorage.getItem("token");
+        const userId = sessionStorage.getItem("userId");
         const username = document.getElementById('username').value.trim();
         const firstName = document.getElementById('firstName').value.trim();
         const lastName = document.getElementById('lastName').value.trim();
@@ -1184,7 +1184,7 @@
                 return response.json();
             }).then(update => {
                 console.log(update);
-                  localStorage.setItem("user", JSON.stringify(update));
+                sessionStorage.setItem("user", JSON.stringify(update));
                   updateProfileUI(update);
                   // document.getElementById("change_profile").reset();
                 })
