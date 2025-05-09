@@ -866,12 +866,27 @@
                     return;
                 }
                 sessionStorage.setItem("userId", user.userId);
+                
+                // Thiết lập biến toàn cục currentUserId và user
+                currentUserId = user.userId;
+                
+                // Lưu thông tin người dùng vào sessionStorage để truy cập sau này
+                const userData = {
+                    id: user.userId,
+                    username: user.username,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email
+                };
+                sessionStorage.setItem("user", JSON.stringify(userData));
+                
+                // Cập nhật UI
                 document.getElementById("firstName").value = user.firstName;
                 document.getElementById("lastName").value = user.lastName;
                 document.getElementById("email").value = user.email;
                 document.getElementById("username").value = user.username;
                 document.getElementById("password").value = "";
-                console.log(user.userId);
+                console.log("Đã lưu currentUserId:", user.userId);
                 const profileName = `${user.firstName} ${user.lastName}`;
                 const profileNameElement = document.querySelector(".profile h1");
                 if (profileNameElement) {
@@ -931,6 +946,7 @@
             })
             .catch(error => console.error("Error fetching user data:", error));
     }
+
 
     async function fetchConversations(userId) {
         const token = sessionStorage.getItem("token");
@@ -1052,7 +1068,7 @@
                                         </div>
                                         <div class="dropdown">
                                             <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
-                                            <div class="dropdown-menu dropdown-menu-right">
+                                            <div class="dropdown-menu">
                                                 <button class="dropdown-item" th:text="#{clear.history}"><i class="material-icons">clear</i>Clear History</button>
                                                 <button class="dropdown-item" th:text="#{block.contact}"><i class="material-icons">block</i>Block Contact</button>
                                                 <button class="dropdown-item" th:text="#{delete.contact}"><i class="material-icons">delete</i>Delete Contact</button>
@@ -1063,17 +1079,31 @@
                                 </div>
                             </div>`;
             const sendMessage = document.getElementById("send-message");
-            sendMessage.innerHTML = `<form class="position-relative w-100">
-                                        <textarea class="form-control" rows="1"></textarea>
-
+            sendMessage.innerHTML = `<form class="position-relative w-100" id="message-form" onsubmit="return false;">
+                                        <textarea id="message-input" class="form-control" placeholder="Nhập tin nhắn..." rows="1"></textarea>
                                         <button type="submit" class="btn send"><i class="material-icons">send</i></button>
                                     </form>
                                     <label>
                                         <input type="file">
                                         <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
                                     </label>`;
+                                    
+            // Thêm event handler cho form ngay sau khi tạo
+            const messageForm = document.getElementById('message-form');
+            if (messageForm) {
+                // Xóa event listener cũ trước khi thêm cái mới (tránh duplicate)
+                messageForm.removeEventListener('submit', handleFormSubmit);
+                
+                // Thêm event listener mới với hàm xử lý riêng biệt để ngăn form submit
+                messageForm.addEventListener('submit', handleFormSubmit);
+            }
+            
+            // Lưu thông tin cuộc trò chuyện hiện tại
+            currentConversationId = conversationId;
+            currentRecipientId = userId;
+            currentRecipientUsername = conversationName;
+                                    
             const messages = await response.json();
-
             if (!messages || messages.length === 0) {
                 content.innerHTML = "<p>No messages yet</p>";
                 return;
@@ -1154,7 +1184,7 @@
     function handleConversationClick(conversationId, userId, conversationName, isGroup = false) {
         console.log("Mở cuộc trò chuyện:", conversationId, conversationName, isGroup);
         
-        // Lưu thông tin cuộc trò chuyện hiện tại
+        // Lưu thông tin cuộc trò chuyện hiện tại vào biến toàn cục
         currentConversationId = conversationId;
         if (!isGroup) {
             currentRecipientId = userId;
@@ -1278,11 +1308,21 @@
 
         // Lấy thông tin người dùng hiện tại từ sessionStorage
         currentUsername = sessionStorage.getItem('username');
+        
+        // Lấy ID người dùng hiện tại từ sessionStorage
+        const userData = JSON.parse(sessionStorage.getItem('user'));
+        if (userData && userData.id) {
+            currentUserId = userData.id;
+            console.log("currentUserId đã được thiết lập:", currentUserId);
+        } else {
+            console.warn("Không thể lấy ID người dùng từ sessionStorage");
+        }
 
         // Gửi tin nhắn JOIN khi kết nối thành công
         if (currentUsername) {
             const chatMessage = {
                 sender: currentUsername,
+                senderId: currentUserId?.toString(),
                 type: 'JOIN'
             };
             stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(chatMessage));
@@ -1382,22 +1422,39 @@
     // Gửi tin nhắn
     function sendMessage(event) {
         if (event) {
-            event.preventDefault();
-        }
-
-        if (!stompClient || !isConnected) {
-            console.error("WebSocket chưa được kết nối. Đang kết nối lại...");
-            connectWebSocket();
-            setTimeout(sendMessage, 1000); // Thử lại sau 1 giây
-            return;
+            event.preventDefault(); // Ngăn form submit mặc định
+            event.stopPropagation(); // Ngăn sự kiện lan tỏa
         }
 
         const messageInput = document.getElementById('message-input');
-        if (!messageInput || !messageInput.value.trim()) {
-            return;
+        if (!messageInput || messageInput.value.trim() === '') {
+            return false; // Không gửi tin nhắn trống
+        }
+
+        // Kiểm tra người dùng đã đăng nhập chưa
+        if (!currentUserId) {
+            // Lấy ID từ sessionStorage nếu chưa có
+            const userData = JSON.parse(sessionStorage.getItem('user'));
+            if (userData && userData.id) {
+                currentUserId = userData.id;
+                console.log("Đã lấy currentUserId từ sessionStorage:", currentUserId);
+            } else {
+                console.error("Không thể gửi tin nhắn: Không tìm thấy ID người dùng");
+                return false;
+            }
+        }
+
+        // Kiểm tra recipient đã được thiết lập chưa
+        if (!currentRecipientId && currentConversationId !== 'public') {
+            console.error("Không thể gửi tin nhắn: Chưa chọn người nhận");
+            return false;
         }
 
         const messageContent = messageInput.value.trim();
+        
+        // Lấy thời gian hiện tại cho tin nhắn
+        const currentTime = new Date();
+        const timeISO = currentTime.toISOString();
 
         // Xác định loại tin nhắn: công khai, riêng tư hoặc nhóm
         let messageType = 'CHAT'; // Mặc định là công khai
@@ -1406,11 +1463,14 @@
         // Chuẩn bị đối tượng tin nhắn với thông tin đầy đủ
         const chatMessage = {
             sender: currentUsername,
-            senderId: currentUserId?.toString(),
+            senderId: currentUserId.toString(), // Đảm bảo senderId luôn là string
             content: messageContent,
             type: messageType,
-            timestamp: new Date().toISOString()
+            timestamp: timeISO
         };
+
+        console.log("Thông tin gửi tin nhắn - senderId:", chatMessage.senderId);
+        console.log("Thông tin gửi tin nhắn - currentUserId:", currentUserId);
 
         // Tin nhắn riêng tư
         if (currentRecipientId && currentConversationId !== 'public') {
@@ -1432,20 +1492,40 @@
                 chatMessage.groupId = parseInt(currentConversationId);
             }
         }
+        // Kiểm tra kết nối WebSocket trước khi gửi
+        if (!stompClient || !isConnected) {
+            console.error("WebSocket chưa được kết nối. Đang kết nối lại...");
+            connectWebSocket();
+            
+            // Lưu tin nhắn vào hàng đợi để gửi sau khi kết nối
+            setTimeout(() => {
+                console.log(`Thử gửi lại tin nhắn: ${messageContent}`);
+                stompClient.send(destination, {}, JSON.stringify(chatMessage));
+            }, 1000);
+        } else {
+            // Gửi tin nhắn qua WebSocket
+            console.log(`Gửi tin nhắn ${messageType} tới ${destination}:`, chatMessage);
+            stompClient.send(destination, {}, JSON.stringify(chatMessage));
+        }
 
-        console.log(`Gửi tin nhắn ${messageType} tới ${destination}:`, chatMessage);
-        stompClient.send(destination, {}, JSON.stringify(chatMessage));
-
-        // Hiển thị tin nhắn của mình ngay lập tức
+        // QUAN TRỌNG: Hiển thị tin nhắn của mình TRƯỚC khi gửi qua WebSocket
+        // Để tránh cảm giác giật khi gửi tin nhắn
         displayMessage({
             sender: currentUsername,
             content: messageContent,
             type: messageType,
+            timestamp: timeISO,
             isMe: true // Đánh dấu là tin nhắn của mình
         });
-
-        // Xóa nội dung input sau khi gửi
+        
+        // Xóa nội dung input sau khi hiển thị tin nhắn
         messageInput.value = '';
+        
+        // Focus lại vào input để người dùng có thể tiếp tục gõ
+        messageInput.focus();
+        
+        // Rất quan trọng: Trả về false để ngăn form submit mặc định
+        return false;
     }
 
     // Hiển thị tin nhắn trên giao diện
@@ -1472,26 +1552,39 @@
             const messageElement = document.createElement('div');
             messageElement.className = isFromMe ? 'message me' : 'message';
 
-            const now = new Date();
-            const formattedTime = now.getHours().toString().padStart(2, '0') + ':' +
-                                now.getMinutes().toString().padStart(2, '0');
+            // Định dạng thời gian
+            let formattedTime;
+            if (message.timestamp) {
+                const messageDate = new Date(message.timestamp);
+                formattedTime = messageDate.getHours().toString().padStart(2, '0') + ':' +
+                              messageDate.getMinutes().toString().padStart(2, '0');
+            } else {
+                const now = new Date();
+                formattedTime = now.getHours().toString().padStart(2, '0') + ':' +
+                              now.getMinutes().toString().padStart(2, '0');
+            }
 
+            // Nội dung tin nhắn
+            const messageContent = message.content || message.messageText || '';
+            
             messageElement.innerHTML = `
                 <div class="text-main">
                     <div class="text-group ${isFromMe ? 'me' : ''}">
                         <div class="text ${isFromMe ? 'me' : ''}">
-                            <p>${escapeHtml(message.content)}</p>
+                            <p>${escapeHtml(messageContent)}</p>
                         </div>
                     </div>
                     <span>${formattedTime}</span>
                 </div>
             `;
-
             messagesArea.appendChild(messageElement);
         }
 
-        // Cuộn xuống tin nhắn mới nhất
-        scrollToBottom(document.getElementById('content'));
+        // Cuộn xuống tin nhắn mới nhất một cách mượt mà
+        messagesArea.scrollTo({
+            top: messagesArea.scrollHeight,
+            behavior: 'smooth'
+        });
     }
 
     // Cập nhật số lượng tin nhắn chưa đọc
@@ -1526,16 +1619,13 @@
 
     // Khởi tạo giao diện chat
     function initializeChatUI(conversationId, userId, name, isGroup = false) {
+        console.log("Khởi tạo giao diện chat:", name, conversationId, userId);
+        
+        // Lưu thông tin cuộc trò chuyện hiện tại vào biến toàn cục
         currentConversationId = conversationId;
         currentRecipientId = isGroup ? null : userId;
         currentRecipientUsername = isGroup ? null : name;
 
-        // Đăng ký nhận tin nhắn nhóm nếu cần
-        if (isGroup && stompClient && isConnected) {
-            subscribeToGroupMessages(conversationId);
-        }
-
-        // Khởi tạo UI chat
         const topElement = document.getElementById('top');
         if (topElement) {
             topElement.innerHTML = `
@@ -1555,7 +1645,7 @@
         const sendMessageElement = document.getElementById('send-message');
         if (sendMessageElement) {
             sendMessageElement.innerHTML = `
-                <form class="position-relative w-100" id="message-form">
+                <form class="position-relative w-100" id="message-form" onsubmit="return false;">
                     <textarea id="message-input" class="form-control" placeholder="Nhập tin nhắn..." rows="1"></textarea>
                     <button type="submit" class="btn send"><i class="material-icons">send</i></button>
                 </form>
@@ -1568,41 +1658,22 @@
             // Thêm event listener để gửi tin nhắn
             const form = document.getElementById('message-form');
             if (form) {
-                form.addEventListener('submit', sendMessage);
+                // Xóa event listener cũ trước khi thêm cái mới (tránh duplicate)
+                form.removeEventListener('submit', handleFormSubmit);
+                
+                // Thêm event listener mới với hàm xử lý riêng biệt để ngăn form submit
+                form.addEventListener('submit', handleFormSubmit);
             }
         }
     }
-
-    // Cập nhật fetchMessages để kết nối với WebSocket khi chuyển đổi hội thoại
-    const originalFetchMessages = fetchMessages;
-    fetchMessages = function(conversationId, userId, conversationName, isGroup = false) {
-        originalFetchMessages(conversationId, userId, conversationName, isGroup);
-
-        // Lưu thông tin người dùng và cuộc trò chuyện hiện tại
-        currentUserId = userId;
-        currentUsername = sessionStorage.getItem('username');
-
-        // Khởi tạo giao diện chat
-        initializeChatUI(conversationId, userId, conversationName, isGroup);
-
-        // Kết nối WebSocket nếu chưa kết nối
-        if (!isConnected) {
-            connectWebSocket();
-        }
-    };
-
-    // Kết nối WebSocket khi trang được tải
-    document.addEventListener('DOMContentLoaded', function() {
-        // Lấy thông tin người dùng và kết nối WebSocket
-        const username = sessionStorage.getItem('username');
-        if (username) {
-            currentUsername = username;
-            // Trì hoãn kết nối WebSocket để đảm bảo đã lấy được thông tin người dùng
-            setTimeout(function() {
-                connectWebSocket();
-            }, 1000);
-        }
-    });
+    
+    // Hàm xử lý submit form riêng biệt để đảm bảo không reload trang
+    function handleFormSubmit(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        sendMessage(event);
+        return false;
+    }
 
     // Cập nhật UI khi nhận tin nhắn mới
     function updateConversationList(senderUsername) {
