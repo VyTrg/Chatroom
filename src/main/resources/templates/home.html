@@ -830,14 +830,14 @@
         window.location.href = currentUrl.toString();
     });
     document.addEventListener("DOMContentLoaded", function () {
-        let username = localStorage.getItem("username");
+        let username = sessionStorage.getItem("username");
 
         // if (username) {
         //     username = decodeURIComponent(username);
         // }
 
         if (!username) {
-            console.error("No username found in localStorage.");
+            console.error("No username found in sessionStorage.");
             return;
         }
         console.log("test: ",username);
@@ -845,7 +845,7 @@
     });
 
     function fetchUserIdByUsername(username) {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         console.log(username);
         fetch(`${baseURL}/users/username/${username}`, {
             method: "GET",
@@ -865,7 +865,7 @@
                     console.error("User not found or invalid response");
                     return;
                 }
-                localStorage.setItem("userId", user.userId);
+                sessionStorage.setItem("userId", user.userId);
                 document.getElementById("firstName").value = user.firstName;
                 document.getElementById("lastName").value = user.lastName;
                 document.getElementById("email").value = user.email;
@@ -890,7 +890,7 @@
     }
 
     function fetchUserData(userId) {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         console.log(userId);
         console.log(token);
         fetch(`${baseURL}/users/id/${userId}`, {
@@ -933,7 +933,7 @@
     }
 
     async function fetchConversations(userId) {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         console.log("Fetching conversations for user:", userId);
         console.log("Token:", token);
 
@@ -1026,7 +1026,7 @@
     }
 
     async function fetchMessages(conversationId, userId, conversationName) {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const content = document.getElementById("show-message");
         content.innerHTML = '';
 
@@ -1151,11 +1151,31 @@
         return text.replace(/[&<>"']/g, m => map[m]);
     }
 
+    function handleConversationClick(conversationId, userId, conversationName, isGroup = false) {
+        console.log("Mở cuộc trò chuyện:", conversationId, conversationName, isGroup);
+        
+        // Lưu thông tin cuộc trò chuyện hiện tại
+        currentConversationId = conversationId;
+        if (!isGroup) {
+            currentRecipientId = userId;
+            currentRecipientUsername = conversationName;
+        } else {
+            currentRecipientId = null;
+        }
+        
+        // Lấy ID người dùng hiện tại
+        const currentUserId = sessionStorage.getItem('userId');
+        
+        // Tải tin nhắn
+        console.log("Tải tin nhắn cho cuộc trò chuyện:", conversationId);
+        fetchMessages(conversationId, currentUserId, conversationName, isGroup);
+    }
+
     document.getElementById("change_profile").addEventListener("submit", function(event) {
         console.log("changeProfile called");
         event.preventDefault();
-        const token = localStorage.getItem("token");
-        const userId = localStorage.getItem("userId");
+        const token = sessionStorage.getItem("token");
+        const userId = sessionStorage.getItem("userId");
         const username = document.getElementById('username').value.trim();
         const firstName = document.getElementById('firstName').value.trim();
         const lastName = document.getElementById('lastName').value.trim();
@@ -1184,7 +1204,7 @@
                 return response.json();
             }).then(update => {
                 console.log(update);
-                  localStorage.setItem("user", JSON.stringify(update));
+                  sessionStorage.setItem("user", JSON.stringify(update));
                   updateProfileUI(update);
                   // document.getElementById("change_profile").reset();
                 })
@@ -1223,7 +1243,7 @@
             return;
         }
 
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
             console.error("Không tìm thấy token, không thể kết nối WebSocket");
             return;
@@ -1256,8 +1276,8 @@
         // Đăng ký nhận tin nhắn riêng tư (/user/queue/private)
         stompClient.subscribe('/user/queue/private', onPrivateMessageReceived);
 
-        // Lấy thông tin người dùng hiện tại từ localStorage
-        currentUsername = localStorage.getItem('username');
+        // Lấy thông tin người dùng hiện tại từ sessionStorage
+        currentUsername = sessionStorage.getItem('username');
 
         // Gửi tin nhắn JOIN khi kết nối thành công
         if (currentUsername) {
@@ -1555,15 +1575,15 @@
 
     // Cập nhật fetchMessages để kết nối với WebSocket khi chuyển đổi hội thoại
     const originalFetchMessages = fetchMessages;
-    fetchMessages = function(conversationId, userId, conversationName) {
-        originalFetchMessages(conversationId, userId, conversationName);
+    fetchMessages = function(conversationId, userId, conversationName, isGroup = false) {
+        originalFetchMessages(conversationId, userId, conversationName, isGroup);
 
         // Lưu thông tin người dùng và cuộc trò chuyện hiện tại
         currentUserId = userId;
-        currentUsername = localStorage.getItem('username');
+        currentUsername = sessionStorage.getItem('username');
 
         // Khởi tạo giao diện chat
-        initializeChatUI(conversationId, userId, conversationName, false);
+        initializeChatUI(conversationId, userId, conversationName, isGroup);
 
         // Kết nối WebSocket nếu chưa kết nối
         if (!isConnected) {
@@ -1574,7 +1594,7 @@
     // Kết nối WebSocket khi trang được tải
     document.addEventListener('DOMContentLoaded', function() {
         // Lấy thông tin người dùng và kết nối WebSocket
-        const username = localStorage.getItem('username');
+        const username = sessionStorage.getItem('username');
         if (username) {
             currentUsername = username;
             // Trì hoãn kết nối WebSocket để đảm bảo đã lấy được thông tin người dùng
@@ -1602,7 +1622,7 @@
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token')
             }
         })
         .then(response => {
