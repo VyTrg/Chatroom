@@ -1118,12 +1118,14 @@
             sender: currentUsername,
             senderId: currentUserId.toString(), // Đảm bảo senderId luôn là string
             content: messageContent,
+            messageText: messageContent, // Thêm trường messageText để tương thích với phương thức hiển thị
             type: messageType,
             timestamp: timeISO
         };
 
         console.log("Thông tin gửi tin nhắn - senderId:", chatMessage.senderId);
         console.log("Thông tin gửi tin nhắn - currentUserId:", currentUserId);
+        console.log("Đối tượng tin nhắn:", chatMessage);
 
         // Tin nhắn riêng tư
         if (currentRecipientId && currentConversationId !== 'public') {
@@ -1217,9 +1219,19 @@
             return;
         }
 
+        console.log("Hiển thị tin nhắn:", message);
+
         // Xác định xem đây có phải là tin nhắn của người dùng hiện tại không
         const isMe = message.isMe || message.sender === currentUsername || message.senderId === currentUserId?.toString();
-        const time = formatMessageTime(message.timestamp);
+        
+        // Định dạng thời gian
+        let time;
+        try {
+            time = formatTime(message.timestamp || message.createdAt);
+        } catch(e) {
+            console.error("Lỗi định dạng thời gian:", e);
+            time = "Vừa xong";
+        }
 
         if (isMe) {
             // Tin nhắn của người dùng hiện tại (bên phải, màu xanh)
@@ -1237,7 +1249,7 @@
                                 </div>
                             </div>
                             <div class="text me">
-                                <p>${escapeHtml(message.content)}</p>
+                                <p>${escapeHtml(message.content || message.messageText)}</p>
                             </div>
                         </div>
                         <span>${time}</span>
@@ -1252,7 +1264,7 @@
                     <div class="text-main">
                         <div class="text-group d-flex align-items-center mr-2">
                             <div class="text">
-                                <p>${escapeHtml(message.content)}</p>
+                                <p>${escapeHtml(message.content || message.messageText)}</p>
                             </div>
                             <div class="dropdown ml-2">
                                 <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -1698,13 +1710,13 @@
                     <input type="file">
                     <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
                 </label>`;
-
+                
                 // Thêm event handler cho form ngay sau khi tạo
                 const messageForm = document.getElementById('message-form');
                 if (messageForm) {
                     // Xóa event listener cũ trước khi thêm cái mới (tránh duplicate)
                     messageForm.removeEventListener('submit', handleFormSubmit);
-
+                    
                     // Thêm event listener mới với hàm xử lý riêng biệt để ngăn form submit
                     messageForm.addEventListener('submit', handleFormSubmit);
                 }
@@ -1893,6 +1905,7 @@
                 sender: currentUsername,
                 senderId: currentUserId.toString(), // Đảm bảo senderId luôn là string
                 content: messageContent,
+                messageText: messageContent, // Thêm trường messageText để tương thích với phương thức hiển thị
                 type: messageType,
                 timestamp: timeISO
             };
