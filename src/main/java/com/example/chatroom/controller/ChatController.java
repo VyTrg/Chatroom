@@ -58,27 +58,46 @@ public class ChatController {
                 Long recipientId = Long.parseLong(chatMessage.getRecipientId());
                 recipient = userRepository.findById(recipientId).orElse(null);
             } catch (Exception e) {
+                log.error("[PRIVATE] Error parsing recipient ID: {}", e.getMessage(), e);
                 recipient = null;
             }
         }
         if (sender != null && recipient != null) {
-            // Lưu tin nhắn vào database
-            Conversation conversation = chatService.findOrCreatePrivateConversation(sender, recipient);
-            Message message = new Message();
-            message.setSender(sender);
-            message.setConversation(conversation);
-            message.setMessageText(chatMessage.getContent());
-            message.setCreatedAt(LocalDateTime.now());
-            message.setIsRead(false);
-            chatService.saveMessage(message);
+            try {
+                // Lưu tin nhắn vào database
+                Conversation conversation = chatService.findOrCreatePrivateConversation(sender, recipient);
+                Message message = new Message();
+                message.setSender(sender);
+                message.setConversation(conversation);
+                message.setMessageText(chatMessage.getContent());
+                message.setCreatedAt(LocalDateTime.now());
+                message.setIsRead(false);
+                Message savedMessage = chatService.saveMessage(message);
+                
+                // Add the message ID and conversation ID to the chat message
+                chatMessage.setMessageId(savedMessage.getId().toString());
+                chatMessage.setConversationId(conversation.getId().toString());
+                
+                // Send message to recipient
+                String recipientUsername = recipient.getUsername();
+                System.out.println("[PRIVATE] Sending from " + chatMessage.getSender() + " to " + recipientUsername);
+                messagingTemplate.convertAndSendToUser(recipientUsername, "/queue/private", chatMessage);
+                
+                // Also send a copy to the sender so they can see their own messages
+                messagingTemplate.convertAndSendToUser(chatMessage.getSender(), "/queue/private", chatMessage);
+                
+                log.info("[PRIVATE] Message saved with ID: {} and sent from {} to {} with content: {}", 
+                        savedMessage.getId(),
+                        chatMessage.getSender(), 
+                        recipientUsername,
+                        chatMessage.getContent());
+            } catch (Exception e) {
+                log.error("[PRIVATE] Error sending private message: {}", e.getMessage(), e);
+            }
+        } else {
+            log.error("[PRIVATE] Failed to send message - sender or recipient not found. Sender: {}, Recipient ID: {}", 
+                    chatMessage.getSender(), chatMessage.getRecipientId());
         }
-        String recipientUsername = (recipient != null) ? recipient.getUsername() : chatMessage.getRecipient();
-        System.out.println("[PRIVATE] Sending from " + chatMessage.getSender() + " to " + recipientUsername);
-        log.info("[PRIVATE] Sending from {} to {} with content: {}",
-                chatMessage.getSender(),
-                recipientUsername,
-                chatMessage.getContent());
-        messagingTemplate.convertAndSendToUser(recipientUsername, "/queue/private", chatMessage);
     }
 
     @MessageMapping("/chat.group")
@@ -95,11 +114,22 @@ public class ChatController {
                 message.setMessageText(chatMessage.getContent());
                 message.setCreatedAt(LocalDateTime.now());
                 message.setIsRead(false);
-                chatService.saveMessage(message);
+                Message savedMessage = chatService.saveMessage(message);
+                
+                // Add the message ID and conversation ID to the chat message
+                chatMessage.setMessageId(savedMessage.getId().toString());
+                chatMessage.setConversationId(group.getId().toString());
+                
+                log.info("[GROUP] Message saved with ID: {} and sent to group {} from {}", 
+                         savedMessage.getId(), groupId, chatMessage.getSender());
+                
+                messagingTemplate.convertAndSend("/topic/group." + groupId, chatMessage);
+            } else {
+                log.error("[GROUP] Failed to send message - group or sender not found. Group ID: {}, Sender: {}", 
+                          groupId, chatMessage.getSender());
             }
-            messagingTemplate.convertAndSend("/topic/group." + groupId, chatMessage);
         } catch (Exception e) {
-            // log lỗi nếu recipient không phải là groupId hợp lệ
+            log.error("[GROUP] Error sending group message: {}", e.getMessage(), e);
         }
     }
 

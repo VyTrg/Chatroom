@@ -146,9 +146,29 @@
 						.then(response => response.json())
 						.then(data => {
 							if (data.token) {
-								localStorage.setItem("token", data.token);
-								localStorage.setItem("username", formData.username);
+								// Lưu token và username vào sessionStorage
+								sessionStorage.setItem("token", data.token);
+								sessionStorage.setItem("username", formData.username);
+								
+								// Đồng thờI lưu userId nếu có
+								if (data.userId) {
+									sessionStorage.setItem("userId", data.userId);
+									
+									// Tạo và lưu đối tượng user
+									const user = {
+										id: data.userId,
+										username: formData.username
+									};
+									sessionStorage.setItem("user", JSON.stringify(user));
+								}
+								
+								// Đặt flag để kích hoạt kết nối WebSocket ngay khi trang home được tải
+								sessionStorage.setItem("autoConnectWebSocket", "true");
+								
+								// Chuyển hướng đến trang home
 								window.location.href = "http://localhost:8080/home";
+							} else {
+								alert("Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.");
 							}
 						})
 						.catch(error => {

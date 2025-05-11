@@ -228,6 +228,11 @@
 					if (alertLoading) alertLoading.style.display = "none";
 					if (data.status === "success") {
 						alert("Verify message has been sent to your email. Please check your mail.");
+						// Lưu username để sử dụng sau khi xác minh
+						const sessionId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+						localStorage.setItem(`pending_username_${sessionId}`, formData.username);
+						localStorage.setItem(`pending_sessionId`, sessionId);
+						
 						// window.location.href = "/sign-in.html"; // Redirect to login page
 						lastNameInput.value = "";
 						firstNameInput.value = "";
