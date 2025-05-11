@@ -937,7 +937,7 @@
             if (stompClient && stompClient.connected) {
                 stompClient.send('/app/chat.heartbeat', {}, JSON.stringify({
                     sender: currentUsername,
-                    type: 'HEARTBEAT'
+                    type: MessageType.HEARTBEAT
                 }));
                 console.log("Đã gửi heartbeat");
             } else {
@@ -1004,6 +1004,23 @@
             const message = JSON.parse(payload.body);
             console.log("Tin nhắn riêng tư nhận được:", message);
             
+            // Đảm bảo tin nhắn có định dạng đúng
+            if (!message.sender || !message.content) {
+                console.error("Định dạng tin nhắn không hợp lệ:", message);
+                return;
+            }
+            
+            // Lấy thông tin người dùng hiện tại từ sessionStorage nếu chưa có
+            if (!currentUserId) {
+                const userData = JSON.parse(sessionStorage.getItem('user') || '{}');
+                if (userData && userData.id) {
+                    currentUserId = userData.id;
+                } else {
+                    console.error("Không thể lấy thông tin người dùng từ sessionStorage");
+                    return;
+                }
+            }
+            
             // Kiểm tra xem tin nhắn có phải từ người gửi hiện tại không
             const isFromCurrentSender = message.sender === currentUsername || message.senderId === currentUserId?.toString();
             
@@ -1033,6 +1050,17 @@
                 
                 // Hiển thị tin nhắn
                 displayMessage(message);
+            } else {
+                // Nếu không phải cuộc trò chuyện hiện tại, cập nhật số tin nhắn chưa đọc
+                const conversationElement = document.querySelector(`[data-conversation-id="${message.conversationId}"]`);
+                if (conversationElement) {
+                    const unreadBadge = conversationElement.querySelector('.badge');
+                    if (unreadBadge) {
+                        const currentCount = parseInt(unreadBadge.textContent || '0');
+                        unreadBadge.textContent = currentCount + 1;
+                        unreadBadge.style.display = 'block';
+                    }
+                }
             }
         } catch (error) {
             console.error("Lỗi khi xử lý tin nhắn riêng tư:", error);
@@ -1120,7 +1148,8 @@
             content: messageContent,
             messageText: messageContent, // Thêm trường messageText để tương thích với phương thức hiển thị
             type: messageType,
-            timestamp: timeISO
+            timestamp: timeISO,
+            conversationId: currentConversationId  // Thêm conversationId vào tin nhắn
         };
 
         console.log("Thông tin gửi tin nhắn - senderId:", chatMessage.senderId);
@@ -1134,7 +1163,7 @@
             chatMessage.type = messageType;
             chatMessage.recipientId = currentRecipientId.toString();
             chatMessage.recipient = currentRecipientUsername;
-            
+
             // Hiển thị tin nhắn ngay khi gửi (optimistic UI)
             chatMessage.isMe = true;
             displayMessage(chatMessage);
@@ -1148,7 +1177,7 @@
                 chatMessage.type = messageType;
                 // Đặt recipient để server xử lý như groupId
                 chatMessage.recipient = currentConversationId.toString();
-                
+
                 // Hiển thị tin nhắn ngay khi gửi (optimistic UI)
                 chatMessage.isMe = true;
                 displayMessage(chatMessage);
@@ -1286,8 +1315,6 @@
         // Cuộn xuống dưới để hiển thị tin nhắn mới nhất
         scrollToBottom(document.getElementById('content'));
     }
-</script>
-<script>
     document.getElementById("langSelect").addEventListener("change", function () {
         const selectedLang = this.value;
         const currentUrl = new URL(window.location.href);
@@ -1307,10 +1334,19 @@
         }
 
         console.log("test: ",username);
+        
+        // Kiểm tra flag kết nối WebSocket đã được đặt khi đăng nhập
+        const shouldConnectWebSocket = sessionStorage.getItem("autoConnectWebSocket");
+        if (shouldConnectWebSocket === "true") {
+            console.log("Kết nối WebSocket ngay khi trang tải xong...");
+            // Kết nối WebSocket ngay lập tức
+            connectWebSocket();
+            // Xóa flag để không kết nối lại vào lần tải trang tiếp theo
+            sessionStorage.removeItem("autoConnectWebSocket");
+        }
+        
         fetchUserIdByUsername(username);
     });
-</script>
-<script>
     function fetchUserIdByUsername(username) {
         const token = sessionStorage.getItem("token");
         console.log(username);
@@ -1565,7 +1601,7 @@
                 // Thêm event listener mới với hàm xử lý riêng biệt để ngăn form submit
                 messageForm.addEventListener('submit', handleFormSubmit);
             }
-            
+
             // Lưu thông tin cuộc trò chuyện hiện tại
             currentConversationId = conversationId;
             currentRecipientId = userId;
@@ -1790,19 +1826,19 @@
             try {
                 const message = JSON.parse(payload.body);
                 console.log("Tin nhắn riêng tư nhận được:", message);
-
+                
                 // Kiểm tra xem tin nhắn có phải từ người gửi hiện tại không
                 const isFromCurrentSender = message.sender === currentUsername || message.senderId === currentUserId?.toString();
-
+                
                 // Kiểm tra xem tin nhắn có phải cho cuộc trò chuyện hiện tại không
                 const isForCurrentConversation =
                     (message.senderId === currentRecipientId && message.recipientId === currentUserId?.toString()) ||
                     (message.recipientId === currentRecipientId && message.senderId === currentUserId?.toString());
-
+                
                 // Cập nhật UI danh sách cuộc trò chuyện
                 if (!isFromCurrentSender) {
                     updateConversationList(message.sender);
-
+                    
                     // Hiển thị thông báo nếu tin nhắn không phải đang trong cuộc trò chuyện hiện tại
                     if (!isForCurrentConversation && Notification.permission === 'granted') {
                         new Notification('Tin nhắn mới', {
@@ -1810,14 +1846,14 @@
                         });
                     }
                 }
-
+                
                 // Nếu là tin nhắn trong cuộc trò chuyện hiện tại, hiển thị ngay
                 if (isForCurrentConversation) {
                     // Đánh dấu tin nhắn đã đọc nếu cần
                     if (message.messageId && !isFromCurrentSender) {
                         markMessageAsRead(message.messageId);
                     }
-
+                    
                     // Hiển thị tin nhắn
                     displayMessage(message);
                 }
@@ -1844,7 +1880,7 @@
         // Gửi tin nhắn
         function sendMessage(event) {
             event.preventDefault();
-
+            
             if (!stompClient || !isConnected) {
                 console.error("WebSocket chưa được kết nối, không thể gửi tin nhắn");
                 const errorElement = document.getElementById('message-error');
@@ -1852,25 +1888,25 @@
                     errorElement.textContent = "Không thể gửi tin nhắn do mất kết nối. Đang kết nối lại...";
                     errorElement.style.display = 'block';
                 }
-
+                
                 // Thử kết nối lại
                 reconnectWebSocket();
                 return;
             }
-
+            
             const messageInput = document.getElementById('message-input');
             if (!messageInput) {
                 console.error("Không tìm thấy phần tử message-input");
                 return;
             }
-
+            
             const messageContent = messageInput.value.trim();
-
+            
             if (!messageContent) {
                 console.log("Tin nhắn trống, không gửi");
                 return;
             }
-
+            
             // Reset input và error message nếu có
             messageInput.value = '';
             const errorElement = document.getElementById('message-error');
@@ -1878,11 +1914,11 @@
                 errorElement.style.display = 'none';
                 errorElement.textContent = '';
             }
-
+            
             // Tạo timestamp theo định dạng ISO
             const now = new Date();
             const timeISO = now.toISOString();
-
+            
             // Mặc định là tin nhắn công khai
             let messageType = 'PUBLIC';
             let destination = '/app/chat.sendMessage';
@@ -1907,11 +1943,13 @@
                 content: messageContent,
                 messageText: messageContent, // Thêm trường messageText để tương thích với phương thức hiển thị
                 type: messageType,
-                timestamp: timeISO
+                timestamp: timeISO,
+                conversationId: currentConversationId  // Thêm conversationId vào tin nhắn
             };
 
             console.log("Thông tin gửi tin nhắn - senderId:", chatMessage.senderId);
             console.log("Thông tin gửi tin nhắn - currentUserId:", currentUserId);
+            console.log("Đối tượng tin nhắn:", chatMessage);
 
             // Tin nhắn riêng tư
             if (currentRecipientId && currentConversationId !== 'public') {
@@ -1940,7 +1978,7 @@
                     displayMessage(chatMessage);
                 }
             }
-
+            
             try {
                 // Gửi tin nhắn qua WebSocket
                 console.log(`Gửi tin nhắn ${messageType} tới ${destination}:`, chatMessage);
@@ -1953,7 +1991,7 @@
                     errorElement.style.display = 'block';
                 }
             }
-
+            
             // Focus lại vào input để người dùng có thể tiếp tục gõ
             if (messageInput) {
                 messageInput.focus();
@@ -1989,12 +2027,12 @@
                     'Authorization': 'Bearer ' + sessionStorage.getItem('token')
                 }
             })
-                .then(response => {
-                    if (response.ok) {
-                        console.log(`Đã đánh dấu tin nhắn ${messageId} là đã đọc`);
-                    }
-                })
-                .catch(error => console.error('Lỗi khi đánh dấu tin nhắn đã đọc:', error));
+            .then(response => {
+                if (response.ok) {
+                    console.log(`Đã đánh dấu tin nhắn ${messageId} là đã đọc`);
+                }
+            })
+            .catch(error => console.error('Lỗi khi đánh dấu tin nhắn đã đọc:', error));
         }
 
         document.getElementById("langSelect").addEventListener("change", function () {
