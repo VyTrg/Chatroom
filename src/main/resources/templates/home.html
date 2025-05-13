@@ -848,6 +848,7 @@
     let currentRecipientUsername = null;
     let currentRecipientId = null;
     let isConnected = false;
+    let isGroupConversation = false; // Cờ để xác định cuộc trò chuyện hiện tại là nhóm hay không
     let messageSubscriptions = {}; // Store subscriptions for cleanup
     const baseURL = "http://localhost:8080/api";
 
@@ -949,6 +950,19 @@
             
             // Thiết lập cơ chế ping-pong để giữ kết nối WebSocket
             startHeartbeat();
+            setTimeout(() => {
+                const groupElements = document.querySelectorAll('[data-is-group="true"]');
+                if (groupElements.length > 0) {
+                    console.log(`Tìm thấy ${groupElements.length} nhóm, đăng ký nhận tin nhắn`);
+                    groupElements.forEach(el => {
+                        const groupId = el.dataset.conversationId;
+                        if (groupId) {
+                            console.log(`Đăng ký nhận tin nhắn cho nhóm: ${groupId}`);
+                            subscribeToGroupMessages(groupId);
+                        }
+                    });
+                }
+            }, 1000); // Chờ 1 giây để đảm bảo cuộc trò chuyện đã được tải
         } else {
             console.error("Không thể lấy thông tin người dùng từ sessionStorage");
         }
@@ -1011,7 +1025,10 @@
 
     // Đăng ký nhận tin nhắn cho một nhóm cụ thể
     function subscribeToGroupMessages(groupId) {
-        if (!isConnected || !stompClient) return;
+        if (!isConnected || !stompClient) {
+            console.error("Không thể đăng ký nhóm: WebSocket chưa kết nối");
+            return;
+        }
 
         // Kiểm tra nếu đã đăng ký trước đó thì không đăng ký lại
         if (messageSubscriptions[`group_${groupId}`]) {
@@ -1019,12 +1036,30 @@
             return messageSubscriptions[`group_${groupId}`];
         }
 
-        const subscription = stompClient.subscribe(`/topic/group.${groupId}`, onGroupMessageReceived);
-        console.log(`Đã đăng ký nhận tin nhắn cho nhóm: ${groupId}`);
+        // Quan trọng: Đảm bảo định dạng topic khớp với định dạng server đang sử dụng
+        const groupTopic = `/topic/group.${groupId}`;
+        console.log(`Đăng ký nhóm với ID: ${groupId}, path=${groupTopic}`);
         
-        // Lưu subscription để có thể hủy đăng ký khi cần
-        messageSubscriptions[`group_${groupId}`] = subscription;
-        return subscription;
+        try {
+            const subscription = stompClient.subscribe(groupTopic, function(payload) {
+                console.log(`NHẬN TIN NHẮN NHÓM từ ${groupTopic}:`, payload);
+                onGroupMessageReceived(payload);
+            });
+            console.log(` ĐÃ ĐĂNG KÝ THÀNH CÔNG nhận tin nhắn cho nhóm: ${groupId}`);
+
+            // Lưu subscription để có thể hủy đăng ký khi cần
+            messageSubscriptions[`group_${groupId}`] = subscription;
+            
+            // Gửi tin nhắn test để kiểm tra kết nối (chỉ log, không gửi thực)
+            console.log(`Muốn gửi tin nhắn đến nhóm, sử dụng destination: /app/chat.group`);
+            
+            // In ra danh sách đăng ký hiện tại
+            console.log(`Danh sách đăng ký hiện tại:`, Object.keys(messageSubscriptions));
+            
+            return subscription;
+        } catch (error) {
+            console.error(` LỖI khi đăng ký nhóm ${groupId}:`, error);
+        }
     }
     
     // Xử lý khi nhận tin nhắn công khai
@@ -1126,76 +1161,79 @@
 
     // Xử lý khi nhận tin nhắn nhóm
     function onGroupMessageReceived(payload) {
-        try {
-            const message = JSON.parse(payload.body);
-            console.log("Nhận tin nhắn nhóm:", message);
+        const message = JSON.parse(payload.body);
+        console.log("Nhận tin nhắn nhóm:", message);
+
+        // Kiểm tra cấu trúc tin nhắn
+        const hasValidStructure = message && (message.groupId || message.conversationId || message.recipient);
+        if (!hasValidStructure) {
+            console.error("Cấu trúc tin nhắn nhóm không hợp lệ:", message);
+            return;
+        }
+        
+        // Kiểm tra xem tin nhắn có phải từ người gửi hiện tại không
+        const isFromCurrentSender = message.sender === currentUsername || message.senderId === currentUserId?.toString();
+        
+        // Xác định ID của nhóm để so sánh
+        const groupId = message.conversationId || message.groupId || message.recipient;
+        
+        // Kiểm tra xem tin nhắn có thuộc cuộc trò chuyện nhóm hiện tại không
+        const isForCurrentGroup = currentConversationId && currentConversationId.toString() === groupId?.toString();
+        
+        // Log thông tin chi tiết để debug
+        console.log("Thông tin tin nhắn nhóm:", {
+            messageGroupId: groupId,
+            currentConvId: currentConversationId,
+            messageSenderId: message.senderId,
+            currentUserId: currentUserId,
+            isForCurrentGroup: isForCurrentGroup,
+            isFromCurrentSender: isFromCurrentSender
+        });
+        
+        // Nếu không phải từ người dùng hiện tại, cập nhật danh sách cuộc trò chuyện
+        if (!isFromCurrentSender) {
+            updateConversationList(message.sender || message.senderName);
             
-            // Kiểm tra xem tin nhắn có phải từ người gửi hiện tại không
-            const isFromCurrentSender = message.sender === currentUsername || message.senderId === currentUserId?.toString();
+            // Hiển thị thông báo nếu tin nhắn không phải đang xem cuộc trò chuyện nhóm này
+            if (!isForCurrentGroup && Notification.permission === 'granted') {
+                new Notification('Tin nhắn nhóm mới', {
+                    body: `${message.sender || message.senderName}: ${message.content || message.messageText || message.message}`
+                });
+            }
+        }
+        
+        // Hiển thị tin nhắn nếu đang xem cuộc trò chuyện nhóm này
+        if (isForCurrentGroup) {
+            console.log("Hiển thị tin nhắn cho cuộc trò chuyện nhóm hiện tại");
             
-            // Xác định ID của nhóm để so sánh
-            const groupId = message.conversationId || message.groupId || message.recipient;
-            
-            // Kiểm tra xem tin nhắn có thuộc cuộc trò chuyện nhóm hiện tại không
-            const isForCurrentGroup = currentConversationId && currentConversationId.toString() === groupId?.toString();
-            
-            // Log thông tin chi tiết để debug
-            console.log("Thông tin tin nhắn nhóm:", {
-                messageGroupId: groupId,
-                currentConvId: currentConversationId,
-                messageSenderId: message.senderId,
-                currentUserId: currentUserId,
-                isForCurrentGroup: isForCurrentGroup,
-                isFromCurrentSender: isFromCurrentSender
-            });
-            
-            // Nếu không phải từ người dùng hiện tại, cập nhật danh sách cuộc trò chuyện
-            if (!isFromCurrentSender) {
-                updateConversationList(message.sender || message.senderName);
-                
-                // Hiển thị thông báo nếu không phải đang xem cuộc trò chuyện nhóm này
-                if (!isForCurrentGroup && Notification.permission === 'granted') {
-                    new Notification('Tin nhắn nhóm mới', {
-                        body: `${message.sender || message.senderName}: ${message.content || message.messageText || message.message}`
-                    });
-                }
+            // Đánh dấu tin nhắn đã đọc nếu cần
+            if (message.messageId && !isFromCurrentSender) {
+                markMessageAsRead(message.messageId);
             }
             
-            // Hiển thị tin nhắn nếu đang xem cuộc trò chuyện nhóm này
-            if (isForCurrentGroup) {
-                console.log("Hiển thị tin nhắn cho cuộc trò chuyện nhóm hiện tại");
-                
-                // Đánh dấu tin nhắn đã đọc nếu cần
-                if (message.messageId && !isFromCurrentSender) {
-                    markMessageAsRead(message.messageId);
+            // Hiển thị tin nhắn
+            displayMessage(message);
+            
+            // Đảm bảo cuộn xuống sau khi hiển thị tin nhắn
+            setTimeout(() => {
+                const chatContainer = document.getElementById('content');
+                if (chatContainer) {
+                    scrollToBottom(chatContainer);
                 }
-                
-                // Hiển thị tin nhắn
-                displayMessage(message);
-                
-                // Đảm bảo cuộn xuống tin nhắn mới
-                setTimeout(() => {
-                    const chatContainer = document.getElementById('content');
-                    if (chatContainer) {
-                        scrollToBottom(chatContainer);
-                    }
-                }, 100);
-            } else {
-                console.log("Tin nhắn không thuộc cuộc trò chuyện nhóm hiện tại, không hiển thị");
-                
-                // Cập nhật số tin nhắn chưa đọc
-                const conversationElement = document.querySelector(`[data-conversation-id="${groupId}"]`);
-                if (conversationElement) {
-                    const unreadBadge = conversationElement.querySelector('.badge');
-                    if (unreadBadge) {
-                        const currentCount = parseInt(unreadBadge.textContent || '0');
-                        unreadBadge.textContent = currentCount + 1;
-                        unreadBadge.style.display = 'block';
-                    }
+            }, 100);
+        } else {
+            console.log("Tin nhắn không thuộc cuộc trò chuyện nhóm hiện tại, không hiển thị");
+            
+            // Cập nhật số tin nhắn chưa đọc
+            const conversationElement = document.querySelector(`[data-conversation-id="${groupId}"]`);
+            if (conversationElement) {
+                const unreadBadge = conversationElement.querySelector('.badge');
+                if (unreadBadge) {
+                    const currentCount = parseInt(unreadBadge.textContent || '0');
+                    unreadBadge.textContent = currentCount + 1;
+                    unreadBadge.style.display = 'block';
                 }
             }
-        } catch (error) {
-            console.error("Lỗi khi xử lý tin nhắn nhóm:", error);
         }
     }
 
@@ -1225,7 +1263,13 @@
         const messageContent = messageInput.value.trim();
         
         if (!messageContent) {
-            console.log("Tin nhắn trống, không gửi");
+            console.log("Không gửi tin nhắn rỗng");
+            return;
+        }
+        
+        // Kiểm tra xem có cuộc trò chuyện đang mở không
+        if (!currentConversationId) {
+            console.error("Không có cuộc trò chuyện nào được chọn");
             return;
         }
         
@@ -1241,8 +1285,8 @@
         const now = new Date();
         const timeISO = now.toISOString();
         
-        // Mặc định là tin nhắn công khai
-        let messageType = 'PUBLIC';
+        // Thiết lập loại tin nhắn mặc định
+        let messageType = 'CHAT';
         let destination = '/app/chat.sendMessage';
 
         // Kiểm tra xem các biến toàn cục đã được khởi tạo chưa
@@ -1260,6 +1304,7 @@
 
         // Chuẩn bị đối tượng tin nhắn với thông tin đầy đủ
         const chatMessage = {
+            senderId: currentUserId,
             sender: currentUsername,
             senderId: currentUserId.toString(), // Đảm bảo senderId luôn là string
             content: messageContent,
@@ -1269,12 +1314,25 @@
             conversationId: currentConversationId  // Thêm conversationId vào tin nhắn
         };
 
-        console.log("Thông tin gửi tin nhắn - senderId:", chatMessage.senderId);
-        console.log("Thông tin gửi tin nhắn - currentUserId:", currentUserId);
-        console.log("Đối tượng tin nhắn:", chatMessage);
-
-        // Tin nhắn riêng tư
-        if (currentRecipientId && currentConversationId !== 'public') {
+        console.log("===== THÔNG TIN GỬI TIN NHẮN =====");
+        console.log("SenderId:", currentUserId);
+        console.log("ConversationId:", currentConversationId);
+        console.log("IsGroupConversation:", isGroupConversation);
+        
+        // Phân biệt rõ ràng giữa tin nhắn nhóm và cá nhân dựa trên biến isGroupConversation
+        if (isGroupConversation) {
+            // TIN NHẮN NHÓM
+            messageType = 'GROUP';
+            destination = '/app/chat.group';
+            chatMessage.type = messageType;
+            chatMessage.groupId = currentConversationId.toString();
+            chatMessage.recipient = currentConversationId.toString(); // Đặt recipient = groupId để controller có thể đọc
+            
+            console.log("TIN NHẮN NHÓM:");
+            console.log("Destination:", destination);
+            console.log("GroupId:", chatMessage.groupId);
+        } else if (currentRecipientId) {
+            // TIN NHẮN CÁ NHÂN
             messageType = 'PRIVATE';
             destination = '/app/chat.private';
             chatMessage.type = messageType;
@@ -1289,11 +1347,20 @@
         else if (currentConversationId && currentConversationId !== 'public') {
             const conversation = document.querySelector(`[data-conversation-id="${currentConversationId}"]`);
             if (conversation && conversation.dataset.isGroup === "true") {
-                messageType = 'GROUP';
-                destination = '/app/chat.group';
+                messageType = 'GROUP'; // Đúng theo enum trong MessageType.java
+                destination = `/app/chat.group`;
                 chatMessage.type = messageType;
-                // Đặt recipient để server xử lý như groupId
+                chatMessage.groupId = currentConversationId.toString(); // Thêm groupId rõ ràng
                 chatMessage.recipient = currentConversationId.toString();
+
+                // Log chi tiết thông tin tin nhắn nhóm
+                console.log(`===== GỬI TIN NHẮN NHÓM ĐẾN ${destination} =====`, {
+                    type: chatMessage.type,
+                    groupId: chatMessage.groupId,
+                    recipient: chatMessage.recipient,
+                    senderId: chatMessage.senderId,
+                    message: chatMessage.content
+                });
 
                 // Hiển thị tin nhắn ngay khi gửi (optimistic UI)
                 chatMessage.isMe = true;
@@ -1619,12 +1686,14 @@
                 const unreadCount = latestMessage && latestMessage.isRead === false && latestMessage.sender.id !== userId ? 1 : 0;
                 const imageUrl = conversation.imageUrl || 'img/avatars/default-avatar.png';
 
+                const isGroup = conversation.isGroup === true;
                 const chatCard = `
                 <a href="#list-chat" class="filterDiscussions all single" data-toggle="list" role="tab"
                    data-conversation-id="${conversation.id}"
                    data-recipient-id="${conversation.participantId || ''}" 
                    data-recipient-name="${conversation.name}"
-                   onclick="handleConversationClick(${conversation.id}, ${conversation.participantId || 'null'}, '${conversation.name}');">
+                   data-is-group="${isGroup}"
+                   onclick="handleConversationClick(${conversation.id}, ${conversation.participantId || 'null'}, '${conversation.name}', ${isGroup});">
                     <img class="avatar-md" src="${imageUrl}" data-toggle="tooltip" data-placement="top" title="${conversation.name}" alt="avatar">
                     <div class="status">                        <i class="material-icons online">fiber_manual_record</i>
                     </div>
@@ -1832,20 +1901,19 @@
     }
 
     function handleConversationClick(conversationId, userId, conversationName, isGroup = false) {
-        console.log("Mở cuộc trò chuyện:", conversationId, "với người dùng:", userId, "tên:", conversationName);
-
-        // Xóa lớp active từ tất cả các phần tử cuộc trò chuyện
-        document.querySelectorAll('.filterDiscussions').forEach(el => {
-            el.classList.remove('active');
+        console.log(`Clicked on conversation: ID=${conversationId}, Name=${conversationName}, IsGroup=${isGroup}`);
+        
+        // Đánh dấu cuộc trò chuyện đang được chọn trong UI
+        document.querySelectorAll('.discussions .person').forEach(item => {
+            item.classList.remove('active');
         });
-
-        // Thêm lớp active cho cuộc trò chuyện được chọn
-        const currentConversationElement = document.querySelector(`[data-conversation-id="${conversationId}"]`);
-        if (currentConversationElement) {
-            currentConversationElement.classList.add('active');
+        
+        const selectedConversation = document.querySelector(`.person[data-conversation-id="${conversationId}"]`);
+        if (selectedConversation) {
+            selectedConversation.classList.add('active');
         }
-
-        // Lưu thông tin cuộc trò chuyện hiện tại vào biến toàn cục
+        
+        // Reset và cập nhật biến toàn cục
         currentConversationId = conversationId;
         currentRecipientId = isGroup ? null : userId;
         currentRecipientUsername = isGroup ? null : conversationName;
@@ -2088,128 +2156,13 @@
                     return;
                 }
             }
-
-            // Chuẩn bị đối tượng tin nhắn với thông tin đầy đủ
-            const chatMessage = {
-                sender: currentUsername,
-                senderId: currentUserId.toString(), // Đảm bảo senderId luôn là string
-                content: messageContent,
-                messageText: messageContent, // Thêm trường messageText để tương thích với phương thức hiển thị
-                type: messageType,
-                timestamp: timeISO,
-                conversationId: currentConversationId  // Thêm conversationId vào tin nhắn
-            };
-
-            console.log("Thông tin gửi tin nhắn - senderId:", chatMessage.senderId);
-            console.log("Thông tin gửi tin nhắn - currentUserId:", currentUserId);
-            console.log("Đối tượng tin nhắn:", chatMessage);
-
-            // Tin nhắn riêng tư
-            if (currentRecipientId && currentConversationId !== 'public') {
-                messageType = 'PRIVATE';
-                destination = '/app/chat.private';
-                chatMessage.type = messageType;
-                chatMessage.recipientId = currentRecipientId.toString();
-                chatMessage.recipient = currentRecipientUsername;
-
-                // Hiển thị tin nhắn ngay khi gửi (optimistic UI)
-                chatMessage.isMe = true;
-                displayMessage(chatMessage);
-                
-                // Đảm bảo cuộn xuống sau khi hiển thị tin nhắn
-                setTimeout(() => {
-                    const chatContainer = document.getElementById('content');
-                    if (chatContainer) {
-                        scrollToBottom(chatContainer);
-                    }
-                }, 100);
-            }
-            // Tin nhắn nhóm
-            else if (currentConversationId && currentConversationId !== 'public') {
-                const conversation = document.querySelector(`[data-conversation-id="${currentConversationId}"]`);
-                if (conversation && conversation.dataset.isGroup === "true") {
-                    messageType = 'GROUP';
-                    destination = '/app/chat.group';
-                    chatMessage.type = messageType;
-                    // Đặt recipient để server xử lý như groupId
-                    chatMessage.recipient = currentConversationId.toString();
-
-                    // Hiển thị tin nhắn ngay khi gửi (optimistic UI)
-                    chatMessage.isMe = true;
-                    displayMessage(chatMessage);
-                    
-                    // Đảm bảo cuộn xuống sau khi hiển thị tin nhắn
-                    setTimeout(() => {
-                        const chatContainer = document.getElementById('content');
-                        if (chatContainer) {
-                            scrollToBottom(chatContainer);
-                        }
-                    }, 100);
-                }
-            }
-            
-            try {
-                // Gửi tin nhắn qua WebSocket
-                console.log(`Gửi tin nhắn ${messageType} tới ${destination}:`, chatMessage);
-                stompClient.send(destination, {}, JSON.stringify(chatMessage));
-            } catch (error) {
-                console.error("Lỗi khi gửi tin nhắn:", error);
-                const errorElement = document.getElementById('message-error');
-                if (errorElement) {
-                    errorElement.textContent = "Lỗi khi gửi tin nhắn: " + error.message;
-                    errorElement.style.display = 'block';
-                }
-            }
-            
-            // Focus lại vào input để người dùng có thể tiếp tục gõ
-            if (messageInput) {
-                messageInput.focus();
-            }
         }
-
-        // Hàm xử lý submit form riêng biệt để đảm bảo không reload trang
-        function handleFormSubmit(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            sendMessage(event);
-            return false;
-        }
-
-        // Cập nhật UI khi nhận tin nhắn mới
-        function updateConversationList(senderUsername) {
-            // Nếu tin nhắn từ người dùng không có trong danh sách, thêm họ vào
-            const userId = currentUserId;
-            if (userId) {
-                // Cập nhật lại danh sách cuộc trò chuyện để hiển thị tin nhắn mới nhất
-                fetchConversations(userId).then(() => {
-                    console.log("Đã cập nhật danh sách cuộc hội thoại sau khi nhận tin nhắn mới");
-                });
-            }
-        }
-
-        // Đánh dấu tin nhắn đã đọc
-        function markMessageAsRead(messageId) {
-            fetch(`${baseURL}/messages/${messageId}/read`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + sessionStorage.getItem('token')
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    console.log(`Đã đánh dấu tin nhắn ${messageId} là đã đọc`);
-                }
-            })
-            .catch(error => console.error('Lỗi khi đánh dấu tin nhắn đã đọc:', error));
-        }
-
-        document.getElementById("langSelect").addEventListener("change", function () {
-            const selectedLang = this.value;
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set("lang", selectedLang);
-            window.location.href = currentUrl.toString();
-        });
+        
+        // Thiết lập header khi chọn cuộc trò chuyện
+        document.getElementById("chat-name").textContent = conversationName;
+        
+        // Tải tin nhắn
+        fetchMessages(conversationId, userId, conversationName);
     }
 </script>
 </body>
