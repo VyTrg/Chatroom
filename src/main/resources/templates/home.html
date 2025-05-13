@@ -1306,7 +1306,6 @@
         const chatMessage = {
             senderId: currentUserId,
             sender: currentUsername,
-            senderId: currentUserId.toString(), // Đảm bảo senderId luôn là string
             content: messageContent,
             messageText: messageContent, // Thêm trường messageText để tương thích với phương thức hiển thị
             type: messageType,
@@ -1915,8 +1914,31 @@
         
         // Reset và cập nhật biến toàn cục
         currentConversationId = conversationId;
-        currentRecipientId = isGroup ? null : userId;
-        currentRecipientUsername = isGroup ? null : conversationName;
+        // currentRecipientId = isGroup ? null : userId;
+        // currentRecipientUsername = isGroup ? null : conversationName;
+        isGroupConversation = isGroup;
+
+        // Xử lý khác nhau cho cuộc trò chuyện nhóm và cá nhân
+        if (isGroup) {
+            // Đây là nhóm, reset thông tin người nhận cá nhân
+            currentRecipientId = null;
+            currentRecipientUsername = conversationName;
+
+            // THÊM DÒNG NÀY - Đăng ký nhận tin nhắn nhóm
+            console.log(`Đăng ký nhận tin nhắn cho nhóm ID=${conversationId}`);
+            subscribeToGroupMessages(conversationId);
+        } else {
+            // Đây là cuộc trò chuyện cá nhân, lấy thông tin người nhận
+            if (selectedConversation && selectedConversation.hasAttribute('data-members')) {
+                const recipients = selectedConversation.getAttribute('data-members').split(',');
+                currentRecipientId = recipients.find(id => id != currentUserId);
+                currentRecipientUsername = conversationName;
+            } else {
+                console.log("Sử dụng userId từ tham số:", userId);
+                currentRecipientId = userId;
+                currentRecipientUsername = conversationName;
+            }
+        }
 
         console.log("Thông tin cuộc trò chuyện hiện tại:", {
             currentConversationId,
