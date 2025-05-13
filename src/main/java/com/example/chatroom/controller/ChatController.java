@@ -104,7 +104,8 @@ public class ChatController {
     public void sendGroup(@Payload ChatMessage chatMessage) {
         // groupId truyền qua recipient
         try {
-            Long groupId = Long.parseLong(chatMessage.getRecipient());
+//            Long groupId = Long.parseLong(chatMessage.getRecipient());
+            Long groupId = chatMessage.getGroupId();
             Conversation group = chatService.getGroupConversationById(groupId);
             User sender = userRepository.findByUsername(chatMessage.getSender()).orElse(null);
             if (group != null && sender != null) {
