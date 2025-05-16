@@ -8,11 +8,14 @@ import com.example.chatroom.model.User;
 import com.example.chatroom.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,5 +86,16 @@ public class UserController {
     @GetMapping("/conversations/{userId}")
     public List<Conversation> getConversationsOfUser(@PathVariable Long userId) {
         return userService.getConversationsOfUser(userId);
+    }
+
+    @PostMapping("/{id}/profile-picture")
+    public ResponseEntity<User> uploadProfilePicture(@PathVariable Long id,
+                                                     @RequestParam("file") MultipartFile file) {
+        try {
+            User updatedUser = userService.uploadProfilePicture(id, file);
+            return ResponseEntity.ok(updatedUser);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

@@ -44,4 +44,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             "ORDER BY m.created_at DESC",
             nativeQuery = true)
     List<Message> findLatestMessagesForUser(@Param("userId") Long userId);
+
+
 }

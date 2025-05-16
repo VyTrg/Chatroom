@@ -16,8 +16,8 @@ public class Attachment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "message_id",insertable=false, updatable=false)
+    @ManyToOne(optional=false, fetch=FetchType.EAGER)
+    @JoinColumn(name = "message_id", nullable = false)
     private Message message;
 
     @Column(nullable = false, name = "file_url")

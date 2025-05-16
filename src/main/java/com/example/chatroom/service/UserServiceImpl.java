@@ -1,5 +1,7 @@
 package com.example.chatroom.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.chatroom.dto.UserWithContactsDTO;
 import com.example.chatroom.mapper.UserWithContactsMapper;
 import com.example.chatroom.model.ContactWith;
@@ -10,8 +12,11 @@ import com.example.chatroom.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -21,6 +26,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private ConversationRepository conversationRepository;
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     private final UserWithContactsMapper userWithContactsMapper = new UserWithContactsMapper();
 
@@ -77,5 +85,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
+    }
+
+    @Override
+    public User uploadProfilePicture(Long userId, MultipartFile file) throws IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+        Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                "folder", "profile_pictures",
+                "public_id", "user_" + userId + "_profile",
+                "overwrite", true
+        ));
+
+        // Save URL
+        String imageUrl = uploadResult.get("secure_url").toString();
+        user.setProfilePicture(imageUrl);
+        return userRepository.save(user);
     }
 }
