@@ -1499,7 +1499,36 @@
             return;
         }
 
-        console.log("Hiển thị tin nhắn:", message);
+        console.log("Chuẩn bị hiển thị tin nhắn:", message);
+        
+        // Kiểm tra tin nhắn đã tồn tại trong DOM chưa để tránh hiển thị trùng lặp
+        // Nếu tin nhắn có messageId, kiểm tra theo ID đó
+        if (message.messageId) {
+            const existingMessage = document.querySelector(`[data-message-id="${message.messageId}"]`);
+            if (existingMessage) {
+                console.log("Tin nhắn có ID đã tồn tại, không hiển thị lại:", message.messageId);
+                return;
+            }
+        }
+        
+        // Đối với tin nhắn optimistic (không có messageId từ server)
+        // Kiểm tra theo nội dung và người gửi 
+        const messageContent = message.content || message.messageText || "";
+        if (messageContent && message.senderId) {
+            const existingMessages = document.querySelectorAll('.message');
+            for (let i = 0; i < existingMessages.length; i++) {
+                const el = existingMessages[i];
+                const elContent = el.querySelector('p') ? el.querySelector('p').textContent : '';
+                
+                // Nếu nội dung giống nhau và cùng người gửi, coi là tin nhắn trùng lặp
+                if (elContent === messageContent && 
+                    message.sender === currentUsername && 
+                    el.classList.contains('me')) {
+                    console.log("Phát hiện tin nhắn trùng lặp theo nội dung và người gửi:", messageContent);
+                    return;
+                }
+            }
+        }
 
         // Xác định xem đây có phải là tin nhắn của người dùng hiện tại không
         const isMe = message.isMe || message.sender === currentUsername || message.senderId === currentUserId?.toString();
@@ -1513,7 +1542,7 @@
             time = "Vừa xong";
         }
 
-        // Tạo ID tin nhắn tạm thời nếu không có
+        // Tạo ID tin nhắn tạm thởi nếu không có
         const messageId = message.messageId || `temp-${new Date().getTime()}`;
 
         if (isMe) {
