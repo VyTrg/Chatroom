@@ -5,7 +5,6 @@ import com.example.chatroom.repository.ContactWithRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 import java.util.List;
 
 @Service
@@ -25,6 +24,17 @@ public class ContactWithServiceImpl implements ContactWithService{
 
     @Override
     public ContactWith saveContactWith(ContactWith contactWith) {
+        // Không cho phép tự kết bạn với chính mình
+        if (contactWith.getContactOne().getId().equals(contactWith.getContactTwo().getId())) {
+            throw new IllegalArgumentException("Không thể gửi yêu cầu kết bạn cho chính mình.");
+        }
+        // Kiểm tra đã tồn tại mối quan hệ bạn bè hay chưa (theo cả 2 chiều)
+        ContactWith existing1 = contactWithRepository.findContactWithsByContactOne_IdAndContactTwo_Id(contactWith.getContactOne().getId(), contactWith.getContactTwo().getId());
+        ContactWith existing2 = contactWithRepository.findContactWithsByContactOne_IdAndContactTwo_Id(contactWith.getContactTwo().getId(), contactWith.getContactOne().getId());
+        if (existing1 != null || existing2 != null) {
+            throw new IllegalArgumentException("Hai người dùng đã là bạn bè hoặc đã gửi yêu cầu trước đó.");
+        }
+        // Có thể kiểm tra thêm user tồn tại nếu cần
         return contactWithRepository.save(contactWith);
     }
 

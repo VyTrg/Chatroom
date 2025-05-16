@@ -20,4 +20,5 @@ public class ConservationController {
     public List<Conversation> getAllConversationsForUser(@PathVariable Long userId) {
         return conversationService.getAllConversationsForUser(userId);
     }
+
 }

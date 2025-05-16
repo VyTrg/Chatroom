@@ -17,11 +17,11 @@ public class Message {
     private Long id;
 
     @ManyToOne(fetch=FetchType.EAGER)
-    @JoinColumn(name = "user_id",insertable=false, updatable=false)
+    @JoinColumn(name = "user_id")
     private User sender;
 
     @ManyToOne(fetch=FetchType.EAGER)
-    @JoinColumn(name = "conversation_id",insertable=false, updatable=false)
+    @JoinColumn(name = "conversation_id")
     private Conversation conversation;
 
     @Column(nullable = false, name = "message_text")

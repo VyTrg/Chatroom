@@ -1,5 +1,6 @@
 package com.example.chatroom.repository;
 
+import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.ConversationMember;
 import com.example.chatroom.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,4 +41,6 @@ public interface ConversationMemberRepository extends JpaRepository<Conversation
 
     // Lấy thành viên nhóm
     List<ConversationMember> findAllByConversationId(Long conversationId);
+
+    boolean existsByConversationAndUser(Conversation group, User user);
 }

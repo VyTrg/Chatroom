@@ -44,6 +44,16 @@ public interface ChatService {
 
     List<ConversationMember> getGroupMembers(Long groupId);
 
+    /**
+     * Kiểm tra user có phải thành viên group không
+     */
+    boolean isUserInGroup(User user, Conversation group);
+
 //     Đánh dấu tin nhắn đã đọc
     void markMessageAsRead(Long messageId, Long userId);
+
+    /**
+     * Lấy tất cả tin nhắn theo conversationId
+     */
+    List<Message> getMessagesByConversationId(Long conversationId);
 }

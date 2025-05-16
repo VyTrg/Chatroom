@@ -71,6 +71,7 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/logout",
                                 "/api/users/**",  // Cho phép truy cập API users
+                                "/api/conversations/**", // Thêm quyền truy cập API conversations
                                 "/home",
                                 "/signup",
                                 "sign-up.html",
@@ -89,7 +90,8 @@ public class SecurityConfig {
                                 "/ws",
                                 "/ws/**",
                                 "/ws/info/**",
-                                "/testchatusers.html"
+                                "/testchatusers.html",
+                                "conversations/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

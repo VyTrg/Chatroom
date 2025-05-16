@@ -2,6 +2,7 @@ package com.example.chatroom.config;
 
 import com.example.chatroom.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -13,6 +14,8 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -30,6 +34,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+
+    @Bean
+    public TaskScheduler heartBeatScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("websocket-heartbeat-scheduler-");
+        scheduler.initialize();
+        return scheduler;
+    }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -46,14 +59,29 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             registry.setApplicationDestinationPrefixes("/app");
             System.out.println("[WEBSOCKET_CONFIG] Đã thiết lập application prefix: /app");
 
-            registry.enableSimpleBroker("/topic", "/queue");
-            System.out.println("[WEBSOCKET_CONFIG] Đã kích hoạt broker cho: /topic, /queue");
+            registry.enableSimpleBroker("/topic", "/queue", "/user")
+                   .setHeartbeatValue(new long[]{10000, 10000})
+                   .setTaskScheduler(heartBeatScheduler());
+            
+            registry.setUserDestinationPrefix("/user");
+            
+            System.out.println("[WEBSOCKET_CONFIG] Đã kích hoạt broker cho: /topic, /queue, /user");
+            System.out.println("[WEBSOCKET_CONFIG] Đã thiết lập heartbeat 10s và user destination prefix");
 
             System.out.println("[WEBSOCKET_CONFIG] Cấu hình message broker hoàn tất");
         } catch (Exception e) {
             System.err.println("[WEBSOCKET_CONFIG] Lỗi khi cấu hình message broker: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+        registration.setMessageSizeLimit(128 * 1024) // 128KB
+                   .setSendBufferSizeLimit(512 * 1024) // 512KB
+                   .setSendTimeLimit(20000); // 20 seconds
+        
+        System.out.println("[WEBSOCKET_CONFIG] Đã cấu hình transport với message size limit: 128KB");
     }
 
     @Override
@@ -72,7 +100,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         if (token.startsWith("Bearer ")) {
                             token = token.substring(7);
                         }
-                    } else if (accessor.getSessionAttributes().get("token") != null) {
+                    } else if (accessor.getSessionAttributes() != null && accessor.getSessionAttributes().get("token") != null) {
                         token = (String) accessor.getSessionAttributes().get("token");
                     }
                     // Nếu vẫn không có, thử lấy từ URI
@@ -83,7 +111,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                             // Parse uri để lấy token nếu có
                         }
                     }
-                    System.out.println("[WS] Token lấy từ header/query: " + token);
+                    System.out.println("[WS] Token lấy từ header/query: " + (token != null ? token.substring(0, Math.min(10, token.length())) + "..." : "null"));
                     // === Thêm đoạn set user xác thực JWT ===
                     if (token != null && !token.isBlank()) {
                         try {
@@ -93,6 +121,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                 Authentication auth = new UsernamePasswordAuthenticationToken(
                                         userDetails, null, userDetails.getAuthorities());
                                 accessor.setUser(auth); // QUAN TRỌNG!
+                                
+                                // Lưu username vào session attributes để sử dụng khi disconnect
+                                if (accessor.getSessionAttributes() != null) {
+                                    accessor.getSessionAttributes().put("username", username);
+                                    System.out.println("[WS] Đã lưu username vào session attributes: " + username);
+                                }
+                                
                                 System.out.println("[WS] Đã gán user cho session: " + username);
                             } else {
                                 System.out.println("[WS] Token không hợp lệ cho user: " + username);

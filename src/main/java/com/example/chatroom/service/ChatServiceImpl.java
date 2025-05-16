@@ -197,4 +197,25 @@ public class ChatServiceImpl implements ChatService {
     public List<ConversationMember> getGroupMembers(Long groupId) {
         return conversationMemberRepository.findAllByConversationId(groupId);
     }
+
+    @Override
+    public boolean isUserInGroup(User user, Conversation group) {
+        if (user == null || group == null) {
+            System.out.println("[isUserInGroup] user or group is null! user=" + user + ", group=" + group);
+            return false;
+        }
+        boolean result = conversationMemberRepository.existsByUserIdAndConversationId(user.getId(), group.getId());
+        System.out.println("[isUserInGroup] userId=" + user.getId() + ", groupId=" + group.getId() + ", exists=" + result);
+        return result;
+    }
+
+    @Override
+    public List<Message> getMessagesByConversationId(Long conversationId) {
+        if (messageRepository == null) {
+            // Nếu repository chưa được cấu hình, trả về rỗng
+            return new ArrayList<>();
+        }
+        // Lấy tất cả tin nhắn theo conversationId, sắp xếp theo thời gian tăng dần
+        return messageRepository.findByConversationIdOrderByCreatedAtDesc(conversationId, Pageable.unpaged()).getContent();
+    }
 }

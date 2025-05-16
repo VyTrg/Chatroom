@@ -1,4 +1,4 @@
-//package com.example.chatroom.event;
+package com.example.chatroom.event;//package com.example.chatroom.event;
 //
 //import com.example.chatroom.chat.ChatMessage;
 //import com.example.chatroom.chat.MessageType;
