@@ -78,18 +78,25 @@ public class ChatController {
                 chatMessage.setMessageId(savedMessage.getId().toString());
                 chatMessage.setConversationId(conversation.getId().toString());
                 
-                // Send message to recipient
-                String recipientUsername = recipient.getUsername();
-                System.out.println("[PRIVATE] Sending from " + chatMessage.getSender() + " to " + recipientUsername);
-                messagingTemplate.convertAndSendToUser(recipientUsername, "/queue/private", chatMessage);
-                
-                // Also send a copy to the sender so they can see their own messages
-                messagingTemplate.convertAndSendToUser(chatMessage.getSender(), "/queue/private", chatMessage);
+//                // Send message to recipient
+//                String recipientUsername = recipient.getUsername();
+//                System.out.println("[PRIVATE] Sending from " + chatMessage.getSender() + " to " + recipientUsername);
+//                messagingTemplate.convertAndSendToUser(recipientUsername, "/queue/private", chatMessage);
+
+                String conversationTopic = "/topic/private." + conversation.getId();
+                System.out.println("[PRIVATE] Sending to topic: " + conversationTopic);
+
+                messagingTemplate.convertAndSend(conversationTopic, chatMessage);
+
+
+//                // Also send a copy to the sender so they can see their own messages
+//                messagingTemplate.convertAndSendToUser(chatMessage.getSender(), "/queue/private", chatMessage);
                 
                 log.info("[PRIVATE] Message saved with ID: {} and sent from {} to {} with content: {}", 
                         savedMessage.getId(),
                         chatMessage.getSender(), 
-                        recipientUsername,
+//                        recipientUsername,
+                        chatMessage.getSender(),
                         chatMessage.getContent());
             } catch (Exception e) {
                 log.error("[PRIVATE] Error sending private message: {}", e.getMessage(), e);
