@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -80,15 +81,21 @@ public class JwtFilter extends OncePerRequestFilter {
 
             // Nếu có username trong token, tìm thông tin người dùng từ cơ sở dữ liệu
             if (username != null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                try {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                // Kiểm tra null và tạo AuthenticationToken cho người dùng
-                if (userDetails != null) {
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    // Kiểm tra null và tạo AuthenticationToken cho người dùng
+                    if (userDetails != null) {
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-                    // Đặt thông tin người dùng vào SecurityContext để Spring Security xử lý
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                        // Đặt thông tin người dùng vào SecurityContext để Spring Security xử lý
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
+                } catch (UsernameNotFoundException e) {
+                    // logger.error("Người dùng không tồn tại trong database: " + username);
+                    // Không throw exception nữa - chỉ log lỗi và tiếp tục
+                    // Token sẽ không được xác thực, nhưng filter chain vẫn tiếp tục
                 }
             }
         }
