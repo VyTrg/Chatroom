@@ -1575,7 +1575,7 @@
                 <div class="message" data-message-id="${messageId}">
                     <div class="text-main">
                         <div class="user-name mb-1">
-                            <strong>${escapeHtml(message.sender?.username || "Unknown")}</strong>
+                            <strong>${escapeHtml(message.sender?.username || message.sender || "Unknown")}</strong>
                         </div>
                         <div class="text-group d-flex align-items-center mr-2">
                             <div class="text">
@@ -1955,7 +1955,7 @@
                                 <div class="message" >
 												<div class="text-main">
 													    <div class="user-name mb-1">
-															<strong>${escapeHtml(message.sender?.username || "Unknown")}</strong>
+															<strong>${escapeHtml(message.sender?.username || message.sender || "Unknown")}</strong>
 														</div>
 													    <div class="text-group d-flex align-items-center mr-2" >
 														<div class="text">
@@ -2324,6 +2324,9 @@
                 console.log("GroupId:", chatMessage.groupId);
             } else if (currentRecipientId) {
                 // TIN NHẮN CÁ NHÂN
+                console.log("TIN NHẮN RIÊNG TƯ:");
+
+                // Đặt destination và type
                 messageType = 'PRIVATE';
                 destination = '/app/chat.private';
                 chatMessage.type = messageType;
