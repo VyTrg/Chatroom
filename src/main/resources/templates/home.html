@@ -1574,6 +1574,9 @@
             const messageHTML = `
                 <div class="message" data-message-id="${messageId}">
                     <div class="text-main">
+                        <div class="user-name mb-1">
+                            <strong>${escapeHtml(message.sender?.username || "Unknown")}</strong>
+                        </div>
                         <div class="text-group d-flex align-items-center mr-2">
                             <div class="text">
                                 <p>${escapeHtml(message.content || message.messageText)}</p>
@@ -1951,6 +1954,9 @@
                     const messageHTML = `
                                 <div class="message" >
 												<div class="text-main">
+													    <div class="user-name mb-1">
+															<strong>${escapeHtml(message.sender?.username || "Unknown")}</strong>
+														</div>
 													    <div class="text-group d-flex align-items-center mr-2" >
 														<div class="text">
 															<p>${escapeHtml(message.messageText)}</p>
