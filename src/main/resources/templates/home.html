@@ -1176,8 +1176,40 @@
                     markMessageAsRead(message.messageId);
                 }
                 
-                // Hiển thị tin nhắn
-                displayMessage(message);
+                // Kiểm tra xem tin nhắn đã tồn tại trong DOM chưa (dựa vào messageId)
+                const existingMessage = document.querySelector(`[data-message-id="${message.messageId}"]`);
+                if (!existingMessage) {
+                    console.log("Hiển thị tin nhắn mới");
+                    
+                    // Chuẩn bị phần tử tin nhắn để hiển thị
+                    const content = document.getElementById("show-message");
+                    if (!content) {
+                        console.error("Không tìm thấy phần tử hiển thị tin nhắn");
+                        return;
+                    }
+                    
+                    // Tạo phần tử tin nhắn với thuộc tính data-* để dễ dàng tham chiếu
+                    const messageElement = document.createElement('div');
+                    messageElement.className = isFromCurrentSender ? 'message me' : 'message';
+                    messageElement.setAttribute('data-message-id', message.messageId || `temp-${new Date().getTime()}`);
+                    messageElement.setAttribute('data-sender-id', messageSenderId || '');
+                    messageElement.setAttribute('data-conversation-id', messageConversationId || '');
+                    
+                    // Thêm HTML tin nhắn tương ứng
+                    if (isFromCurrentSender) {
+                        messageElement.innerHTML = generateMyMessageHTML(message);
+                    } else {
+                        messageElement.innerHTML = generateOtherMessageHTML(message);
+                    }
+                    
+                    // Thêm tin nhắn vào khung chat
+                    content.appendChild(messageElement);
+                    
+                    // Hiển thị tin nhắn với displayMessage
+                    // displayMessage(message);
+                } else {
+                    console.log("Tin nhắn đã tồn tại, không hiển thị lại");
+                }
                 
                 // Đảm bảo cuộn xuống tin nhắn mới
                 setTimeout(() => {
