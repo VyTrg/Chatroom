@@ -414,7 +414,7 @@
                                     <!--                                                    </div>-->
                                     <!--                                                    <label class="switch">-->
                                     <!--                                                        <input type="checkbox">-->
-                                    <!--                                                        <span class="slider round mode"></span>-->
+                                    <!--                                                        <span class="slider round"></span>-->
                                     <!--                                                    </label>-->
                                     <!--                                                </div>-->
                                     <!--                                            </div>-->
@@ -1545,60 +1545,136 @@
         // Tạo ID tin nhắn tạm thởi nếu không có
         const messageId = message.messageId || `temp-${new Date().getTime()}`;
 
+        // Tạo các phần tử DOM thay vì sử dụng insertAdjacentHTML
+        // Điều này giúp gắn sự kiện vào các nút một cách chính xác
+        const messageDiv = document.createElement('div');
+        messageDiv.className = isMe ? 'message me' : 'message';
+        messageDiv.setAttribute('data-message-id', messageId);
+
+        const textMainDiv = document.createElement('div');
+        textMainDiv.className = 'text-main';
+        messageDiv.appendChild(textMainDiv);
+
         if (isMe) {
             // Tin nhắn của người dùng hiện tại (bên phải, màu xanh)
-            const messageHTML = `
-                <div class="message me" data-message-id="${messageId}">
-                    <div class="text-main">
-                        <div class="text-group me align-items-center ml-2">
-                            <div class="dropdown ml-2">
-                                <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="material-icons md-30">more_vert</i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <button class="dropdown-item">Update</button>
-                                    <button class="dropdown-item">Delete</button>
-                                </div>
-                            </div>
-                            <div class="text me">
-                                <p>${escapeHtml(message.content || message.messageText)}</p>
-                            </div>
-                        </div>
-                        <span>${time}</span>
-                    </div>
-                </div>
-            `;
-            content.insertAdjacentHTML('beforeend', messageHTML);
+            const textGroupDiv = document.createElement('div');
+            textGroupDiv.className = 'text-group me align-items-center ml-2';
+            textMainDiv.appendChild(textGroupDiv);
+
+            // Dropdown menu
+            const dropdownDiv = document.createElement('div');
+            dropdownDiv.className = 'dropdown ml-2';
+            textGroupDiv.appendChild(dropdownDiv);
+
+            const dropdownButton = document.createElement('button');
+            dropdownButton.className = 'btn';
+            dropdownButton.setAttribute('data-toggle', 'dropdown');
+            dropdownButton.setAttribute('aria-haspopup', 'true');
+            dropdownButton.setAttribute('aria-expanded', 'false');
+            dropdownDiv.appendChild(dropdownButton);
+
+            const icon = document.createElement('i');
+            icon.className = 'material-icons md-30';
+            icon.textContent = 'more_vert';
+            dropdownButton.appendChild(icon);
+
+            const dropdownMenu = document.createElement('div');
+            dropdownMenu.className = 'dropdown-menu';
+            dropdownDiv.appendChild(dropdownMenu);
+
+            const editButton = document.createElement('button');
+            editButton.className = 'dropdown-item';
+            editButton.textContent = 'Update';
+            editButton.onclick = function() { editMessage(messageId); };
+            dropdownMenu.appendChild(editButton);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'dropdown-item';
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function() { deleteItem(messageId); };
+            dropdownMenu.appendChild(deleteButton);
+
+            // Nội dung tin nhắn
+            const textDiv = document.createElement('div');
+            textDiv.className = 'text me';
+            textGroupDiv.appendChild(textDiv);
+
+            const paragraph = document.createElement('p');
+            paragraph.textContent = message.content || message.messageText || '';
+            textDiv.appendChild(paragraph);
+
+            // Thời gian
+            const timeSpan = document.createElement('span');
+            timeSpan.textContent = time;
+            textMainDiv.appendChild(timeSpan);
         } else {
             // Tin nhắn của người khác (bên trái, màu xám)
-            const messageHTML = `
-                <div class="message" data-message-id="${messageId}">
-                    <div class="text-main">
-                        <div class="user-name mb-1">
-                            <strong>${escapeHtml(message.sender?.username || message.sender || "Unknown")}</strong>
-                        </div>
-                        <div class="text-group d-flex align-items-center mr-2">
-                            <div class="text">
-                                <p>${escapeHtml(message.content || message.messageText)}</p>
-                            </div>
-                            <div class="dropdown ml-2">
-                                <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="material-icons md-30">more_vert</i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <button class="dropdown-item">Update</button>
-                                    <button class="dropdown-item">Delete</button>
-                                </div>
-                            </div>
-                        </div>
-                        <span>${time}</span>
-                    </div>
-                </div>
-            `;
-            content.insertAdjacentHTML('beforeend', messageHTML);
+            // Tên người gửi
+            const userNameDiv = document.createElement('div');
+            userNameDiv.className = 'user-name mb-1';
+            textMainDiv.appendChild(userNameDiv);
+
+            const strongName = document.createElement('strong');
+            strongName.textContent = message.sender?.username || message.sender || "Unknown";
+            userNameDiv.appendChild(strongName);
+
+            // Nhóm tin nhắn
+            const textGroupDiv = document.createElement('div');
+            textGroupDiv.className = 'text-group d-flex align-items-center mr-2';
+            textMainDiv.appendChild(textGroupDiv);
+
+            // Nội dung tin nhắn
+            const textDiv = document.createElement('div');
+            textDiv.className = 'text';
+            textGroupDiv.appendChild(textDiv);
+
+            const paragraph = document.createElement('p');
+            paragraph.textContent = message.content || message.messageText || '';
+            textDiv.appendChild(paragraph);
+
+            // Dropdown menu
+            const dropdownDiv = document.createElement('div');
+            dropdownDiv.className = 'dropdown ml-2';
+            textGroupDiv.appendChild(dropdownDiv);
+
+            const dropdownButton = document.createElement('button');
+            dropdownButton.className = 'btn';
+            dropdownButton.setAttribute('data-toggle', 'dropdown');
+            dropdownButton.setAttribute('aria-haspopup', 'true');
+            dropdownButton.setAttribute('aria-expanded', 'false');
+            dropdownDiv.appendChild(dropdownButton);
+
+            const icon = document.createElement('i');
+            icon.className = 'material-icons md-30';
+            icon.textContent = 'more_vert';
+            dropdownButton.appendChild(icon);
+
+            const dropdownMenu = document.createElement('div');
+            dropdownMenu.className = 'dropdown-menu';
+            dropdownDiv.appendChild(dropdownMenu);
+
+            const editButton = document.createElement('button');
+            editButton.className = 'dropdown-item';
+            editButton.textContent = 'Edit';
+            editButton.onclick = function() { editMessage(messageId); };
+            dropdownMenu.appendChild(editButton);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'dropdown-item';
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function() { deleteItem(messageId); };
+            dropdownMenu.appendChild(deleteButton);
+
+            // Thời gian
+            const timeSpan = document.createElement('span');
+            timeSpan.textContent = time;
+            textMainDiv.appendChild(timeSpan);
         }
 
-        // Cuộn xuống dưới để hiển thị tin nhắn mới nhất
+        // Thêm tin nhắn vào container
+        content.appendChild(messageDiv);
+
+        // Cuộn xuống dưới để hiển thị tin nhắn
         setTimeout(() => {
             const chatContainer = document.getElementById('content');
             if (chatContainer) {
@@ -1923,9 +1999,9 @@
             }
 
             messages.forEach(message => {
-                const isOwnMessage = message.sender.id === userId;
+                const isOwnMessage = String(message.sender.id) === sessionStorage.getItem("userId");
                 const time = formatTime(message.createdAt);
-                console.log(message.sender.id, userId);
+                console.log("Sender ID:", message.sender.id, "Current User ID:", sessionStorage.getItem("userId"));
                 if (isOwnMessage) {
 
                     //send message
@@ -1938,8 +2014,8 @@
                                                                 <i class="material-icons md-30">more_vert</i>
                                                             </button>
                                                             <div class="dropdown-menu">
-                                                                <button class="dropdown-item" th:text="#{message.update}">Update</button>
-                                                                <button class="dropdown-item" th:text="#{message.delete}">Delete</button>
+                                                                <button class="dropdown-item" onclick="editMessage('${message.id}')">Update</button>
+                                                                <button class="dropdown-item" onclick="deleteItem('${message.id}')">Delete</button>
                                                             </div>
                                                         </div>
 														<div class="text me">
@@ -1968,8 +2044,8 @@
                                                                 <i class="material-icons md-30">more_vert</i>
                                                             </button>
                                                             <div class="dropdown-menu">
-                                                                <button class="dropdown-item" th:text="#{message.update}">Update</button>
-                                                                <button class="dropdown-item" th:text="#{message.delete}">Delete</button>
+                                                                <button class="dropdown-item" onclick="editMessage('${message.id}')">Update</button>
+                                                                <button class="dropdown-item" onclick="deleteItem('${message.id}')">Delete</button>
                                                             </div>
                                                         </div>
 													</div>
@@ -2072,8 +2148,6 @@
 
         // Reset và cập nhật biến toàn cục
         currentConversationId = conversationId;
-        // currentRecipientId = isGroup ? null : userId;
-        // currentRecipientUsername = isGroup ? null : conversationName;
         isGroupConversation = isGroup;
 
         // Xử lý khác nhau cho cuộc trò chuyện nhóm và cá nhân
@@ -2148,7 +2222,7 @@
                         console.log("Đã nhấp vào nút xóa lịch sử");
                         const convId = this.getAttribute('data-conversation-id') || currentConversationId;
                         if (!convId) {
-                            showToast("Không thể xác định cuộc trò chuyện", true);
+                            console.error("Không thể xác định cuộc trò chuyện");
                             return;
                         }
                         clearConversationHistory(convId);
@@ -2164,7 +2238,7 @@
                         console.log("Đã nhấp vào nút chặn liên hệ");
                         const uid = this.getAttribute('data-user-id') || currentRecipientId;
                         if (!uid) {
-                            showToast("Không thể xác định người dùng", true);
+                            console.error("Không thể xác định người dùng");
                             return;
                         }
                         blockContact(uid);
@@ -2180,7 +2254,7 @@
                         console.log("Đã nhấp vào nút xóa liên hệ");
                         const contactId = this.getAttribute('data-contact-id') || currentRecipientId;
                         if (!contactId) {
-                            showToast("Không thể xác định liên hệ", true);
+                            console.error("Không thể xác định liên hệ");
                             return;
                         }
                         deleteContact(contactId);
@@ -2196,7 +2270,7 @@
                         console.log("Đã nhấp vào nút đổi tên cuộc trò chuyện");
                         const convId = this.getAttribute('data-conversation-id') || currentConversationId;
                         if (!convId) {
-                            showToast("Không thể xác định cuộc trò chuyện", true);
+                            console.error("Không thể xác định cuộc trò chuyện");
                             return;
                         }
                         renameConversation(convId);
@@ -2205,7 +2279,7 @@
                     console.error("Không tìm thấy nút Rename");
                 }
             }, 100); // Đợi một chút để DOM được cập nhật
-            
+
             const sendMessageElement = document.getElementById("send-message");
             if (sendMessageElement) {
                 sendMessageElement.innerHTML = `
@@ -2574,13 +2648,13 @@
             console.error("No conversation selected");
             return;
         }
-        
+
         if (!confirm('Bạn có chắc chắn muốn xóa lịch sử cuộc trò chuyện này?')) {
             return;
         }
-        
+
         const token = sessionStorage.getItem("token");
-        
+
         fetch(`${baseURL}/messages/conversation/${conversationId}/clear`, {
             method: 'DELETE',
             headers: {
@@ -2588,21 +2662,21 @@
                 'Content-Type': 'application/json'
             }
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Lỗi: ${response.status}`);
-            }
-            // Xóa tin nhắn khỏi UI
-            const messageContainer = document.getElementById('show-message');
-            if (messageContainer) {
-                messageContainer.innerHTML = '';
-                showToast("Đã xóa lịch sử cuộc trò chuyện");
-            }
-        })
-        .catch(error => {
-            console.error("Lỗi khi xóa lịch sử cuộc trò chuyện:", error);
-            showToast("Không thể xóa lịch sử cuộc trò chuyện", true);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Lỗi: ${response.status}`);
+                }
+                // Xóa tin nhắn khỏi UI
+                const messageContainer = document.getElementById('show-message');
+                if (messageContainer) {
+                    messageContainer.innerHTML = '';
+                    showToast("Đã xóa lịch sử cuộc trò chuyện");
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi khi xóa lịch sử cuộc trò chuyện:", error);
+                showToast("Không thể xóa lịch sử cuộc trò chuyện", true);
+            });
     }
 
     function blockContact(userId) {
@@ -2610,18 +2684,18 @@
             console.error("No user selected");
             return;
         }
-        
+
         if (!confirm('Bạn có chắc chắn muốn chặn người liên hệ này?')) {
             return;
         }
-        
+
         const token = sessionStorage.getItem("token");
         const currentUserId = sessionStorage.getItem("userId");
         if (!token || !currentUserId) {
             console.error("Not logged in");
             return;
         }
-        
+
         fetch(`${baseURL}/users/${currentUserId}/block/${userId}`, {
             method: 'POST',
             headers: {
@@ -2629,21 +2703,19 @@
                 'Content-Type': 'application/json'
             }
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Could not block user");
-            }
-            showToast("Đã chặn người liên hệ");
-            
-            // Tải lại danh sách cuộc trò chuyện
-            if (currentUserId) {
-                fetchConversations(currentUserId);
-            }
-        })
-        .catch(error => {
-            console.error('Error blocking user:', error);
-            showToast("Không thể chặn người liên hệ", true);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Could not block user");
+                }
+                showToast("Đã chặn người liên hệ");
+
+                // Tải lại danh sách cuộc trò chuyện
+                if (currentUserId) {
+                    fetchConversations(currentUserId);
+                }
+            })
+            .catch(error => console.error('Error blocking user:', error));
+        showToast("Không thể chặn người liên hệ", true);
     }
 
     function deleteContact(contactId) {
@@ -2651,13 +2723,13 @@
             console.error("No contact selected");
             return;
         }
-        
+
         if (!confirm('Bạn có chắc chắn muốn xóa người liên hệ này?')) {
             return;
         }
-        
+
         const token = sessionStorage.getItem("token");
-        
+
         fetch(`${baseURL}/contacts/${contactId}`, {
             method: 'DELETE',
             headers: {
@@ -2665,23 +2737,23 @@
                 'Content-Type': 'application/json'
             }
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Could not delete contact");
-            }
-            showToast("Đã xóa người liên hệ");
-            
-            // Tải lại danh sách cuộc trò chuyện và danh sách liên hệ
-            const currentUserId = sessionStorage.getItem("userId");
-            if (currentUserId) {
-                fetchConversations(currentUserId);
-                fetchUserData(currentUserId); // Để cập nhật danh sách liên hệ
-            }
-        })
-        .catch(error => {
-            console.error('Error deleting contact:', error);
-            showToast("Không thể xóa liên hệ", true);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Could not delete contact");
+                }
+                showToast("Đã xóa người liên hệ");
+
+                // Tải lại danh sách cuộc trò chuyện và danh sách liên hệ
+                const currentUserId = sessionStorage.getItem("userId");
+                if (currentUserId) {
+                    fetchConversations(currentUserId);
+                    fetchUserData(currentUserId); // Để cập nhật danh sách liên hệ
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting contact:', error);
+                showToast("Không thể xóa liên hệ", true);
+            });
     }
 
 
@@ -2690,13 +2762,13 @@
             console.error("No conversation selected");
             return;
         }
-        
+
         if (!confirm('Bạn có chắc chắn muốn xóa cuộc trò chuyện này?')) {
             return;
         }
-        
+
         const token = sessionStorage.getItem("token");
-        
+
         fetch(`${baseURL}/conversations/${conversationId}`, {
             method: 'DELETE',
             headers: {
@@ -2704,51 +2776,51 @@
                 'Content-Type': 'application/json'
             }
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Could not delete conversation");
-            }
-            showToast("Đã xóa cuộc trò chuyện");
-            
-            // Xóa cuộc trò chuyện khỏi UI
-            const conversationElement = document.querySelector(`[data-conversation-id="${conversationId}"]`);
-            if (conversationElement) {
-                conversationElement.remove();
-            }
-            
-            // Xóa nội dung chat nếu đang ở trong cuộc trò chuyện đó
-            if (currentConversationId === conversationId) {
-                const messageContainer = document.getElementById('show-message');
-                if (messageContainer) {
-                    messageContainer.innerHTML = '';
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Could not delete conversation");
                 }
-                
-                const topElement = document.getElementById("top");
-                if (topElement) {
-                    topElement.innerHTML = '';
+                showToast("Đã xóa cuộc trò chuyện");
+
+                // Xóa cuộc trò chuyện khỏi UI
+                const conversationElement = document.querySelector(`[data-conversation-id="${conversationId}"]`);
+                if (conversationElement) {
+                    conversationElement.remove();
                 }
-                
-                const sendMessageElement = document.getElementById("send-message");
-                if (sendMessageElement) {
-                    sendMessageElement.innerHTML = '';
+
+                // Xóa nội dung chat nếu đang ở trong cuộc trò chuyện đó
+                if (currentConversationId === conversationId) {
+                    const messageContainer = document.getElementById('show-message');
+                    if (messageContainer) {
+                        messageContainer.innerHTML = '';
+                    }
+
+                    const topElement = document.getElementById("top");
+                    if (topElement) {
+                        topElement.innerHTML = '';
+                    }
+
+                    const sendMessageElement = document.getElementById("send-message");
+                    if (sendMessageElement) {
+                        sendMessageElement.innerHTML = '';
+                    }
+
+                    // Reset biến toàn cục
+                    currentConversationId = null;
+                    currentRecipientId = null;
+                    currentRecipientUsername = null;
                 }
-                
-                // Reset biến toàn cục
-                currentConversationId = null;
-                currentRecipientId = null;
-                currentRecipientUsername = null;
-            }
-            
-            // Tải lại danh sách cuộc trò chuyện
-            const currentUserId = sessionStorage.getItem("userId");
-            if (currentUserId) {
-                fetchConversations(currentUserId);
-            }
-        })
-        .catch(error => {
-            console.error('Error deleting conversation:', error);
-            showToast("Không thể xóa cuộc trò chuyện", true);
-        });
+
+                // Tải lại danh sách cuộc trò chuyện
+                const currentUserId = sessionStorage.getItem("userId");
+                if (currentUserId) {
+                    fetchConversations(currentUserId);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting conversation:', error);
+                showToast("Không thể xóa cuộc trò chuyện", true);
+            });
     }
 
     /**
@@ -2759,20 +2831,20 @@
             console.error("No conversation selected");
             return;
         }
-        
+
         const newName = prompt('Nhập tên mới cho cuộc trò chuyện:', currentRecipientUsername);
         if (!newName || newName.trim() === '' || (currentRecipientUsername && newName.trim() === currentRecipientUsername)) {
             return;
         }
-        
+
         const trimmedName = newName.trim();
         if (trimmedName.length < 3) {
             showToast("Tên phải có ít nhất 3 ký tự", true);
             return;
         }
-        
+
         const token = sessionStorage.getItem("token");
-        
+
         fetch(`${baseURL}/conversations/${conversationId}/rename`, {
             method: 'PUT',
             headers: {
@@ -2781,39 +2853,39 @@
             },
             body: JSON.stringify({ name: trimmedName })
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errorData => {
-                    throw new Error(errorData.message || `Lỗi: ${response.status}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            showToast("Đã đổi tên cuộc trò chuyện thành công");
-            
-            // Update conversation name in UI
-            const conversationElement = document.querySelector(`[data-conversation-id="${conversationId}"]`);
-            if (conversationElement) {
-                const nameElement = conversationElement.querySelector('.data h5');
-                if (nameElement) {
-                    nameElement.textContent = trimmedName;
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || `Lỗi: ${response.status}`);
+                    });
                 }
-            }
-            
-            // Update current conversation header
-            const topNameElement = document.querySelector('#top .data h5 a');
-            if (topNameElement) {
-                topNameElement.textContent = trimmedName;
-            }
-            
-            // Update variable
-            currentRecipientUsername = trimmedName;
-        })
-        .catch(error => {
-            console.error('Lỗi khi đổi tên cuộc trò chuyện:', error);
-            showToast("Không thể đổi tên cuộc trò chuyện", true);
-        });
+                return response.json();
+            })
+            .then(data => {
+                showToast("Đã đổi tên cuộc trò chuyện thành công");
+
+                // Update conversation name in UI
+                const conversationElement = document.querySelector(`[data-conversation-id="${conversationId}"]`);
+                if (conversationElement) {
+                    const nameElement = conversationElement.querySelector('.data h5');
+                    if (nameElement) {
+                        nameElement.textContent = trimmedName;
+                    }
+                }
+
+                // Update current conversation header
+                const topNameElement = document.querySelector('#top .data h5 a');
+                if (topNameElement) {
+                    topNameElement.textContent = trimmedName;
+                }
+
+                // Update variable
+                currentRecipientUsername = trimmedName;
+            })
+            .catch(error => {
+                console.error('Lỗi khi đổi tên cuộc trò chuyện:', error);
+                showToast("Không thể đổi tên cuộc trò chuyện", true);
+            });
     }
 
     /**
@@ -2834,7 +2906,7 @@
             toast.style.transition = 'opacity 0.3s ease-in-out';
             document.body.appendChild(toast);
         }
-        
+
         // Thiết lập style dựa trên loại thông báo
         if (isError) {
             toast.style.backgroundColor = '#f44336';
@@ -2842,15 +2914,196 @@
             toast.style.backgroundColor = '#4CAF50';
         }
         toast.style.color = 'white';
-        
+
         // Cập nhật nội dung và hiển thị
         toast.textContent = message;
         toast.style.opacity = '1';
-        
+
         // Tự động ẩn sau 3 giây
         setTimeout(() => {
             toast.style.opacity = '0';
         }, 3000);
+    }
+
+    /**
+     * Cập nhật thông tin liên hệ
+     */
+    function updateContact(contactId) {
+        if (!contactId) {
+            console.error("No contact selected");
+            return;
+        }
+
+        const token = sessionStorage.getItem("token");
+        const currentUserId = sessionStorage.getItem("userId");
+
+        if (!token || !currentUserId) {
+            console.error("Not logged in");
+            return;
+        }
+
+        // Lấy thông tin hiện tại của liên hệ
+        fetch(`${baseURL}/contacts/${contactId}`, {
+            method: "GET",
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Lỗi: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(contact => {
+                // Hiển thị form cập nhật với thông tin hiện tại
+                const nickname = prompt('Nhập biệt danh mới cho liên hệ:', contact.nickname || '');
+
+                if (nickname === null) {
+                    // Người dùng bấm Cancel
+                    return;
+                }
+
+                // Cập nhật thông tin liên hệ - chỉ thay đổi nickname và giữ nguyên các thông tin khác
+                const updatedContact = {
+                    ...contact,
+                    nickname: nickname.trim()
+                };
+
+                // Gửi yêu cầu cập nhật
+                return fetch(`${baseURL}/contacts/${contactId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedContact)
+                });
+            })
+            .then(response => {
+                if (!response || !response.ok) {
+                    throw new Error("Không thể cập nhật liên hệ");
+                }
+                showToast("Đã cập nhật thông tin liên hệ");
+
+                // Tải lại danh sách cuộc trò chuyện
+                if (currentUserId) {
+                    fetchConversations(currentUserId);
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi cập nhật liên hệ:', error);
+                showToast("Không thể cập nhật thông tin liên hệ", true);
+            });
+    }
+
+    /**
+     * Xóa một mục (tin nhắn)
+     */
+    function deleteItem(messageId) {
+        if (!messageId) {
+            console.error("No message selected");
+            return;
+        }
+
+        // Bỏ qua tin nhắn tạm thởi
+        if (messageId.startsWith('temp-')) {
+            console.log("Không thể xóa tin nhắn tạm thởi");
+            showToast("Không thể xóa tin nhắn chưa được lưu", true);
+            return;
+        }
+
+        if (!confirm('Bạn có chắc chắn muốn xóa tin nhắn này?')) {
+            return;
+        }
+
+        const token = sessionStorage.getItem("token");
+
+        fetch(`${baseURL}/messages/${messageId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Lỗi: ${response.status}`);
+                }
+
+                // Xóa tin nhắn khỏi UI
+                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    messageElement.remove();
+                    showToast("Đã xóa tin nhắn");
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi khi xóa tin nhắn:", error);
+                showToast("Không thể xóa tin nhắn", true);
+            });
+    }
+    /**
+     * Chỉnh sửa tin nhắn
+     */
+    function editMessage(messageId) {
+        if (!messageId) {
+            console.error("No message selected");
+            return;
+        }
+
+        // Tìm phần tử tin nhắn
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (!messageElement) {
+            console.error("Message element not found");
+            return;
+        }
+
+        // Tìm phần tử chứa nội dung tin nhắn
+        const messageContent = messageElement.querySelector('p');
+        if (!messageContent) {
+            console.error("Message content element not found");
+            return;
+        }
+
+        // Lấy nội dung hiện tại
+        const currentContent = messageContent.textContent;
+
+        // Hiển thị prompt để nhập nội dung mới
+        const newContent = prompt('Nhập nội dung mới cho tin nhắn:', currentContent);
+
+        // Nếu người dùng bấm Cancel hoặc không thay đổi nội dung
+        if (!newContent || newContent.trim() === currentContent) {
+            return;
+        }
+
+        const token = sessionStorage.getItem("token");
+
+        // Gửi yêu cầu cập nhật tin nhắn
+        fetch(`${baseURL}/messages/${messageId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                content: newContent.trim()
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Lỗi: ${response.status}`);
+                }
+
+                // Cập nhật nội dung tin nhắn trên UI
+                messageContent.textContent = newContent.trim();
+                showToast("Đã cập nhật tin nhắn");
+            })
+            .catch(error => {
+                console.error("Lỗi khi cập nhật tin nhắn:", error);
+                showToast("Không thể cập nhật tin nhắn", true);
+            });
     }
 </script>
 </body>
