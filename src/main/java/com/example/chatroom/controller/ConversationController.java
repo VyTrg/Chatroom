@@ -1,15 +1,19 @@
 package com.example.chatroom.controller;
 
+import com.example.chatroom.chat.MessageType;
+import com.example.chatroom.chat.NotificationMessage;
 import com.example.chatroom.model.ContactWith;
 import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.ConversationMember;
 import com.example.chatroom.repository.ConversationRepository;
 import com.example.chatroom.service.ContactWithService;
+import com.example.chatroom.service.ConservationServiceImpl;
 import com.example.chatroom.service.ConversationService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -19,7 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/conversations")
+@RequestMapping("/api")
 public class ConversationController {
 
     @Autowired
@@ -30,19 +34,25 @@ public class ConversationController {
 
     @Autowired
     private ConversationRepository conversationRepository;
+    
+    @Autowired
+    private ConservationServiceImpl conservationService;
+    
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/conversations/user/{userId}")
     public List<Conversation> getConversationsForUser(@PathVariable Long userId) {
         return conversationService.getConversationsForUser(userId);
     }
 
-    @DeleteMapping("/{conversationId}")
+    @DeleteMapping("/conversations/{conversationId}")
     public ResponseEntity<Void> deleteConversation(@PathVariable Long conversationId) {
         conversationService.deleteConversation(conversationId);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{conversationId}/rename")
+    @PutMapping("/conversations/{conversationId}/rename")
     public ResponseEntity<Conversation> renameConversation(
             @PathVariable Long conversationId,
             @RequestBody Map<String, String> nameRequest) {
@@ -51,12 +61,12 @@ public class ConversationController {
         return ResponseEntity.ok(renamed);
     }
 
-    @GetMapping("/{conversationId}/members")
+    @GetMapping("/conversations/{conversationId}/members")
     public List<ConversationMember> getConversationMembers(@PathVariable Long conversationId) {
         return conversationService.getConversationMembers(conversationId);
     }
 
-    @GetMapping("/by-contact/{contactId}")
+    @GetMapping("/conversations/by-contact/{contactId}")
     public ResponseEntity<?> getConversationsByContactId(@PathVariable Long contactId) {
         try {
             // Lấy thông tin liên hệ
@@ -94,6 +104,34 @@ public class ConversationController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Lỗi khi tìm cuộc trò chuyện: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/group-conversations/user/{userId}")
+    public List<Conversation> getAllConversationsForUser(@PathVariable Long userId) {
+        return conservationService.getAllConversationsForUser(userId);
+    }
+    
+    @PostMapping("/group-conversations/group")
+    public ResponseEntity<Conversation> createGroupConversation(
+            @RequestBody List<Long> userIds,
+            @RequestParam(required = false) String conversationName) {
+        try {
+            Conversation conversation = conservationService.createGroupConversation(userIds, conversationName);
+            for (Long userId : userIds) {
+                NotificationMessage notification = new NotificationMessage();
+                notification.setType(MessageType.valueOf("GROUP_REQUEST"));  // message type for group notifications
+                notification.setMessage("You have been added to a new group: " + (conversationName != null ? conversationName : "Unnamed Group"));
+                notification.setUserId(userId);  // the user who receives this notification
+
+                messagingTemplate.convertAndSend(
+                        "/topic/notifications/" + userId,  // topic specific to this user
+                        notification
+                );
+            }
+            return ResponseEntity.ok(conversation);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
         }
     }
 }
