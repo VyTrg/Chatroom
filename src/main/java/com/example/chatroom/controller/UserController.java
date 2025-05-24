@@ -107,6 +107,7 @@ public class UserController {
     public ResponseEntity<User> searchNewUser(@RequestParam("info") String search, @RequestParam("user") Long userId) {
         User user = userService.findNewContact(search, userId);
         return ResponseEntity.ok(user);
+    }
     @PostMapping("/{userId}/block/{blockedUserId}")
     public ResponseEntity<Void> blockUser(@PathVariable Long userId, @PathVariable Long blockedUserId) {
         userService.blockUser(userId, blockedUserId);
