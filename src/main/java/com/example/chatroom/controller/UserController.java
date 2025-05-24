@@ -4,6 +4,7 @@ import com.example.chatroom.dto.UserWithContactsDTO;
 import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.User;
 
+
 import com.example.chatroom.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/users")
