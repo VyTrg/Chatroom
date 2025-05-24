@@ -4,9 +4,11 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.chatroom.dto.UserWithContactsDTO;
 import com.example.chatroom.mapper.UserWithContactsMapper;
+import com.example.chatroom.model.Block;
 import com.example.chatroom.model.ContactWith;
 import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.User;
+import com.example.chatroom.repository.BlockRepository;
 import com.example.chatroom.repository.ConversationRepository;
 import com.example.chatroom.repository.UserRepository;
 
@@ -26,6 +28,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private ConversationRepository conversationRepository;
+
+    @Autowired
+    private BlockRepository blockRepository;
 
     @Autowired
     private Cloudinary cloudinary;
@@ -74,13 +79,13 @@ public class UserServiceImpl implements UserService {
             conversationRepository.findAllConversationsForUser(userId);
     }
 
-        @Override
-        public UserWithContactsDTO getUserWithContactsDTOByUsername(String username) {
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
-            List<ContactWith> contactList = userRepository.findAllContactsByUsername(username);
-            return userWithContactsMapper.toUserWithContactsDTO(user, contactList);
-        }
+    @Override
+    public UserWithContactsDTO getUserWithContactsDTOByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+        List<ContactWith> contactList = userRepository.findAllContactsByUsername(username);
+        return userWithContactsMapper.toUserWithContactsDTO(user, contactList);
+    }
 
     @Override
     public Optional<User> getUserById(Long id) {
@@ -115,4 +120,25 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameOrEmailNotInContactWith(search, userId);
     }
 
+    public void blockUser(Long userId, Long blockedUserId) {
+        // Kiểm tra hai người dùng có tồn tại không
+        User blocker = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        
+        User blocked = userRepository.findById(blockedUserId)
+                .orElseThrow(() -> new RuntimeException("User to block not found with id: " + blockedUserId));
+        
+        // Kiểm tra nếu đã chặn rồi thì không chặn nữa
+        if (blockRepository.existsByBlockerAndBlocked(blocker, blocked)) {
+            return; // Đã chặn rồi, không làm gì thêm
+        }
+        
+        // Tạo bản ghi chặn mới
+        Block block = new Block();
+        block.setBlocker(blocker);
+        block.setBlocked(blocked);
+        
+        // Lưu bản ghi chặn
+        blockRepository.save(block);
+    }
 }

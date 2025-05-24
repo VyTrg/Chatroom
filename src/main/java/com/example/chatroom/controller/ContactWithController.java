@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/contacts")
@@ -55,12 +56,45 @@ public class ContactWithController {
 
     // Xóa liên hệ
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteContact(@PathVariable("id") Long id) {
-        ContactWith contact = contactWithService.getContactWithById(id);
+    public ResponseEntity<?> deleteContact(@PathVariable("id") Long id) {
+        try {
+            ContactWith contact = contactWithService.getContactWithById(id);
+            if (contact == null) {
+                return ResponseEntity.status(404)
+                        .body(Map.of("error", "Không tìm thấy liên hệ với ID: " + id));
+            }
+
+            // Lưu thông tin liên hệ trước khi xóa để frontend có thể sử dụng
+            Map<String, Object> contactInfo = Map.of(
+                    "id", contact.getId(),
+                    "user1", contact.getContactOne().getId(),
+                    "user2", contact.getContactTwo().getId()
+            );
+
+            contactWithService.deleteContactWith(contact);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Đã xóa liên hệ thành công",
+                    "contactInfo", contactInfo
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", "Lỗi khi xóa liên hệ: " + e.getMessage()));
+        }
+    }
+    
+    // Tìm liên hệ theo ID của hai người dùng (có thể theo cả hai chiều)
+    @GetMapping("/find-by-users")
+    public ResponseEntity<ContactWith> findContactByUsers(
+            @RequestParam("userId") Long userId,
+            @RequestParam("contactId") Long contactId) {
+        
+        // Tìm theo cả hai chiều (user1->user2 hoặc user2->user1)
+        ContactWith contact = contactWithService.getContactWithByUserIds(userId, contactId);
         if (contact == null) {
             return ResponseEntity.notFound().build();
         }
-        contactWithService.deleteContactWith(contact);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(contact);
     }
 }

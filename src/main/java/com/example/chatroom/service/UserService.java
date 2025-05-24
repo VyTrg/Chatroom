@@ -35,4 +35,5 @@ public interface UserService {
 
     User findNewContact(String search, Long userId);
 
+    void blockUser(Long userId, Long blockedUserId);
 }
