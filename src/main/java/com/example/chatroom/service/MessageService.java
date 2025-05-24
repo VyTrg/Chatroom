@@ -11,4 +11,10 @@ public interface MessageService {
     List<Message> getLatestMessagesForUser(Long userId);
 
     List<Message> getMessagesByConversation(Long conversationId);
+    
+    void deleteMessage(Long messageId);
+    
+    void deleteAllMessagesInConversation(Long conversationId);
+    
+    Message updateMessage(Long messageId, String newContent);
 }

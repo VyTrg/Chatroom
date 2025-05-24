@@ -850,6 +850,8 @@
     let isConnected = false;
     let isGroupConversation = false; // Cờ để xác định cuộc trò chuyện hiện tại là nhóm hay không
     let messageSubscriptions = {}; // Store subscriptions for cleanup
+    let editSubscription = null;
+    let deleteSubscription = null;
     const baseURL = "http://localhost:8080/api";
 
     // Kết nối WebSocket khi người dùng đã đăng nhập
@@ -910,6 +912,7 @@
 
         // Đăng ký nhận tin nhắn công khai (/topic/public)
         messageSubscriptions.public = stompClient.subscribe('/topic/public', onPublicMessageReceived);
+        subscribeToContextMenuUpdates();
 
         // KHÔNG đăng ký kênh chung cho tin nhắn riêng tư nữa
         // Thay vào đó, sẽ đăng ký theo conversationId cụ thể khi người dùng chọn cuộc trò chuyện
@@ -943,6 +946,18 @@
                 console.error("Lỗi khi lấy dữ liệu người dùng:", error);
             });
     }
+    function subscribeToContextMenuUpdates() {
+        if (stompClient) {
+            const currentUserId = sessionStorage.getItem('userId');
+            if (currentUserId) {
+                // Đăng ký nhận thông báo khi có thay đổi về cuộc trò chuyện
+                stompClient.subscribe(`/user/${currentUserId}/queue/conversation-changes`, onConversationChange);
+
+                // Đăng ký nhận thông báo khi có thay đổi về liên hệ
+                stompClient.subscribe(`/user/${currentUserId}/queue/contact-changes`, onContactChange);
+            }
+        }
+    }
 
     // Xử lý lỗi kết nối
     function onError(error) {
@@ -958,6 +973,298 @@
 
         // Thử kết nối lại sau 5 giây
         setTimeout(reconnectWebSocket, 5000);
+    }
+
+    function onConversationChange(payload) {
+        try {
+            const data = JSON.parse(payload.body);
+
+            const currentUserId = sessionStorage.getItem('userId');
+            // Không xử lý nếu chính mình là người thực hiện thay đổi
+            if (data.initiatorId === currentUserId) {
+                return;
+            }
+
+            switch (data.type) {
+                case "DELETE":
+                    handleConversationDeleted(data.conversationId);
+                    break;
+                case "CLEAR_HISTORY":
+                    handleConversationHistoryCleared(data.conversationId);
+                    break;
+                case "UPDATE":
+                    handleConversationUpdated(data.conversationId, data.updatedData);
+                    break;
+                case "RENAME":
+                    handleConversationRenamed(data.conversationId, data.newName);
+                    break;
+            }
+        } catch (error) {
+            console.error("Lỗi khi xử lý thay đổi cuộc trò chuyện:", error);
+        }
+    }
+
+    // Xử lý khi cuộc trò chuyện bị xóa
+    function handleConversationDeleted(conversationId) {
+        // Xóa cuộc trò chuyện khỏi UI
+        const conversationElement = document.querySelector(`[data-conversation-id="${conversationId}"]`);
+        if (conversationElement) {
+            conversationElement.remove();
+        }
+
+        // Nếu đang xem cuộc trò chuyện này, xóa nội dung và hiển thị thông báo
+        if (currentConversationId === conversationId) {
+            const messageContainer = document.getElementById('show-message');
+            if (messageContainer) {
+                messageContainer.innerHTML = '';
+            }
+
+            const topElement = document.getElementById("top");
+            if (topElement) {
+                topElement.innerHTML = '';
+            }
+
+            const sendMessageElement = document.getElementById("send-message");
+            if (sendMessageElement) {
+                sendMessageElement.innerHTML = '';
+            }
+
+            // Reset biến toàn cục
+            currentConversationId = null;
+            currentRecipientId = null;
+            currentRecipientUsername = null;
+
+            showToast("Cuộc trò chuyện đã bị xóa bởi người dùng khác");
+        }
+    }
+
+    // Xử lý khi lịch sử cuộc trò chuyện bị xóa
+    function handleConversationHistoryCleared(conversationId) {
+        // Nếu đang xem cuộc trò chuyện này, xóa nội dung tin nhắn
+        if (currentConversationId === conversationId) {
+            const messageContainer = document.getElementById('show-message');
+            if (messageContainer) {
+                messageContainer.innerHTML = '';
+                showToast("Lịch sử cuộc trò chuyện đã bị xóa bởi người dùng khác");
+            }
+        }
+    }
+
+    // Xử lý khi cuộc trò chuyện được cập nhật
+    function handleConversationUpdated(conversationId, updatedData) {
+        // Cập nhật thông tin cuộc trò chuyện trong UI
+        const conversationElement = document.querySelector(`[data-conversation-id="${conversationId}"]`);
+        if (conversationElement) {
+            // Cập nhật ảnh nhóm nếu có
+            if (updatedData.groupAvatar) {
+                const avatarElement = conversationElement.querySelector('img.avatar-md');
+                if (avatarElement) {
+                    avatarElement.src = updatedData.groupAvatar;
+                }
+            }
+
+            // Cập nhật tên nhóm nếu có
+            if (updatedData.name) {
+                const nameElement = conversationElement.querySelector('.data h5');
+                if (nameElement) {
+                    nameElement.textContent = updatedData.name;
+                }
+            }
+
+            // Cập nhật mô tả nếu có
+            if (updatedData.description) {
+                const descElement = conversationElement.querySelector('.data p');
+                if (descElement) {
+                    descElement.textContent = updatedData.description;
+                }
+            }
+
+            // Hiển thị thông báo nếu đang xem cuộc trò chuyện này
+            if (currentConversationId === conversationId) {
+                // Cập nhật thông tin trong header cuộc trò chuyện
+                if (updatedData.name) {
+                    const topNameElement = document.querySelector('#top .data h5 a');
+                    if (topNameElement) {
+                        topNameElement.textContent = updatedData.name;
+                    }
+                }
+
+                if (updatedData.groupAvatar) {
+                    const topAvatarElement = document.querySelector('#top img.avatar-md');
+                    if (topAvatarElement) {
+                        topAvatarElement.src = updatedData.groupAvatar;
+                    }
+                }
+
+                showToast("Thông tin cuộc trò chuyện đã được cập nhật");
+            }
+        }
+    }
+
+    // Xử lý khi cuộc trò chuyện được đổi tên
+    function handleConversationRenamed(conversationId, newName) {
+        // Cập nhật tên cuộc trò chuyện trong UI
+        const conversationElement = document.querySelector(`[data-conversation-id="${conversationId}"]`);
+        if (conversationElement) {
+            const nameElement = conversationElement.querySelector('.data h5');
+            if (nameElement) {
+                nameElement.textContent = newName;
+            }
+
+            // Hiển thị thông báo nếu đang xem cuộc trò chuyện này
+            if (currentConversationId === conversationId) {
+                const topNameElement = document.querySelector('#top .data h5 a');
+                if (topNameElement) {
+                    topNameElement.textContent = newName;
+                }
+                currentRecipientUsername = newName;
+                showToast("Cuộc trò chuyện đã được đổi tên thành: " + newName);
+            }
+        }
+    }
+
+    // Xử lý các thay đổi về liên hệ
+    function onContactChange(payload) {
+        try {
+            const data = JSON.parse(payload.body);
+            const currentUserId = sessionStorage.getItem('userId');
+            // Không xử lý nếu chính mình là người thực hiện thay đổi
+            if (data.type === "CONFIRMATION") {
+                handleContactActionConfirmation(data);
+                return;
+            }
+            if (data.initiatorId === currentUserId) {
+                return;
+            }
+
+            switch (data.type) {
+                case "BLOCKED":
+                    handleContactBlocked(data.userId);
+                    break;
+                case "UNBLOCKED":
+                    handleContactUnblocked(data.userId);
+                    break;
+                case "DELETE":
+                    handleContactDeleted(data.contactId, data.userId);
+                    break;
+                case "UPDATE":
+                    handleContactUpdated(data.userId, data.updatedData);
+                    break;
+            }
+        } catch (error) {
+            console.error("Lỗi khi xử lý thay đổi liên hệ:", error);
+        }
+    }
+
+    // Xử lý khi bị chặn
+    function handleContactBlocked(userId) {
+        // Tìm cuộc trò chuyện với người dùng này
+        const conversationElement = document.querySelector(`.filterDiscussions[data-recipient-id="${userId}"]`);
+        if (conversationElement) {
+            // Thêm chỉ báo đã bị chặn
+            conversationElement.classList.add('blocked');
+
+            // Nếu đang xem cuộc trò chuyện với người này
+            if (currentRecipientId === userId) {
+                // Vô hiệu hóa form gửi tin nhắn
+                const messageForm = document.querySelector('.message-form');
+                if (messageForm) {
+                    const textarea = messageForm.querySelector('textarea');
+                    const sendButton = messageForm.querySelector('button[type="submit"]');
+
+                    if (textarea) textarea.disabled = true;
+                    if (sendButton) sendButton.disabled = true;
+
+                    showToast("Bạn đã bị chặn bởi người dùng này");
+                }
+            }
+        }
+    }
+
+    // Xử lý khi được bỏ chặn
+    function handleContactUnblocked(userId) {
+        // Tìm cuộc trò chuyện với người dùng này
+        const conversationElement = document.querySelector(`.filterDiscussions[data-recipient-id="${userId}"]`);
+        if (conversationElement) {
+            // Xóa chỉ báo đã bị chặn
+            conversationElement.classList.remove('blocked');
+
+            // Nếu đang xem cuộc trò chuyện với người này
+            if (currentRecipientId === userId) {
+                // Kích hoạt lại form gửi tin nhắn
+                const messageForm = document.querySelector('.message-form');
+                if (messageForm) {
+                    const textarea = messageForm.querySelector('textarea');
+                    const sendButton = messageForm.querySelector('button[type="submit"]');
+
+                    if (textarea) textarea.disabled = false;
+                    if (sendButton) sendButton.disabled = false;
+
+                    showToast("Bạn đã được bỏ chặn bởi người dùng này");
+                }
+            }
+        }
+    }
+
+    // Xử lý khi bị xóa khỏi danh sách liên hệ
+    function handleContactDeleted(contactId, userId) {
+        // Xóa liên hệ khỏi danh sách
+        const contactElement = document.querySelector(`.contact[data-user-id="${userId}"]`);
+        if (contactElement) {
+            contactElement.remove();
+        }
+
+        showToast("Bạn đã bị xóa khỏi danh sách liên hệ của người dùng khác");
+    }
+
+    // Xử lý khi thông tin liên hệ được cập nhật
+    function handleContactUpdated(userId, updatedData) {
+        // Cập nhật thông tin liên hệ trong UI
+        const contactElement = document.querySelector(`.contact[data-user-id="${userId}"]`);
+        if (contactElement) {
+            if (updatedData.username || updatedData.displayName) {
+                const nameElement = contactElement.querySelector('h5');
+                if (nameElement) {
+                    nameElement.textContent = updatedData.displayName || updatedData.username;
+                }
+            }
+
+            if (updatedData.profilePicture) {
+                const avatarElement = contactElement.querySelector('img.avatar-md');
+                if (avatarElement) {
+                    avatarElement.src = updatedData.profilePicture;
+                }
+            }
+        }
+
+        // Cập nhật trong cuộc trò chuyện nếu có
+        const conversationElement = document.querySelector(`.filterDiscussions[data-recipient-id="${userId}"]`);
+        if (conversationElement) {
+            if (updatedData.username || updatedData.displayName) {
+                const nameElement = conversationElement.querySelector('.data h5');
+                if (nameElement) {
+                    nameElement.textContent = updatedData.displayName || updatedData.username;
+                }
+            }
+
+            if (updatedData.profilePicture) {
+                const avatarElement = conversationElement.querySelector('img.avatar-md');
+                if (avatarElement) {
+                    avatarElement.src = updatedData.profilePicture;
+                }
+            }
+
+            // Cập nhật header cuộc trò chuyện nếu đang xem
+            if (currentRecipientId === userId) {
+                if (updatedData.username || updatedData.displayName) {
+                    const topNameElement = document.querySelector('#top .data h5 a');
+                    if (topNameElement) {
+                        topNameElement.textContent = updatedData.displayName || updatedData.username;
+                        currentRecipientUsername = updatedData.displayName || updatedData.username;
+                    }
+                }
+            }
+        }
     }
 
     // Thiết lập heartbeat để giữ kết nối WebSocket luôn mở
@@ -1055,10 +1362,34 @@
                 delete messageSubscriptions[`private_${conversationId}`];
             }
 
+            if (editSubscription) {
+                editSubscription.unsubscribe();
+            }
+
+            if (deleteSubscription) {
+                deleteSubscription.unsubscribe();
+            }
+
             // Format topic dựa trên conversationId
             const privateTopic = `/topic/private.${conversationId}`;
 
             console.log(`[TEST] ĐĂNG KÝ TIN NHẮN RIÊNG TƯ - TOPIC: ${privateTopic}`);
+
+            editSubscription = stompClient.subscribe(`/topic/conversations/${conversationId}/edit`, function(payload) {
+                const data = JSON.parse(payload.body);
+                console.log("Nhận thông báo chỉnh sửa tin nhắn:", data);
+                handleMessageEdit(data);
+            });
+
+            deleteSubscription = stompClient.subscribe(`/topic/conversations/${conversationId}/delete`, function(payload) {
+                const data = JSON.parse(payload.body);
+                console.log("Nhận thông báo xóa tin nhắn:", data);
+                if (data.type === 'DELETE') {
+                    handleMessageDelete(data);
+                } else if (data.type === 'UPDATE') {
+                    handleMessageEdit(data);
+                }
+            });
 
             // Đăng ký kênh mới
             const subscription = stompClient.subscribe(privateTopic, function(payload) {
@@ -1066,8 +1397,26 @@
                 onPrivateMessageReceived(payload);
             });
 
+            const contactSubscription = stompClient.subscribe(`/user/${currentUserId}/queue/messages`, function(payload) {
+                const data = JSON.parse(payload.body);
+                console.log("Nhan thong bao chung:", data);
+
+                if (data.type === 'DELETE') {
+                    if (data.messageId){
+                        handleMessageDelete(data);
+                    }else if (data.contactId){
+                        handleContactChange(data);
+                    }
+                }
+                else if (data.type === "UPDATE" && data.messageId) {
+                    handleMessageEdit(data);
+                }
+            })
+
             // Lưu subscription
             messageSubscriptions[`private_${conversationId}`] = subscription;
+            messageSubscriptions[`contact_${currentUserId}`] = contactSubscription;
+
 
             // Log ra toàn bộ subscriptions hiện tại để debug
             console.log("Danh sách subscriptions hiện tại:");
@@ -1100,115 +1449,160 @@
             const message = JSON.parse(payload.body);
             console.log("Tin nhắn riêng tư nhận được:", message);
 
-            // Thiết lập dữ liệu cần thiết để xử lý tin nhắn
-            const messageContent = message.content || message.messageText;
-            const messageSenderId = message.senderId?.toString();
-            const messageRecipientId = message.recipientId?.toString();
-            const messageConversationId = message.conversationId?.toString();
+            if (data.type === 'UPDATE') {
+                // Xử lý tin nhắn đã được chỉnh sửa
+                handleMessageEdit(data);
+            } else if (data.type === 'DELETE') {
+                // Xử lý tin nhắn đã bị xóa
+                handleMessageDelete(data);
+            } else {
 
-            // Kiểm tra xem tin nhắn có phải từ người gửi hiện tại không
-            const isFromCurrentSender = message.sender === currentUsername || messageSenderId === currentUserId?.toString();
+                // Thiết lập dữ liệu cần thiết để xử lý tin nhắn
+                const messageContent = message.content || message.messageText;
+                const messageSenderId = message.senderId?.toString();
+                const messageRecipientId = message.recipientId?.toString();
+                const messageConversationId = message.conversationId?.toString();
 
-            // QUAN TRỌNG: Tin nhắn riêng tư đã được nhận thông qua topic /topic/private.${conversationId}
-            // Nên mặc định nó thuộc về cuộc trò chuyện hiện tại do đã subscribe đúng topic
-            // Tuy nhiên vẫn nên kiểm tra lại để chắc chắn
+                // Kiểm tra xem tin nhắn có phải từ người gửi hiện tại không
+                const isFromCurrentSender = message.sender === currentUsername || messageSenderId === currentUserId?.toString();
 
-            // Kiểm tra xem tin nhắn có phải cho cuộc trò chuyện hiện tại không
-            let isForCurrentConversation = false;
+                // QUAN TRỌNG: Tin nhắn riêng tư đã được nhận thông qua topic /topic/private.${conversationId}
+                // Nên mặc định nó thuộc về cuộc trò chuyện hiện tại do đã subscribe đúng topic
+                // Tuy nhiên vẫn nên kiểm tra lại để chắc chắn
 
-            if (messageConversationId && currentConversationId) {
-                // Kiểm tra trực tiếp bằng conversationId - đây là cách chính xác nhất
-                isForCurrentConversation = messageConversationId === currentConversationId.toString();
-                console.log("Kiểm tra theo conversationId:", messageConversationId, currentConversationId, isForCurrentConversation);
-            }
+                // Kiểm tra xem tin nhắn có phải cho cuộc trò chuyện hiện tại không
+                let isForCurrentConversation = false;
 
-            // Thêm log để debug
-            console.log("Chi tiết tin nhắn riêng tư:", {
-                messageConvId: messageConversationId,
-                currentConvId: currentConversationId,
-                messageSenderId: messageSenderId,
-                messageRecipientId: messageRecipientId,
-                currentUserId: currentUserId?.toString(),
-                isForCurrentConversation: isForCurrentConversation,
-                topic: message._source || "Không xác định"
-            });
-
-            // Cập nhật UI danh sách cuộc trò chuyện
-            if (!isFromCurrentSender) {
-                updateConversationList(message.sender);
-
-                // Hiển thị thông báo nếu tin nhắn không phải đang trong cuộc trò chuyện hiện tại
-                if (!isForCurrentConversation && Notification.permission === 'granted') {
-                    new Notification('Tin nhắn mới', {
-                        body: `${message.sender}: ${message.content}`
-                    });
-                }
-            }
-
-            // Nếu là tin nhắn trong cuộc trò chuyện hiện tại, hiển thị ngay
-            if (isForCurrentConversation) {
-                console.log("Hiển thị tin nhắn cho cuộc trò chuyện hiện tại");
-
-                // Đánh dấu tin nhắn đã đọc nếu cần
-                if (message.messageId && !isFromCurrentSender) {
-                    markMessageAsRead(message.messageId);
+                if (messageConversationId && currentConversationId) {
+                    // Kiểm tra trực tiếp bằng conversationId - đây là cách chính xác nhất
+                    isForCurrentConversation = messageConversationId === currentConversationId.toString();
+                    console.log("Kiểm tra theo conversationId:", messageConversationId, currentConversationId, isForCurrentConversation);
                 }
 
-                // Kiểm tra xem tin nhắn đã tồn tại trong DOM chưa để tránh hiển thị trùng lặp
-                // Nếu tin nhắn có messageId, kiểm tra theo ID đó
-                if (message.messageId) {
-                    const existingMessage = document.querySelector(`[data-message-id="${message.messageId}"]`);
-                    if (existingMessage) {
-                        console.log("Tin nhắn có ID đã tồn tại, không hiển thị lại:", message.messageId);
-                        return;
+                // Thêm log để debug
+                console.log("Chi tiết tin nhắn riêng tư:", {
+                    messageConvId: messageConversationId,
+                    currentConvId: currentConversationId,
+                    messageSenderId: messageSenderId,
+                    messageRecipientId: messageRecipientId,
+                    currentUserId: currentUserId?.toString(),
+                    isForCurrentConversation: isForCurrentConversation,
+                    topic: message._source || "Không xác định"
+                });
+
+                // Cập nhật UI danh sách cuộc trò chuyện
+                if (!isFromCurrentSender) {
+                    updateConversationList(message.sender);
+
+                    // Hiển thị thông báo nếu tin nhắn không phải đang trong cuộc trò chuyện hiện tại
+                    if (!isForCurrentConversation && Notification.permission === 'granted') {
+                        new Notification('Tin nhắn mới', {
+                            body: `${message.sender}: ${message.content}`
+                        });
                     }
                 }
 
-                // Đối với tin nhắn optimistic (không có messageId từ server)
-                // Kiểm tra theo nội dung và người gửi
-                const messageContent = message.content || message.messageText || "";
-                if (messageContent && message.senderId) {
-                    const existingMessages = document.querySelectorAll('.message');
-                    for (let i = 0; i < existingMessages.length; i++) {
-                        const el = existingMessages[i];
-                        const elContent = el.querySelector('p') ? el.querySelector('p').textContent : '';
+                // Nếu là tin nhắn trong cuộc trò chuyện hiện tại, hiển thị ngay
+                if (isForCurrentConversation) {
+                    console.log("Hiển thị tin nhắn cho cuộc trò chuyện hiện tại");
 
-                        // Nếu nội dung giống nhau và cùng người gửi, coi là tin nhắn trùng lặp
-                        if (elContent === messageContent &&
-                            message.sender === currentUsername &&
-                            el.classList.contains('me')) {
-                            console.log("Phát hiện tin nhắn trùng lặp theo nội dung và người gửi:", messageContent);
+                    // Đánh dấu tin nhắn đã đọc nếu cần
+                    if (message.messageId && !isFromCurrentSender) {
+                        markMessageAsRead(message.messageId);
+                    }
+
+                    // Kiểm tra xem tin nhắn đã tồn tại trong DOM chưa để tránh hiển thị trùng lặp
+                    // Nếu tin nhắn có messageId, kiểm tra theo ID đó
+                    if (message.messageId) {
+                        const existingMessage = document.querySelector(`[data-message-id="${message.messageId}"]`);
+                        if (existingMessage) {
+                            console.log("Tin nhắn có ID đã tồn tại, không hiển thị lại:", message.messageId);
                             return;
                         }
                     }
-                }
 
-                // Hiển thị tin nhắn
-                displayMessage(message);
+                    // Đối với tin nhắn optimistic (không có messageId từ server)
+                    // Kiểm tra theo nội dung và người gửi
+                    const messageContent = message.content || message.messageText || "";
+                    if (messageContent && message.senderId) {
+                        const existingMessages = document.querySelectorAll('.message');
+                        for (let i = 0; i < existingMessages.length; i++) {
+                            const el = existingMessages[i];
+                            const elContent = el.querySelector('p') ? el.querySelector('p').textContent : '';
 
-                // Đảm bảo cuộn xuống sau khi hiển thị tin nhắn
-                setTimeout(() => {
-                    const chatContainer = document.getElementById('content');
-                    if (chatContainer) {
-                        scrollToBottom(chatContainer);
+                            // Nếu nội dung giống nhau và cùng người gửi, coi là tin nhắn trùng lặp
+                            if (elContent === messageContent &&
+                                message.sender === currentUsername &&
+                                el.classList.contains('me')) {
+                                console.log("Phát hiện tin nhắn trùng lặp theo nội dung và người gửi:", messageContent);
+                                return;
+                            }
+                        }
                     }
-                }, 150);
-            } else {
-                console.log("Tin nhắn không thuộc cuộc trò chuyện hiện tại, không hiển thị");
 
-                // Cập nhật số tin nhắn chưa đọc
-                const conversationElement = document.querySelector(`[data-conversation-id="${message.conversationId}"]`);
-                if (conversationElement) {
-                    const unreadBadge = conversationElement.querySelector('.badge');
-                    if (unreadBadge) {
-                        const currentCount = parseInt(unreadBadge.textContent || '0');
-                        unreadBadge.textContent = currentCount + 1;
-                        unreadBadge.style.display = 'block';
+                    // Hiển thị tin nhắn
+                    displayMessage(message);
+
+                    // Đảm bảo cuộn xuống sau khi hiển thị tin nhắn
+                    setTimeout(() => {
+                        const chatContainer = document.getElementById('content');
+                        if (chatContainer) {
+                            scrollToBottom(chatContainer);
+                        }
+                    }, 150);
+                } else {
+                    console.log("Tin nhắn không thuộc cuộc trò chuyện hiện tại, không hiển thị");
+
+                    // Cập nhật số tin nhắn chưa đọc
+                    const conversationElement = document.querySelector(`[data-conversation-id="${message.conversationId}"]`);
+                    if (conversationElement) {
+                        const unreadBadge = conversationElement.querySelector('.badge');
+                        if (unreadBadge) {
+                            const currentCount = parseInt(unreadBadge.textContent || '0');
+                            unreadBadge.textContent = currentCount + 1;
+                            unreadBadge.style.display = 'block';
+                        }
                     }
                 }
             }
         } catch (error) {
             console.error("Lỗi khi xử lý tin nhắn riêng tư:", error);
+        }
+    }
+
+    function handleMessageEdit(data) {
+        if (data.conversationId !== currentConversationId) return;
+
+        const messageElement = document.querySelector(`[data-message-id="${data.messageId}"]`);
+        if (messageElement) {
+            const messageContent = messageElement.querySelector('p');
+            if (messageContent) {
+                messageContent.textContent = data.newContent;
+                console.log(`Đã cập nhật tin nhắn ${data.messageId} trên UI`);
+
+                // Hiển thị thông báo nhỏ
+                showToast(`${data.senderName} đã chỉnh sửa một tin nhắn`);
+            }
+        }
+        if (currentConversationId) {
+            fetchMessages(currentConversationId);
+        }
+    }
+
+    // Thêm hàm này sau hàm handleMessageEdit
+    function handleMessageDelete(data) {
+        if (data.conversationId !== currentConversationId) return;
+
+        const messageElement = document.querySelector(`[data-message-id="${data.messageId}"]`);
+        if (messageElement) {
+            messageElement.remove();
+            console.log(`Đã xóa tin nhắn ${data.messageId} khỏi UI`);
+
+            // Hiển thị thông báo nhỏ
+            showToast(`${data.senderName} đã xóa một tin nhắn`);
+        }
+        if (currentConversationId) {
+            fetchMessages(currentConversationId);
         }
     }
 
@@ -2006,7 +2400,7 @@
 
                     //send message
                     const messageHTML = `
-                                        <div class="message me" >
+                                        <div class="message me" data-message-id="${message.id}">
 												<div class="text-main">
 													<div class="text-group me align-items-center ml-2" >
                                                         <div class="dropdown ml-2" >
@@ -2030,7 +2424,7 @@
                 } else {
                     // Received Message
                     const messageHTML = `
-                                <div class="message" >
+                                <div class="message" data-message-id="${message.id}">
 												<div class="text-main">
 													    <div class="user-name mb-1">
 															<strong>${escapeHtml(message.sender?.username || message.sender || "Unknown")}</strong>
@@ -2257,7 +2651,36 @@
                             console.error("Không thể xác định liên hệ");
                             return;
                         }
-                        deleteContact(contactId);
+                        // deleteContact(contactId);
+                        const token = sessionStorage.getItem("token");
+                        const currentUserId = sessionStorage.getItem("userId");
+
+                        // Bước 1: Lấy contactId dựa trên userId
+                        fetch(`${baseURL}/contacts/find-by-users?userId=${currentUserId}&contactId=${userId}`, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        }).then(response => {
+                                if (!response.ok) {
+                                    throw new Error("Không thể tìm thấy thông tin liên hệ");
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data && data.id) {
+                                    console.log("Đã tìm thấy contactId:", data.id);
+                                    // Bước 2: Xóa liên hệ với contactId đúng
+                                    deleteContact(data.id);
+                                } else {
+                                    throw new Error("Không tìm thấy ID liên hệ");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Lỗi khi tìm contactId:", error);
+                                showToast("Không thể xóa liên hệ: " + error.message, true);
+                            });
                     });
                 } else {
                     console.error("Không tìm thấy nút Delete Contact");
@@ -2307,6 +2730,13 @@
                 currentRecipientId = isGroup ? null : userId;
                 currentRecipientUsername = isGroup ? null : conversationName;
 
+                if (currentConversationId) {
+                    if (isGroup) {
+                        subscribeToGroupMessages(currentConversationId);
+                    } else {
+                        subscribeToPrivateMessages(currentConversationId);
+                    }
+                }
                 // Tải tin nhắn cho cuộc trò chuyện
                 fetchMessages(conversationId, currentUserId, conversationName);
             }
@@ -2666,6 +3096,16 @@
                 if (!response.ok) {
                     throw new Error(`Lỗi: ${response.status}`);
                 }
+
+                // Gửi thông báo WebSocket
+                if (stompClient && stompClient.connected) {
+                    const notificationMsg = {
+                        type: "CLEAR_HISTORY",
+                        conversationId: conversationId,
+                        initiatorId: currentUserId
+                    };
+                    stompClient.send("/app/conversation-change", {}, JSON.stringify(notificationMsg));
+                }
                 // Xóa tin nhắn khỏi UI
                 const messageContainer = document.getElementById('show-message');
                 if (messageContainer) {
@@ -2707,6 +3147,16 @@
                 if (!response.ok) {
                     throw new Error("Could not block user");
                 }
+                // Gửi thông báo WebSocket
+                if (stompClient && stompClient.connected) {
+                    const notificationMsg = {
+                        type: "BLOCKED",
+                        userId: userId,
+                        initiatorId: currentUserId
+                    };
+                    stompClient.send("/app/contact-change", {}, JSON.stringify(notificationMsg));
+                }
+
                 showToast("Đã chặn người liên hệ");
 
                 // Tải lại danh sách cuộc trò chuyện
@@ -2718,18 +3168,96 @@
         showToast("Không thể chặn người liên hệ", true);
     }
 
+    function handleContactChange(data){
+        console.log("Xu ly thong bao thay doi lien he: ", data);
+
+        if (data.type === "DELETE"){
+            showToast("Mot lien he da bi xoa");
+
+            const currentUserId = sessionStorage.getItem("userId");
+            fetchUserData(currentUserId);
+            fetchConversations(currentUserId)
+        }
+    }
+
+    // function deleteContact(contactId) {
+    //     if (!contactId) {
+    //         console.error("No contact selected");
+    //         return;
+    //     }
+    //
+    //     if (!confirm('Bạn có chắc chắn muốn xóa người liên hệ này?')) {
+    //         return;
+    //     }
+    //
+    //     const token = sessionStorage.getItem("token");
+    //     const currentUserId = sessionStorage.getItem("userId");
+    //
+    //
+    //     fetch(`${baseURL}/contacts/${contactId}`, {
+    //         method: 'GET',
+    //         headers: {
+    //             'Authorization': `Bearer ${token}`,
+    //             'Content-Type': 'application/json'
+    //         }
+    //     })
+    //     .then(response => response.json())
+    //     .then(contactData => {
+    //         const targetUserId = contactData.userId;
+    //
+    //         // Sau đó thực hiện xóa liên hệ
+    //         return fetch(`${baseURL}/contacts/${contactId}`, {
+    //             method: 'DELETE',
+    //             headers: {
+    //                 'Authorization': `Bearer ${token}`,
+    //                 'Content-Type': 'application/json'
+    //             }
+    //         })
+    //             .then(response => {
+    //             if (!response.ok) {
+    //                 throw new Error("Could not delete contact");
+    //             }
+    //                 // Gửi thông báo WebSocket
+    //             if (stompClient && stompClient.connected) {
+    //                 const notificationMsg = {
+    //                     type: "DELETE",
+    //                     contactId: contactId,
+    //                     userId: targetUserId,
+    //                     initiatorId: currentUserId
+    //                 };
+    //                 stompClient.send("/app/contact-change", {}, JSON.stringify(notificationMsg));
+    //             }
+    //             showToast("Đã xóa người liên hệ");
+    //
+    //             // Tải lại danh sách cuộc trò chuyện và danh sách liên hệ
+    //             const currentUserId = sessionStorage.getItem("userId");
+    //             if (currentUserId) {
+    //                 fetchConversations(currentUserId);
+    //                 fetchUserData(currentUserId); // Để cập nhật danh sách liên hệ
+    //             }
+    //         })
+    //     })
+    //         .catch(error => {
+    //             console.error('Error deleting contact:', error);
+    //             showToast("Không thể xóa liên hệ", true);
+    //         });
+    // }
+    //
+
     function deleteContact(contactId) {
         if (!contactId) {
             console.error("No contact selected");
             return;
         }
 
-        if (!confirm('Bạn có chắc chắn muốn xóa người liên hệ này?')) {
+        if (!confirm('Bạn có chắc chắn muốn xóa người liên hệ này? Điều này cũng sẽ xóa cuộc trò chuyện và lịch sử tin nhắn.')) {
             return;
         }
 
         const token = sessionStorage.getItem("token");
+        const currentUserId = sessionStorage.getItem("userId");
 
+        // Thực hiện xóa liên hệ
         fetch(`${baseURL}/contacts/${contactId}`, {
             method: 'DELETE',
             headers: {
@@ -2739,24 +3267,105 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error("Could not delete contact");
+                    throw new Error(`Lỗi ${response.status}: ${response.statusText}`);
                 }
-                showToast("Đã xóa người liên hệ");
+                return response.text().then(text => text ? JSON.parse(text) : {});
+            })
+            .then(data => {
+                console.log("Đã xóa liên hệ thành công, tìm cuộc trò chuyện liên quan");
+
+                // Tìm cuộc trò chuyện liên quan đến liên hệ này
+                return fetch(`${baseURL}/conversations/by-contact/${contactId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.log("Không tìm thấy cuộc trò chuyện liên quan hoặc có lỗi:", response.status);
+                    // Không tìm thấy không phải lỗi nghiêm trọng, tiếp tục xử lý
+                    return { conversations: [] };
+                }
+                return response.json();
+            })
+            .then(data => {
+                const deletePromises = [];
+
+                // Xóa tất cả cuộc trò chuyện liên quan
+                if (data.conversations && data.conversations.length > 0) {
+                    data.conversations.forEach(conversation => {
+                        console.log("Xóa cuộc trò chuyện:", conversation.id);
+                        deletePromises.push(
+                            fetch(`${baseURL}/conversations/${conversation.id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                        );
+                    });
+                }
+
+                // Nếu có cuộc trò chuyện cần xóa, chờ tất cả hoàn thành
+                if (deletePromises.length > 0) {
+                    return Promise.all(deletePromises);
+                }
+                // Kiểm tra nếu có cuộc trò chuyện đang được xem bị xóa
+                if (data.conversations && data.conversations.length > 0) {
+                    data.conversations.forEach(conversation => {
+                        // Nếu đang xem cuộc trò chuyện bị xóa, dọn dẹp UI
+                        if (currentConversationId === conversation.id) {
+                            // Xóa nội dung chat
+                            const messageContainer = document.getElementById('show-message');
+                            if (messageContainer) {
+                                messageContainer.innerHTML = '';
+                            }
+
+                            const topElement = document.getElementById("top");
+                            if (topElement) {
+                                topElement.innerHTML = '';
+                            }
+
+                            const sendMessageElement = document.getElementById("send-message");
+                            if (sendMessageElement) {
+                                sendMessageElement.innerHTML = '';
+                            }
+
+                            // Reset biến toàn cục
+                            currentConversationId = null;
+                            currentRecipientId = null;
+                            currentRecipientUsername = null;
+                        }
+                    });
+                }
+                return Promise.resolve();
+            })
+            .then(() => {
+                // Gửi thông báo WebSocket
+                if (stompClient && stompClient.connected) {
+                    const notificationMsg = {
+                        type: "DELETE",
+                        contactId: contactId,
+                        initiatorId: currentUserId
+                    };
+                    stompClient.send("/app/contact-change", {}, JSON.stringify(notificationMsg));
+                }
+
+                showToast("Đã xóa người liên hệ và cuộc trò chuyện liên quan");
 
                 // Tải lại danh sách cuộc trò chuyện và danh sách liên hệ
-                const currentUserId = sessionStorage.getItem("userId");
-                if (currentUserId) {
-                    fetchConversations(currentUserId);
-                    fetchUserData(currentUserId); // Để cập nhật danh sách liên hệ
-                }
+                fetchConversations(currentUserId);
+                fetchUserData(currentUserId);
             })
             .catch(error => {
                 console.error('Error deleting contact:', error);
-                showToast("Không thể xóa liên hệ", true);
+                showToast(`Không thể xóa liên hệ: ${error.message}`, true);
             });
     }
-
-
     function deleteConversation(conversationId) {
         if (!conversationId) {
             console.error("No conversation selected");
@@ -2779,6 +3388,16 @@
             .then(response => {
                 if (!response.ok) {
                     throw new Error("Could not delete conversation");
+                }
+
+                // Gửi thông báo WebSocket
+                if (stompClient && stompClient.connected) {
+                    const notificationMsg = {
+                        type: "DELETE",
+                        conversationId: conversationId,
+                        initiatorId: currentUserId
+                    };
+                    stompClient.send("/app/conversation-change", {}, JSON.stringify(notificationMsg));
                 }
                 showToast("Đã xóa cuộc trò chuyện");
 
@@ -2844,6 +3463,8 @@
         }
 
         const token = sessionStorage.getItem("token");
+        const currentUserId = sessionStorage.getItem("userId");
+
 
         fetch(`${baseURL}/conversations/${conversationId}/rename`, {
             method: 'PUT',
@@ -2862,6 +3483,16 @@
                 return response.json();
             })
             .then(data => {
+                // Gửi thông báo WebSocket
+                if (stompClient && stompClient.connected) {
+                    const notificationMsg = {
+                        type: "RENAME",
+                        conversationId: conversationId,
+                        initiatorId: currentUserId,
+                        newName: trimmedName
+                    };
+                    stompClient.send("/app/conversation-change", {}, JSON.stringify(notificationMsg));
+                }
                 showToast("Đã đổi tên cuộc trò chuyện thành công");
 
                 // Update conversation name in UI
@@ -3027,6 +3658,22 @@
                 'Content-Type': 'application/json'
             }
         })
+            // .then(response => {
+            //     if (!response.ok) {
+            //         throw new Error(`Lỗi: ${response.status}`);
+            //     }
+            //
+            //     // Xóa tin nhắn khỏi UI
+            //     const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            //     if (messageElement) {
+            //         messageElement.remove();
+            //         showToast("Đã xóa tin nhắn");
+            //     }
+            // })
+            // .catch(error => {
+            //     console.error("Lỗi khi xóa tin nhắn:", error);
+            //     showToast("Không thể xóa tin nhắn", true);
+            // });
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`Lỗi: ${response.status}`);
@@ -3036,7 +3683,26 @@
                 const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
                 if (messageElement) {
                     messageElement.remove();
-                    showToast("Đã xóa tin nhắn");
+                }
+
+                showToast("Đã xóa tin nhắn");
+
+                // Gửi thông báo WebSocket về việc xóa tin nhắn
+                if (stompClient && stompClient.connected) {
+                    const deleteNotification = {
+                        type: 'DELETE',
+                        messageId: messageId,
+                        conversationId: currentConversationId,
+                        senderId: currentUserId,
+                        senderName: currentUsername,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    // stompClient.send(`/app/chat/${currentConversationId}/delete`, {}, JSON.stringify(deleteNotification));
+                    stompClient.send(`/app/conversations/${currentConversationId}/delete`, {}, JSON.stringify(deleteNotification));
+                    console.log("Đã gửi thông báo xóa tin nhắn qua WebSocket");
+                } else {
+                    console.warn("WebSocket không kết nối, không thể gửi thông báo xóa");
                 }
             })
             .catch(error => {
@@ -3091,19 +3757,57 @@
                 content: newContent.trim()
             })
         })
+            // .then(response => {
+            //     if (!response.ok) {
+            //         throw new Error(`Lỗi: ${response.status}`);
+            //     }
+            //
+            //     // Cập nhật nội dung tin nhắn trên UI
+            //     messageContent.textContent = newContent.trim();
+            //     showToast("Đã cập nhật tin nhắn");
+            // })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`Lỗi: ${response.status}`);
                 }
-
+                return response.json(); // Phải có return ở đây để tiếp tục chuỗi promise
+            })
+            .then(updatedMessage => {
                 // Cập nhật nội dung tin nhắn trên UI
                 messageContent.textContent = newContent.trim();
                 showToast("Đã cập nhật tin nhắn");
+
+                // Gửi thông báo WebSocket về việc chỉnh sửa tin nhắn
+                if (stompClient && stompClient.connected) {
+                    const editNotification = {
+                        type: 'UPDATE',
+                        messageId: messageId,
+                        conversationId: currentConversationId,
+                        newContent: newContent.trim(),
+                        senderId: currentUserId,
+                        senderName: currentUsername,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    // stompClient.send(`/app/chat/${currentConversationId}/edit`, {}, JSON.stringify(editNotification));
+                    stompClient.send(`/app/conversations/${currentConversationId}/edit`, {}, JSON.stringify(editNotification));
+                    console.log("Đã gửi thông báo chỉnh sửa tin nhắn qua WebSocket");
+                } else {
+                    console.warn("WebSocket không kết nối, không thể gửi thông báo chỉnh sửa");
+                }
             })
             .catch(error => {
                 console.error("Lỗi khi cập nhật tin nhắn:", error);
                 showToast("Không thể cập nhật tin nhắn", true);
             });
+        document.addEventListener('DOMContentLoaded', function() {
+            if (sessionStorage.getItem("token") && sessionStorage.getItem("userId")) {
+                currentUserId = sessionStorage.getItem("userId");
+                currentUsername = sessionStorage.getItem("username");
+                console.log("Khởi tạo kết nối WebSocket với userId:", currentUserId);
+                connectWebSocket();
+            }
+        });
     }
 </script>
 </body>

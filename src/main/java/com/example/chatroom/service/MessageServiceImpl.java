@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -29,5 +32,28 @@ public class MessageServiceImpl implements MessageService {
         return messageRepository.findMessagesByConversationId(conversationId);
     }
 
+    @Override
+    public void deleteMessage(Long messageId) {
+        messageRepository.deleteById(messageId);
+    }
 
+    @Override
+    public void deleteAllMessagesInConversation(Long conversationId) {
+        // Xóa tất cả tin nhắn trong cuộc trò chuyện
+        List<Message> messages = messageRepository.findMessagesByConversationId(conversationId);
+        messageRepository.deleteAll(messages);
+    }
+    
+    @Override
+    public Message updateMessage(Long messageId, String newContent) {
+        Optional<Message> messageOpt = messageRepository.findById(messageId);
+        if (messageOpt.isPresent()) {
+            Message message = messageOpt.get();
+            message.setMessageText(newContent);
+            message.setUpdatedAt(LocalDateTime.now());  // Cập nhật thởi gian chỉnh sửa
+            return messageRepository.save(message);
+        } else {
+            throw new NoSuchElementException("Không tìm thấy tin nhắn với ID: " + messageId);
+        }
+    }
 }

@@ -4,7 +4,6 @@ import com.example.chatroom.dto.UserWithContactsDTO;
 import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.User;
 
-
 import com.example.chatroom.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
 
 @RestController
 @RequestMapping("/api/users")
@@ -97,5 +95,11 @@ public class UserController {
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @PostMapping("/{userId}/block/{blockedUserId}")
+    public ResponseEntity<Void> blockUser(@PathVariable Long userId, @PathVariable Long blockedUserId) {
+        userService.blockUser(userId, blockedUserId);
+        return ResponseEntity.ok().build();
     }
 }

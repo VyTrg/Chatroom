@@ -30,4 +30,6 @@ public interface UserService {
     Optional<User> getUserById(Long id);
 
     User uploadProfilePicture(Long userId, MultipartFile file) throws IOException;
+
+    void blockUser(Long userId, Long blockedUserId);
 }

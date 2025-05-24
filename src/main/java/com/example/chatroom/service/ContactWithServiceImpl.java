@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ContactWithServiceImpl implements ContactWithService{
@@ -50,6 +51,19 @@ public class ContactWithServiceImpl implements ContactWithService{
 
     @Override
     public ContactWith getContactWithById(Long id) {
-        return contactWithRepository.findById(id).get();
+        Optional<ContactWith> contactWithOptional = contactWithRepository.findById(id);
+        return contactWithOptional.orElse(null);
+    }
+    
+    @Override
+    public ContactWith getContactWithByUserIds(Long userId1, Long userId2) {
+        // Kiểm tra tìm kiếm theo cả hai hướng
+        ContactWith contact = contactWithRepository.findContactWithsByContactOne_IdAndContactTwo_Id(userId1, userId2);
+        if (contact != null) {
+            return contact;
+        }
+        
+        // Nếu không tìm thấy theo hướng thứ nhất, thử hướng thứ hai
+        return contactWithRepository.findContactWithsByContactOne_IdAndContactTwo_Id(userId2, userId1);
     }
 }

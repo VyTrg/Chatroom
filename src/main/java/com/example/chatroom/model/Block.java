@@ -10,19 +10,19 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@Table(uniqueConstraints = {@UniqueConstraint(name="UK_Block", columnNames = {"blocker", "blocked"})})
+@Table(uniqueConstraints = {@UniqueConstraint(name="UK_Block", columnNames = {"blocker_id", "blocked_id"})}) 
 @AllArgsConstructor
 public class Block {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "blocker_id",insertable=false, updatable=false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @JoinColumn(name = "blocker_id")
     private User blocker;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "blocked_id",insertable=false, updatable=false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @JoinColumn(name = "blocked_id")
     private User blocked;
 
     @Column(nullable = false, name = "created_at")

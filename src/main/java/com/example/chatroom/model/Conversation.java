@@ -13,7 +13,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Table(uniqueConstraints = {@UniqueConstraint(name="UK_Block", columnNames = {"blocker", "blocked"})})
+@Table(uniqueConstraints = {@UniqueConstraint(name="UK_ConversationBlock", columnNames = {"blocker", "blocked"})})
 @AllArgsConstructor
 public class Conversation {
     @Id
