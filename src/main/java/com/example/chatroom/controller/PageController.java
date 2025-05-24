@@ -11,12 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class PageController {
 
-    private final UserService userService;
-
-    public PageController(UserService userService) {
-        this.userService = userService;
-    }
-
     @RequestMapping("/home")
     public String home() {
         return "home";

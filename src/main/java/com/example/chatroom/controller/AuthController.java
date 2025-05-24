@@ -45,6 +45,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String token) {
+        log.info("Received Authorization header: {}", token);
         if (token == null || !token.startsWith("Bearer ")) {
             return ResponseEntity.badRequest().body("Token không hợp lệ hoặc không được cung cấp.");
         }

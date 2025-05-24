@@ -4,10 +4,12 @@ import com.example.chatroom.model.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -44,4 +46,5 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             "ORDER BY m.created_at DESC",
             nativeQuery = true)
     List<Message> findLatestMessagesForUser(@Param("userId") Long userId);
+
 }

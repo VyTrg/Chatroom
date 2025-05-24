@@ -1,6 +1,7 @@
 package com.example.chatroom.controller;
 
 import com.example.chatroom.chat.ChatMessage;
+import com.example.chatroom.model.ConversationMember;
 import com.example.chatroom.model.Message;
 import com.example.chatroom.model.User;
 import com.example.chatroom.model.Conversation;

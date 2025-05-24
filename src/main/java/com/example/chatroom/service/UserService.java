@@ -31,5 +31,10 @@ public interface UserService {
 
     User uploadProfilePicture(Long userId, MultipartFile file) throws IOException;
 
+    User getUserByEmailOrUsernameInDiscussion(String search, Long userId);
+
+    User findNewContact(String search, Long userId);
+
+
     void blockUser(Long userId, Long blockedUserId);
 }

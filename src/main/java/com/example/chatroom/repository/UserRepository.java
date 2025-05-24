@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 
@@ -33,5 +34,28 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
+    @Query(value = "SELECT u.* FROM [user] u " +
+            "INNER JOIN contact_with cw " +
+            "ON (cw.contact_one_id = u.id AND cw.contact_two_id = :currentUserId) " +
+            "OR (cw.contact_two_id = u.id AND cw.contact_one_id = :currentUserId) " +
+            "WHERE (u.username = :search OR u.email = :search) " +
+            "AND u.id != :currentUserId",
+            nativeQuery = true)
+    User findByUsernameOrEmailWithInDiscussion(
+            @Param("search") String search,
+            @Param("currentUserId") Long currentUserId
+    );
 
+    @Query(value = "SELECT u.* FROM [user] u " +
+            "LEFT JOIN contact_with cw " +
+            "ON (cw.contact_one_id = u.id AND cw.contact_two_id = :currentUserId) " +
+            "OR (cw.contact_two_id = u.id AND cw.contact_one_id = :currentUserId) " +
+            "WHERE (u.username = :search OR u.email = :search) " +
+            "AND u.id != :currentUserId " +
+            "AND cw.id IS NULL",
+            nativeQuery = true)
+    User findByUsernameOrEmailNotInContactWith(
+            @Param("search") String search,
+            @Param("currentUserId") Long currentUserId
+    );
 }
