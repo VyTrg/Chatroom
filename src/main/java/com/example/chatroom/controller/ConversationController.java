@@ -21,13 +21,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/conversations")
 public class ConversationController {
-    
+
     @Autowired
     private ConversationService conversationService;
-    
+
     @Autowired
     private ContactWithService contactWithService;
-    
+
     @Autowired
     private ConversationRepository conversationRepository;
 
@@ -86,10 +86,10 @@ public class ConversationController {
 
             // Ghi log để debug
             System.out.println("Tìm thấy " + sharedConversations.size() + " cuộc trò chuyện giữa users: " + user1Id + " và " + user2Id);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("conversations", sharedConversations);
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
