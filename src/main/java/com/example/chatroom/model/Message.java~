@@ -8,6 +8,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "message")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -16,12 +17,12 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "user_id",insertable=false, updatable=false)
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name = "user_id")
     private User sender;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "conversation_id",insertable=false, updatable=false)
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name = "conversation_id")
     private Conversation conversation;
 
     @Column(nullable = false, name = "message_text")
