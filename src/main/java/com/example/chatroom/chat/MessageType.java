@@ -5,5 +5,7 @@ public enum MessageType {
     JOIN,
     LEAVE,
     PRIVATE,
-    GROUP
+    GROUP,
+    FRIEND_REQUEST,
+    GROUP_REQUEST,
 }

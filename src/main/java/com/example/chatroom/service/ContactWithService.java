@@ -16,6 +16,4 @@ public interface ContactWithService {
     void deleteContactWith(ContactWith contactWith);
 
     ContactWith getContactWithById(Long id);
-
-
 }

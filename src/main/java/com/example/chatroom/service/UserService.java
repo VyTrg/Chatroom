@@ -30,4 +30,9 @@ public interface UserService {
     Optional<User> getUserById(Long id);
 
     User uploadProfilePicture(Long userId, MultipartFile file) throws IOException;
+
+    User getUserByEmailOrUsernameInDiscussion(String search, Long userId);
+
+    User findNewContact(String search, Long userId);
+
 }

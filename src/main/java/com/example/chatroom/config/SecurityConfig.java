@@ -107,7 +107,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
 //        config.setAllowedOrigins(List.of("*")); // Cho phép tất cả origin truy cập API
-//        config.setAllowedOrigins(List.of("http://localhost:8080"));
+        config.setAllowedOrigins(List.of("http://localhost:8080"));
 
         config.setAllowedOriginPatterns(List.of("*")); // Cho phép tất cả origin truy cập API và WebSocket
 

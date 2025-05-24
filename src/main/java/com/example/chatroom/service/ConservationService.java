@@ -6,4 +6,7 @@ import java.util.List;
 
 public interface ConservationService {
     List<Conversation> getAllConversationsForUser(Long userId);
+
+    Conversation createGroupConversation(List<Long> userIds, String conversationName);
+
 }

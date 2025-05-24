@@ -1,16 +1,27 @@
 package com.example.chatroom.service;
 
 import com.example.chatroom.model.ContactWith;
+import com.example.chatroom.model.User;
 import com.example.chatroom.repository.ContactWithRepository;
+import com.example.chatroom.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ContactWithServiceImpl implements ContactWithService{
     @Autowired
     private ContactWithRepository contactWithRepository;
+
+    @Autowired
+    private UserRepository UserRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public List<ContactWith> getAllContactsWith() {

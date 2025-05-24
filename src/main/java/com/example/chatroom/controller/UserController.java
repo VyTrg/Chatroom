@@ -98,4 +98,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/search-contacts")
+    public ResponseEntity<User> searchUser(@RequestParam("info") String search, @RequestParam("user") Long userId) {
+        User user = userService.getUserByEmailOrUsernameInDiscussion(search, userId);
+        return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/search-new")
+    public ResponseEntity<User> searchNewUser(@RequestParam("info") String search, @RequestParam("user") Long userId) {
+        User user = userService.findNewContact(search, userId);
+        return ResponseEntity.ok(user);
+    }
 }

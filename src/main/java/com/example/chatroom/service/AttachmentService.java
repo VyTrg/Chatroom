@@ -12,4 +12,6 @@ public interface AttachmentService {
     Attachment uploadAttachment(MultipartFile file, Long messageId) throws IOException;
 
     List<Attachment> getAttachmentsByMessageId(Long messageId);
+
+
 }

@@ -18,12 +18,12 @@ public class ContactRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "sender_id",insertable=false, updatable=false)
+    @ManyToOne(optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "sender_id")
     private User sender;
 
-    @ManyToOne(cascade=CascadeType.ALL, optional=true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "receiver_id",insertable=false, updatable=false)
+    @ManyToOne(optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "receiver_id")
     private User receiver;
 
     @Column(nullable = false, name = "created_at")
@@ -32,7 +32,7 @@ public class ContactRequest {
     @Column(nullable = true, name = "delete_at")
     private LocalDateTime deleteAt;
 
-    @Column(nullable = false, name = "is_accepted")
+    @Column(nullable = true, name = "is_accepted")
     private Boolean isAccepted;
 
     public ContactRequest() {

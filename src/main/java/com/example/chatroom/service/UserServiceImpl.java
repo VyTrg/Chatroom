@@ -104,4 +104,15 @@ public class UserServiceImpl implements UserService {
         user.setProfilePicture(imageUrl);
         return userRepository.save(user);
     }
+
+    @Override
+    public User getUserByEmailOrUsernameInDiscussion(String search, Long userId) {
+        return userRepository.findByUsernameOrEmailWithInDiscussion(search, userId);
+    }
+
+    @Override
+    public User findNewContact(String search, Long userId) {
+        return userRepository.findByUsernameOrEmailNotInContactWith(search, userId);
+    }
+
 }
