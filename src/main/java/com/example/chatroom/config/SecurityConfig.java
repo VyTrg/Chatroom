@@ -74,8 +74,8 @@ public class SecurityConfig {
                                 "/api/conversations/**", // Thêm quyền truy cập API conversations
                                 "/home",
                                 "/signup",
-                                "sign-up.html",
-                                "sign-in.html",
+//                                "sign-up.html",
+//                                "sign-in.html",
                                 "/login",
                                 "/error",
                                 "/css/**",        // Cấp quyền truy cập file CSS

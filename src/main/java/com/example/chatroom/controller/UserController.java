@@ -5,6 +5,7 @@ import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.User;
 
 
+import com.example.chatroom.repository.UserRepository;
 import com.example.chatroom.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,6 +30,8 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping
     public List<User> getAllUsers() {
@@ -78,9 +81,11 @@ public class UserController {
     }
 
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable(value = "id")Long userId) {
-        return null;
+        User user = userRepository.findById(userId).orElseThrow();
+        userService.deleteUser(user);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/conversations/{userId}")
@@ -115,4 +120,6 @@ public class UserController {
         userService.blockUser(userId, blockedUserId);
         return ResponseEntity.ok().build();
     }
+
+
 }

@@ -61,35 +61,35 @@ public class User {
 
 
     @JsonIgnore
-    @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "blocker", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Block> blockerUser;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "blocked", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "blocked", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Block> blockerByUser;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ContactRequest> senderUserRequest;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ContactRequest> receiverUserRequest;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Message> senderUserMessages;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ConversationMember> userConversations;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "contactOne", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "contactOne", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<ContactWith> contactOne;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "contactTwo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "contactTwo", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ContactWith> contactTwo;
 
     public User() {
