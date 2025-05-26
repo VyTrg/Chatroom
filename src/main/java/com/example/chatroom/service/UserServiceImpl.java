@@ -111,29 +111,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void blockUser(Long userId, Long blockedUserId) {
-        // Kiểm tra hai người dùng có tồn tại không
-        User blocker = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-
-        User blocked = userRepository.findById(blockedUserId)
-                .orElseThrow(() -> new RuntimeException("User to block not found with id: " + blockedUserId));
-
-        // Kiểm tra nếu đã chặn rồi thì không chặn nữa
-        if (blockRepository.existsByBlockerAndBlocked(blocker, blocked)) {
-            return; // Đã chặn rồi, không làm gì thêm
-        }
-
-        // Tạo bản ghi chặn mới
-        Block block = new Block();
-        block.setBlocker(blocker);
-        block.setBlocked(blocked);
-
-        // Lưu bản ghi chặn
-        blockRepository.save(block);
-    }
-
-    @Override
     public User getUserByEmailOrUsernameInDiscussion(String search, Long userId) {
         return userRepository.findByUsernameOrEmailWithInDiscussion(search, userId);
     }
@@ -143,4 +120,25 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameOrEmailNotInContactWith(search, userId);
     }
 
+    public void blockUser(Long userId, Long blockedUserId) {
+        // Kiểm tra hai người dùng có tồn tại không
+        User blocker = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        
+        User blocked = userRepository.findById(blockedUserId)
+                .orElseThrow(() -> new RuntimeException("User to block not found with id: " + blockedUserId));
+        
+        // Kiểm tra nếu đã chặn rồi thì không chặn nữa
+        if (blockRepository.existsByBlockerAndBlocked(blocker, blocked)) {
+            return; // Đã chặn rồi, không làm gì thêm
+        }
+        
+        // Tạo bản ghi chặn mới
+        Block block = new Block();
+        block.setBlocker(blocker);
+        block.setBlocked(blocked);
+        
+        // Lưu bản ghi chặn
+        blockRepository.save(block);
+    }
 }

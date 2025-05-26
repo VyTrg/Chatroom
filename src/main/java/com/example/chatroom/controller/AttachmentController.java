@@ -32,4 +32,18 @@ public class AttachmentController {
     public ResponseEntity<List<Attachment>> getAttachments(@PathVariable Long messageId) {
         return ResponseEntity.ok(attachmentService.getAttachmentsByMessageId(messageId));
     }
+
+    @PostMapping("/send")
+    public ResponseEntity<Attachment> sendAttachment(
+            @RequestParam("senderId") Long senderId,
+            @RequestParam("conversationId") Long conversationId,
+            @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            Attachment attachment = attachmentService.sendAttachment(senderId, conversationId, file);
+            return ResponseEntity.ok(attachment);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
 }

@@ -7,16 +7,16 @@
     <meta name="description" content="#">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap core CSS -->
-<!--    		<link href="css/lib" type="text/css" rel="stylesheet">-->
+    <!--    		<link href="css/lib" type="text/css" rel="stylesheet">-->
     <!-- Swipe core CSS -->
-<!--    <link href="/css/swipe.min.css" type="text/css" rel="stylesheet">-->
+    <!--    <link href="/css/swipe.min.css" type="text/css" rel="stylesheet">-->
     <!-- Favicon -->
     <link rel="stylesheet" href="/css/lib/bootstrap.min.css">
     <link rel="stylesheet" href="/css/swipe.min.css">
-<!--    <link href="img/favicon.png" type="image/png" rel="icon">-->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">-->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!--    <link href="img/favicon.png" type="image/png" rel="icon">-->
+<!--    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+    <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>-->
     <script src="https://cdn.jsdelivr.net/npm/stomp-websocket@2.3.4-next/lib/stomp.min.js"></script>
     <style>
         p, a, i, h5, span, h1, h2, h3, h4, h5, h6 {
@@ -99,7 +99,7 @@
 
         .alert.warning {
             background-color: #f8d7da; /
-            color: #721c24;
+        color: #721c24;
             border: 1px solid #f5c6cb;
         }
 
@@ -116,15 +116,15 @@
         <div class="navigation">
             <div class="container">
                 <div class="inside">
-<!--                    menu-->
+                    <!--                    menu-->
                     <div class="nav nav-tab menu">
                         <button class="btn"><img class="avatar-xl" alt="avatar"></button>
                         <a href="#members" data-toggle="tab"><i class="material-icons">account_circle</i></a>
                         <a href="#discussions" data-toggle="tab" class="active"><i class="material-icons active">chat_bubble_outline</i></a>
                         <a href="#notifications" data-toggle="tab" class="f-grow1"><i class="material-icons">notifications_none</i></a>
-<!--                        <button class="btn mode"><i class="material-icons">brightness_2</i></button>-->
+                        <!--                        <button class="btn mode"><i class="material-icons">brightness_2</i></button>-->
                         <a href="#settings" data-toggle="tab"><i class="material-icons">settings</i></a>
-                        <button class="btn power" onclick="visitPage();"><i class="material-icons">power_settings_new</i></button>
+                        <button class="btn power" id="logout1" ><i class="material-icons">power_settings_new</i></button>
                     </div>
                 </div>
             </div>
@@ -146,23 +146,25 @@
                                 <button class="btn filterMembersBtn" data-toggle="list" data-filter="online" style="border: none" th:text="#{filter.online}">Online</button>
                                 <button class="btn filterMembersBtn" data-toggle="list" data-filter="offline" style="border: none" th:text="#{filter.offline}">Offline</button>
                             </div>
-<!--                            contact list-->
+                            <!--                            contact list-->
                             <div class="contacts">
                                 <h1 th:text="#{contacts}">Contacts</h1>
                                 <div class="list-group" id="contacts" role="tablist">
-<!--                                    <a href="#" class="filterMembers all online contact" data-toggle="list">-->
-<!--                                        <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">-->
-<!--                                        <div class="status">-->
-<!--                                            <i class="material-icons online">fiber_manual_record</i>-->
-<!--                                        </div>-->
-<!--                                        <div class="data">-->
-<!--                                            <h5>Janette Dalton</h5>-->
-<!--                                        </div>-->
-<!--                                    </a>-->
+                                    <!--                                    <a href="#" class="filterMembers all online contact" data-toggle="list">-->
+                                    <!--                                        <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">-->
+                                    <!--                                        <div class="status">-->
+                                    <!--                                            <i class="material-icons online">fiber_manual_record</i>-->
+                                    <!--                                        </div>-->
+                                    <!--                                        <div class="data">-->
+                                    <!--                                            <h5>Janette Dalton</h5>-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </a>-->
                                 </div>
                             </div>
                         </div>
-<!--                        discussions-->
+                        <!--                        discussions-->
+
+
                         <div id="discussions" class="tab-pane fade active show">
                             <div class="search">
                                 <form class="form-inline position-relative">
@@ -179,20 +181,20 @@
                             <div class="discussions">
                                 <h1 th:text="#{discussions}">Discussions</h1>
                                 <div class="list-group" id="chats" role="tablist">
-<!--                                    <a href="#list-chat" class="filterDiscussions all unread single active" id="list-chat-list" data-toggle="list" role="tab">-->
-<!--                                        <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">-->
-<!--                                        <div class="status">-->
-<!--                                            <i class="material-icons online">fiber_manual_record</i>-->
-<!--                                        </div>-->
-<!--                                        <div class="new bg-yellow">-->
-<!--                                             <span>+7</span>-->
-<!--                                        </div>-->
-<!--                                        <div class="data">-->
-<!--                                            <h5>Name</h5>-->
-<!--                                            <span>Latest time here(format time & day: 11:00am 1/1/24)</span>-->
-<!--                                            <p>Newest message here...</p>-->
-<!--                                        </div>-->
-<!--                                    </a>-->
+                                    <!--                                    <a href="#list-chat" class="filterDiscussions all unread single active" id="list-chat-list" data-toggle="list" role="tab">-->
+                                    <!--                                        <img class="avatar-md" src="img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">-->
+                                    <!--                                        <div class="status">-->
+                                    <!--                                            <i class="material-icons online">fiber_manual_record</i>-->
+                                    <!--                                        </div>-->
+                                    <!--                                        <div class="new bg-yellow">-->
+                                    <!--                                             <span>+7</span>-->
+                                    <!--                                        </div>-->
+                                    <!--                                        <div class="data">-->
+                                    <!--                                            <h5>Name</h5>-->
+                                    <!--                                            <span>Latest time here(format time & day: 11:00am 1/1/24)</span>-->
+                                    <!--                                            <p>Newest message here...</p>-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </a>-->
                                 </div>
                             </div>
                         </div>
@@ -246,21 +248,21 @@
                                 <div class="profile">
                                     <img class="avatar-xl" alt="avatar">
                                     <h1>Michael Knudsen</h1>
-<!--                                    <span>Helena, Montana</span>-->
-<!--                                    <div class="stats">-->
-<!--                                        <div class="item">-->
-<!--                                            <h2>122</h2>-->
-<!--                                            <h3>Fellas</h3>-->
-<!--                                        </div>-->
-<!--                                        <div class="item">-->
-<!--                                            <h2>305</h2>-->
-<!--                                            <h3>Chats</h3>-->
-<!--                                        </div>-->
-<!--                                        <div class="item">-->
-<!--                                            <h2>1538</h2>-->
-<!--                                            <h3>Posts</h3>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
+                                    <!--                                    <span>Helena, Montana</span>-->
+                                    <!--                                    <div class="stats">-->
+                                    <!--                                        <div class="item">-->
+                                    <!--                                            <h2>122</h2>-->
+                                    <!--                                            <h3>Fellas</h3>-->
+                                    <!--                                        </div>-->
+                                    <!--                                        <div class="item">-->
+                                    <!--                                            <h2>305</h2>-->
+                                    <!--                                            <h3>Chats</h3>-->
+                                    <!--                                        </div>-->
+                                    <!--                                        <div class="item">-->
+                                    <!--                                            <h2>1538</h2>-->
+                                    <!--                                            <h3>Posts</h3>-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </div>-->
                                 </div>
                                 <div class="categories" id="accordionSettings">
                                     <h1 th:text="#{settings}">Settings</h1>
@@ -309,11 +311,11 @@
                                                         <label for="password" th:text="#{setting.password}">Password</label>
                                                         <input type="password" class="form-control" id="password" th:placeholder='#{password.content}'>
                                                     </div>
-<!--                                                    <div class="field">-->
-<!--                                                        <label for="location">Location</label>-->
-<!--                                                        <input type="text" class="form-control" id="location" placeholder="Enter your location" value="Helena, Montana" required>-->
-<!--                                                    </div>-->
-                                                    <button class="btn btn-link w-100" th:text="#{delete.account}">Delete Account</button>
+                                                    <!--                                                    <div class="field">-->
+                                                    <!--                                                        <label for="location">Location</label>-->
+                                                    <!--                                                        <input type="text" class="form-control" id="location" placeholder="Enter your location" value="Helena, Montana" required>-->
+                                                    <!--                                                    </div>-->
+                                                    <button type="button" class="btn btn-link w-100" id="deleteAccountBtn" th:text="#{delete.account}">Delete Account</button>
                                                     <button type="submit" class="btn button w-100" th:text="#{apply}">Apply</button>
                                                 </form>
                                             </div>
@@ -321,193 +323,193 @@
                                     </div>
                                     <!-- End of My Account -->
                                     <!-- Start of Chat History -->
-<!--                                    <div class="category">-->
-<!--                                        <a href="#" class="title collapsed" id="headingTwo" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">-->
-<!--                                            <i class="material-icons md-30 online">mail_outline</i>-->
-<!--                                            <div class="data">-->
-<!--                                                <h5>Chats</h5>-->
-<!--                                                <p>Check your chat history</p>-->
-<!--                                            </div>-->
-<!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
-<!--                                        </a>-->
-<!--                                        <div class="collapse" id="collapseTwo" aria-labelledby="headingTwo" data-parent="#accordionSettings">-->
-<!--                                            <div class="content layer">-->
-<!--                                                <div class="history">-->
-<!--                                                    <p>When you clear your conversation history, the messages will be deleted from your own device.</p>-->
-<!--                                                    <p>The messages won't be deleted or cleared on the devices of the people you chatted with.</p>-->
-<!--                                                    <div class="custom-control custom-checkbox">-->
-<!--                                                        <input type="checkbox" class="custom-control-input" id="same-address">-->
-<!--                                                        <label class="custom-control-label" for="same-address">Hide will remove your chat history from the recent list.</label>-->
-<!--                                                    </div>-->
-<!--                                                    <div class="custom-control custom-checkbox">-->
-<!--                                                        <input type="checkbox" class="custom-control-input" id="save-info">-->
-<!--                                                        <label class="custom-control-label" for="save-info">Delete will remove your chat history from the device.</label>-->
-<!--                                                    </div>-->
-<!--                                                    <button type="submit" class="btn button w-100">Clear blah-blah</button>-->
-<!--                                                </div>-->
-<!--                                            </div>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
+                                    <!--                                    <div class="category">-->
+                                    <!--                                        <a href="#" class="title collapsed" id="headingTwo" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">-->
+                                    <!--                                            <i class="material-icons md-30 online">mail_outline</i>-->
+                                    <!--                                            <div class="data">-->
+                                    <!--                                                <h5>Chats</h5>-->
+                                    <!--                                                <p>Check your chat history</p>-->
+                                    <!--                                            </div>-->
+                                    <!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
+                                    <!--                                        </a>-->
+                                    <!--                                        <div class="collapse" id="collapseTwo" aria-labelledby="headingTwo" data-parent="#accordionSettings">-->
+                                    <!--                                            <div class="content layer">-->
+                                    <!--                                                <div class="history">-->
+                                    <!--                                                    <p>When you clear your conversation history, the messages will be deleted from your own device.</p>-->
+                                    <!--                                                    <p>The messages won't be deleted or cleared on the devices of the people you chatted with.</p>-->
+                                    <!--                                                    <div class="custom-control custom-checkbox">-->
+                                    <!--                                                        <input type="checkbox" class="custom-control-input" id="same-address">-->
+                                    <!--                                                        <label class="custom-control-label" for="same-address">Hide will remove your chat history from the recent list.</label>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <div class="custom-control custom-checkbox">-->
+                                    <!--                                                        <input type="checkbox" class="custom-control-input" id="save-info">-->
+                                    <!--                                                        <label class="custom-control-label" for="save-info">Delete will remove your chat history from the device.</label>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <button type="submit" class="btn button w-100">Clear blah-blah</button>-->
+                                    <!--                                                </div>-->
+                                    <!--                                            </div>-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </div>-->
                                     <!-- End of Chat History -->
                                     <!-- Start of Notifications Settings -->
-<!--                                    <div class="category">-->
-<!--                                        <a href="#" class="title collapsed" id="headingThree" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">-->
-<!--                                            <i class="material-icons md-30 online">notifications_none</i>-->
-<!--                                            <div class="data">-->
-<!--                                                <h5>Notifications</h5>-->
-<!--                                                <p>Turn notifications on or off</p>-->
-<!--                                            </div>-->
-<!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
-<!--                                        </a>-->
-<!--                                        <div class="collapse" id="collapseThree" aria-labelledby="headingThree" data-parent="#accordionSettings">-->
-<!--                                            <div class="content no-layer">-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Desktop Notifications</h5>-->
-<!--                                                        <p>You can set up Swipe to receive notifications when you have new messages.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox" checked>-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Unread Message Badge</h5>-->
-<!--                                                        <p>If enabled shows a red badge on the Swipe app icon when you have unread messages.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox" checked>-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Taskbar Flashing</h5>-->
-<!--                                                        <p>Flashes the Swipe app on mobile in your taskbar when you have new notifications.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox">-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Notification Sound</h5>-->
-<!--                                                        <p>Set the app to alert you via notification sound when you have unread messages.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox" checked>-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Vibrate</h5>-->
-<!--                                                        <p>Vibrate when receiving new messages (Ensure system vibration is also enabled).</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox">-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Turn On Lights</h5>-->
-<!--                                                        <p>When someone send you a text message you will receive alert via notification light.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox">-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                            </div>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-<!--                                    <div class="category">-->
-<!--                                        <a href="#" class="title collapsed" id="headingFour" data-toggle="collapse" data-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">-->
-<!--                                            <i class="material-icons md-30 online">sync</i>-->
-<!--                                            <div class="data">-->
-<!--                                                <h5>Connections</h5>-->
-<!--                                                <p>Sync your social accounts</p>-->
-<!--                                            </div>-->
-<!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
-<!--                                        </a>-->
-<!--                                        <div class="collapse" id="collapseFour" aria-labelledby="headingFour" data-parent="#accordionSettings">-->
-<!--                                            <div class="content">-->
-<!--                                                <div class="app">-->
-<!--                                                    <img src="img/integrations/slack.svg" alt="app">-->
-<!--                                                    <div class="permissions">-->
-<!--                                                        <h5>Skrill</h5>-->
-<!--                                                        <p>Read, Write, Comment</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox" checked>-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="app">-->
-<!--                                                    <img src="img/integrations/dropbox.svg" alt="app">-->
-<!--                                                    <div class="permissions">-->
-<!--                                                        <h5>Dropbox</h5>-->
-<!--                                                        <p>Read, Write, Upload</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox" checked>-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="app">-->
-<!--                                                    <img src="img/integrations/drive.svg" alt="app">-->
-<!--                                                    <div class="permissions">-->
-<!--                                                        <h5>Google Drive</h5>-->
-<!--                                                        <p>No permissions set</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox">-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="app">-->
-<!--                                                    <img src="img/integrations/trello.svg" alt="app">-->
-<!--                                                    <div class="permissions">-->
-<!--                                                        <h5>Trello</h5>-->
-<!--                                                        <p>No permissions set</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox">-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                            </div>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
+                                    <!--                                    <div class="category">-->
+                                    <!--                                        <a href="#" class="title collapsed" id="headingThree" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">-->
+                                    <!--                                            <i class="material-icons md-30 online">notifications_none</i>-->
+                                    <!--                                            <div class="data">-->
+                                    <!--                                                <h5>Notifications</h5>-->
+                                    <!--                                                <p>Turn notifications on or off</p>-->
+                                    <!--                                            </div>-->
+                                    <!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
+                                    <!--                                        </a>-->
+                                    <!--                                        <div class="collapse" id="collapseThree" aria-labelledby="headingThree" data-parent="#accordionSettings">-->
+                                    <!--                                            <div class="content no-layer">-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Desktop Notifications</h5>-->
+                                    <!--                                                        <p>You can set up Swipe to receive notifications when you have new messages.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox" checked>-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Unread Message Badge</h5>-->
+                                    <!--                                                        <p>If enabled shows a red badge on the Swipe app icon when you have unread messages.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox" checked>-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Taskbar Flashing</h5>-->
+                                    <!--                                                        <p>Flashes the Swipe app on mobile in your taskbar when you have new notifications.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox">-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Notification Sound</h5>-->
+                                    <!--                                                        <p>Set the app to alert you via notification sound when you have unread messages.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox" checked>-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Vibrate</h5>-->
+                                    <!--                                                        <p>Vibrate when receiving new messages (Ensure system vibration is also enabled).</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox">-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Turn On Lights</h5>-->
+                                    <!--                                                        <p>When someone send you a text message you will receive alert via notification light.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox">-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                            </div>-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </div>-->
+                                    <!--                                    <div class="category">-->
+                                    <!--                                        <a href="#" class="title collapsed" id="headingFour" data-toggle="collapse" data-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">-->
+                                    <!--                                            <i class="material-icons md-30 online">sync</i>-->
+                                    <!--                                            <div class="data">-->
+                                    <!--                                                <h5>Connections</h5>-->
+                                    <!--                                                <p>Sync your social accounts</p>-->
+                                    <!--                                            </div>-->
+                                    <!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
+                                    <!--                                        </a>-->
+                                    <!--                                        <div class="collapse" id="collapseFour" aria-labelledby="headingFour" data-parent="#accordionSettings">-->
+                                    <!--                                            <div class="content">-->
+                                    <!--                                                <div class="app">-->
+                                    <!--                                                    <img src="img/integrations/slack.svg" alt="app">-->
+                                    <!--                                                    <div class="permissions">-->
+                                    <!--                                                        <h5>Skrill</h5>-->
+                                    <!--                                                        <p>Read, Write, Comment</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox" checked>-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="app">-->
+                                    <!--                                                    <img src="img/integrations/dropbox.svg" alt="app">-->
+                                    <!--                                                    <div class="permissions">-->
+                                    <!--                                                        <h5>Dropbox</h5>-->
+                                    <!--                                                        <p>Read, Write, Upload</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox" checked>-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="app">-->
+                                    <!--                                                    <img src="img/integrations/drive.svg" alt="app">-->
+                                    <!--                                                    <div class="permissions">-->
+                                    <!--                                                        <h5>Google Drive</h5>-->
+                                    <!--                                                        <p>No permissions set</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox">-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="app">-->
+                                    <!--                                                    <img src="img/integrations/trello.svg" alt="app">-->
+                                    <!--                                                    <div class="permissions">-->
+                                    <!--                                                        <h5>Trello</h5>-->
+                                    <!--                                                        <p>No permissions set</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox">-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                            </div>-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </div>-->
                                     <!-- End of Connections -->
                                     <!-- Start of Appearance Settings -->
-<!--                                    <div class="category">-->
-<!--                                        <a href="#" class="title collapsed" id="headingFive" data-toggle="collapse" data-target="#collapseFive" aria-expanded="true" aria-controls="collapseFive">-->
-<!--                                            <i class="material-icons md-30 online">colorize</i>-->
-<!--                                            <div class="data">-->
-<!--                                                <h5>Appearance</h5>-->
-<!--                                                <p>Customize the look of Swipe</p>-->
-<!--                                            </div>-->
-<!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
-<!--                                        </a>-->
-<!--                                        <div class="collapse" id="collapseFive" aria-labelledby="headingFive" data-parent="#accordionSettings">-->
-<!--                                            <div class="content no-layer">-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Turn Off Lights</h5>-->
-<!--                                                        <p>The dark mode is applied to core areas of the app that are normally displayed as light.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox">-->
-<!--                                                        <span class="slider round mode"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                            </div>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
+                                    <!--                                    <div class="category">-->
+                                    <!--                                        <a href="#" class="title collapsed" id="headingFive" data-toggle="collapse" data-target="#collapseFive" aria-expanded="true" aria-controls="collapseFive">-->
+                                    <!--                                            <i class="material-icons md-30 online">colorize</i>-->
+                                    <!--                                            <div class="data">-->
+                                    <!--                                                <h5>Appearance</h5>-->
+                                    <!--                                                <p>Customize the look of Swipe</p>-->
+                                    <!--                                            </div>-->
+                                    <!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
+                                    <!--                                        </a>-->
+                                    <!--                                        <div class="collapse" id="collapseFive" aria-labelledby="headingFive" data-parent="#accordionSettings">-->
+                                    <!--                                            <div class="content no-layer">-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Turn Off Lights</h5>-->
+                                    <!--                                                        <p>The dark mode is applied to core areas of the app that are normally displayed as light.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox">-->
+                                    <!--                                                        <span class="slider round mode"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                            </div>-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </div>-->
                                     <!-- End of Appearance Settings -->
                                     <!-- Start of Language -->
                                     <div class="category">
@@ -533,80 +535,80 @@
                                     </div>
                                     <!-- End of Language -->
                                     <!-- Start of Privacy & Safety -->
-<!--                                    <div class="category">-->
-<!--                                        <a href="#" class="title collapsed" id="headingSeven" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="true" aria-controls="collapseSeven">-->
-<!--                                            <i class="material-icons md-30 online">lock_outline</i>-->
-<!--                                            <div class="data">-->
-<!--                                                <h5>Privacy & Safety</h5>-->
-<!--                                                <p>Control your privacy settings</p>-->
-<!--                                            </div>-->
-<!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
-<!--                                        </a>-->
-<!--                                        <div class="collapse" id="collapseSeven" aria-labelledby="headingSeven" data-parent="#accordionSettings">-->
-<!--                                            <div class="content no-layer">-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Keep Me Safe</h5>-->
-<!--                                                        <p>Automatically scan and delete direct messages you receive from everyone that contain explict content.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox">-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>My Friends Are Nice</h5>-->
-<!--                                                        <p>If enabled scans direct messages from everyone unless they are listed as your friend.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox" checked>-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Everyone can add me</h5>-->
-<!--                                                        <p>If enabled anyone in or out your friends of friends list can send you a friend request.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox" checked>-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Friends of Friends</h5>-->
-<!--                                                        <p>Only your friends or your mutual friends will be able to send you a friend reuqest.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox" checked>-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Data to Improve</h5>-->
-<!--                                                        <p>This settings allows us to use and process information for analytical purposes.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox">-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                                <div class="set">-->
-<!--                                                    <div class="details">-->
-<!--                                                        <h5>Data to Customize</h5>-->
-<!--                                                        <p>This settings allows us to use your information to customize Swipe for you.</p>-->
-<!--                                                    </div>-->
-<!--                                                    <label class="switch">-->
-<!--                                                        <input type="checkbox">-->
-<!--                                                        <span class="slider round"></span>-->
-<!--                                                    </label>-->
-<!--                                                </div>-->
-<!--                                            </div>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
+                                    <!--                                    <div class="category">-->
+                                    <!--                                        <a href="#" class="title collapsed" id="headingSeven" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="true" aria-controls="collapseSeven">-->
+                                    <!--                                            <i class="material-icons md-30 online">lock_outline</i>-->
+                                    <!--                                            <div class="data">-->
+                                    <!--                                                <h5>Privacy & Safety</h5>-->
+                                    <!--                                                <p>Control your privacy settings</p>-->
+                                    <!--                                            </div>-->
+                                    <!--                                            <i class="material-icons">keyboard_arrow_right</i>-->
+                                    <!--                                        </a>-->
+                                    <!--                                        <div class="collapse" id="collapseSeven" aria-labelledby="headingSeven" data-parent="#accordionSettings">-->
+                                    <!--                                            <div class="content no-layer">-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Keep Me Safe</h5>-->
+                                    <!--                                                        <p>Automatically scan and delete direct messages you receive from everyone that contain explict content.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox">-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>My Friends Are Nice</h5>-->
+                                    <!--                                                        <p>If enabled scans direct messages from everyone unless they are listed as your friend.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox" checked>-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Everyone can add me</h5>-->
+                                    <!--                                                        <p>If enabled anyone in or out your friends of friends list can send you a friend request.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox" checked>-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Friends of Friends</h5>-->
+                                    <!--                                                        <p>Only your friends or your mutual friends will be able to send you a friend reuqest.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox" checked>-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Data to Improve</h5>-->
+                                    <!--                                                        <p>This settings allows us to use and process information for analytical purposes.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox">-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                                <div class="set">-->
+                                    <!--                                                    <div class="details">-->
+                                    <!--                                                        <h5>Data to Customize</h5>-->
+                                    <!--                                                        <p>This settings allows us to use your information to customize Swipe for you.</p>-->
+                                    <!--                                                    </div>-->
+                                    <!--                                                    <label class="switch">-->
+                                    <!--                                                        <input type="checkbox">-->
+                                    <!--                                                        <span class="slider round"></span>-->
+                                    <!--                                                    </label>-->
+                                    <!--                                                </div>-->
+                                    <!--                                            </div>-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </div>-->
                                     <!-- End of Privacy & Safety -->
                                     <!-- Start of Logout -->
                                     <div class="category">
@@ -629,6 +631,134 @@
             </div>
         </div>
         <!-- End of Sidebar -->
+<!--        rename dialog-->
+        <div class="modal fade" id="modalDeleteContact" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="requests">
+                    <div class="title">
+                        <h1>Delete contact?</h1>
+                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                            <i class="material-icons">close</i>
+                        </button>
+                    </div>
+                    <div class="content">
+                        <form id="deleteContactForm">
+                            <div class="form-group user-tag">
+                                <button type="button" id="confirmDeleteContact" class="btn button w-100" style="margin: 10px">Accept</button>
+                                <button type="button" class="btn button w-100" data-dismiss="modal" style="margin: 10px">Decline</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalRename" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="requests">
+                    <div class="title">
+                        <h1>Rename discussion</h1>
+                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+                    </div>
+                    <div class="content">
+                        <form id="renameForm">
+                            <div class="form-group user-tag">
+                                <input type="text" class="form-control" id="renameDiscussion" required>
+                            </div>
+                            <button type="submit" class="btn button w-100">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+<!--        block contact confirm-->
+        <div class="modal fade" id="modalBlockContact" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="requests">
+                    <div class="title">
+                        <h1>Block this contact?</h1>
+                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                            <i class="material-icons">close</i>
+                        </button>
+                    </div>
+                    <div class="content">
+                        <form id="blockContactForm">
+                            <div class="form-group user-tag">
+                                <button type="button" id="confirmBlockContact" class="btn button w-100" style="margin: 10px">Accept</button>
+                                <button type="button" class="btn button w-100" data-dismiss="modal" style="margin: 10px">Decline</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!--        clear history dialog confirm-->
+        <div class="modal fade" id="modalClearHistory" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="requests">
+                    <div class="title">
+                        <h1>Clear chat history?</h1>
+                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                            <i class="material-icons">close</i>
+                        </button>
+                    </div>
+                    <div class="content">
+                        <form id="clearHistoryForm">
+                            <div class="form-group user-tag">
+                                <button type="button" id="confirmClearHistory" class="btn button w-100" style="margin: 10px">Accept</button>
+                                <button type="button" class="btn button w-100" data-dismiss="modal" style="margin: 10px">Decline</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--      delete message  confirm dialog-->
+        <div class="modal fade" id="modalConfirm" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="requests">
+                    <div class="title">
+                        <h1>Delete message?</h1>
+                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+                    </div>
+                    <div class="content">
+                        <form id="confirmForm">
+                            <div class="form-group user-tag">
+                                <button type="button" id="confirmDelete" class="btn button w-100" style="margin: 10px">Accept</button>
+                                <button type="button" id="cancelDelete" class="btn button w-100" style="margin: 10px">Decline</button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--        update message dialog-->
+        <div class="modal fade" id="modalUpdateMessage" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="requests">
+                    <div class="title">
+                        <h1>Edit message</h1>
+                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+                    </div>
+                    <div class="content">
+                        <form id="updateMessage">
+                            <div class="form-group user-tag">
+                                <div id="alert-message3" class="alert"></div>
+                                <input type="text" class="form-control" id="editMessage" required>
+                            </div>
+<!--                            <div class="tag-area tag-input-wrapper user-tag" id="userTag">-->
+<!--                             -->
+<!--                            </div>-->
+                            <button type="submit" class="btn button w-100">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Start of Add Friends -->
         <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -645,8 +775,8 @@
                                 <input type="text" class="form-control" id="user" required>
                             </div>
                             <div class="tag-area tag-input-wrapper user-tag" id="userTag">
-<!--                                <label for="welcome" th:text="#{add.friend.message}">Message:</label>-->
-<!--                                <textarea class="text-control" id="welcome"></textarea>-->
+                                <!--                                <label for="welcome" th:text="#{add.friend.message}">Message:</label>-->
+                                <!--                                <textarea class="text-control" id="welcome"></textarea>-->
                             </div>
                             <button type="submit" class="btn button w-100" th:text="#{add.friend.send}">Send Friend Request</button>
                         </form>
@@ -679,10 +809,10 @@
                                 <label for="topic" th:text="#{topic}">Topic:</label>
                                 <input type="text" class="form-control" id="topic" required>
                             </div>
-<!--                            <div class="form-group">-->
-<!--                                <label for="message" th:text="#{add.friend.message}">Message:</label>-->
-<!--                                <textarea class="text-control" id="message"></textarea>-->
-<!--                            </div>-->
+                            <!--                            <div class="form-group">-->
+                            <!--                                <label for="message" th:text="#{add.friend.message}">Message:</label>-->
+                            <!--                                <textarea class="text-control" id="message"></textarea>-->
+                            <!--                            </div>-->
                             <button type="submit" class="btn button w-100" th:text="#{start.conversation}">Start New Chat</button>
                         </form>
                     </div>
@@ -712,186 +842,186 @@
                     </div>
                     <!-- End of Chat -->
                     <!-- Start of Call -->
-<!--                    <div class="call" id="call1">-->
-<!--                        <div class="content">-->
-<!--                            <div class="container">-->
-<!--                                <div class="col-md-12">-->
-<!--                                    <div class="inside">-->
-<!--                                        <div class="panel">-->
-<!--                                            <div class="participant">-->
-<!--                                                <img class="avatar-xxl" src="img/avatars/avatar-female-5.jpg" alt="avatar">-->
-<!--                                                <span>Connecting</span>-->
-<!--                                            </div>-->
-<!--                                            <div class="options">-->
-<!--                                                <button class="btn option"><i class="material-icons md-30">mic</i></button>-->
-<!--                                                <button class="btn option"><i class="material-icons md-30">videocam</i></button>-->
-<!--                                                <button class="btn option call-end"><i class="material-icons md-30">call_end</i></button>-->
-<!--                                                <button class="btn option"><i class="material-icons md-30">person_add</i></button>-->
-<!--                                                <button class="btn option"><i class="material-icons md-30">volume_up</i></button>-->
-<!--                                            </div>-->
-<!--                                            <button class="btn back" name="1"><i class="material-icons md-24">chat</i></button>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
+                    <!--                    <div class="call" id="call1">-->
+                    <!--                        <div class="content">-->
+                    <!--                            <div class="container">-->
+                    <!--                                <div class="col-md-12">-->
+                    <!--                                    <div class="inside">-->
+                    <!--                                        <div class="panel">-->
+                    <!--                                            <div class="participant">-->
+                    <!--                                                <img class="avatar-xxl" src="img/avatars/avatar-female-5.jpg" alt="avatar">-->
+                    <!--                                                <span>Connecting</span>-->
+                    <!--                                            </div>-->
+                    <!--                                            <div class="options">-->
+                    <!--                                                <button class="btn option"><i class="material-icons md-30">mic</i></button>-->
+                    <!--                                                <button class="btn option"><i class="material-icons md-30">videocam</i></button>-->
+                    <!--                                                <button class="btn option call-end"><i class="material-icons md-30">call_end</i></button>-->
+                    <!--                                                <button class="btn option"><i class="material-icons md-30">person_add</i></button>-->
+                    <!--                                                <button class="btn option"><i class="material-icons md-30">volume_up</i></button>-->
+                    <!--                                            </div>-->
+                    <!--                                            <button class="btn back" name="1"><i class="material-icons md-24">chat</i></button>-->
+                    <!--                                        </div>-->
+                    <!--                                    </div>-->
+                    <!--                                </div>-->
+                    <!--                            </div>-->
+                    <!--                        </div>-->
+                    <!--                    </div>-->
                     <!-- End of Call -->
                 </div>
                 <!-- End of Babble -->
                 <!-- Start of Babble -->
                 <div class="babble tab-pane fade" id="list-empty" role="tabpanel" aria-labelledby="list-empty-list">
                     <!-- Start of Chat -->
-<!--                    <div class="chat" id="chat2">-->
-<!--                        <div class="top">-->
-<!--                            <div class="container">-->
-<!--                                <div class="col-md-12">-->
-<!--                                    <div class="inside">-->
-<!--                                        <a href="#"><img class="avatar-md" src="img/avatars/avatar-female-2.jpg" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar"></a>-->
-<!--                                        <div class="status">-->
-<!--                                            <i class="material-icons offline">fiber_manual_record</i>-->
-<!--                                        </div>-->
-<!--                                        <div class="data">-->
-<!--                                            <h5><a href="#">Lean Avent</a></h5>-->
-<!--                                            <span>Inactive</span>-->
-<!--                                        </div>-->
-<!--                                        <button class="btn connect d-md-block d-none" name="2"><i class="material-icons md-30">phone_in_talk</i></button>-->
-<!--                                        <button class="btn connect d-md-block d-none" name="2"><i class="material-icons md-36">videocam</i></button>-->
-<!--                                        <button class="btn d-md-block d-none"><i class="material-icons md-30">info</i></button>-->
-<!--                                        <div class="dropdown">-->
-<!--                                            <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>-->
-<!--                                            <div class="dropdown-menu dropdown-menu-right">-->
-<!--                                                <button class="dropdown-item connect" name="2"><i class="material-icons">phone_in_talk</i>Voice Call</button>-->
-<!--                                                <button class="dropdown-item connect" name="2"><i class="material-icons">videocam</i>Video Call</button>-->
-<!--                                                <hr>-->
-<!--                                                <button class="dropdown-item"><i class="material-icons">clear</i>Clear History</button>-->
-<!--                                                <button class="dropdown-item"><i class="material-icons">block</i>Block Contact</button>-->
-<!--                                                <button class="dropdown-item"><i class="material-icons">delete</i>Delete Contact</button>-->
-<!--                                            </div>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="content empty">-->
-<!--                            <div class="container">-->
-<!--                                <div class="col-md-12">-->
-<!--                                    <div class="no-messages">-->
-<!--                                        <i class="material-icons md-48">forum</i>-->
-<!--                                        <p>Seems people are shy to start the chat. Break the ice send the first message.</p>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="container">-->
-<!--                            <div class="col-md-12">-->
-<!--                                <div class="bottom">-->
-<!--                                    <form class="position-relative w-100">-->
-<!--                                        <textarea class="form-control" placeholder="Start typing for reply..." rows="1"></textarea>-->
-<!--&lt;!&ndash;                                        <button class="btn emoticons"><i class="material-icons">insert_emoticon</i></button>&ndash;&gt;-->
-<!--                                        <button type="submit" class="btn send"><i class="material-icons">send</i></button>-->
-<!--                                    </form>-->
-<!--                                    <label>-->
-<!--                                        <input type="file">-->
-<!--                                        <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>-->
-<!--                                    </label>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
+                    <!--                    <div class="chat" id="chat2">-->
+                    <!--                        <div class="top">-->
+                    <!--                            <div class="container">-->
+                    <!--                                <div class="col-md-12">-->
+                    <!--                                    <div class="inside">-->
+                    <!--                                        <a href="#"><img class="avatar-md" src="img/avatars/avatar-female-2.jpg" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar"></a>-->
+                    <!--                                        <div class="status">-->
+                    <!--                                            <i class="material-icons offline">fiber_manual_record</i>-->
+                    <!--                                        </div>-->
+                    <!--                                        <div class="data">-->
+                    <!--                                            <h5><a href="#">Lean Avent</a></h5>-->
+                    <!--                                            <span>Inactive</span>-->
+                    <!--                                        </div>-->
+                    <!--                                        <button class="btn connect d-md-block d-none" name="2"><i class="material-icons md-30">phone_in_talk</i></button>-->
+                    <!--                                        <button class="btn connect d-md-block d-none" name="2"><i class="material-icons md-36">videocam</i></button>-->
+                    <!--                                        <button class="btn d-md-block d-none"><i class="material-icons md-30">info</i></button>-->
+                    <!--                                        <div class="dropdown">-->
+                    <!--                                            <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>-->
+                    <!--                                            <div class="dropdown-menu dropdown-menu-right">-->
+                    <!--                                                <button class="dropdown-item connect" name="2"><i class="material-icons">phone_in_talk</i>Voice Call</button>-->
+                    <!--                                                <button class="dropdown-item connect" name="2"><i class="material-icons">videocam</i>Video Call</button>-->
+                    <!--                                                <hr>-->
+                    <!--                                                <button class="dropdown-item"><i class="material-icons">clear</i>Clear History</button>-->
+                    <!--                                                <button class="dropdown-item"><i class="material-icons">block</i>Block Contact</button>-->
+                    <!--                                                <button class="dropdown-item"><i class="material-icons">delete</i>Delete Contact</button>-->
+                    <!--                                            </div>-->
+                    <!--                                        </div>-->
+                    <!--                                    </div>-->
+                    <!--                                </div>-->
+                    <!--                            </div>-->
+                    <!--                        </div>-->
+                    <!--                        <div class="content empty">-->
+                    <!--                            <div class="container">-->
+                    <!--                                <div class="col-md-12">-->
+                    <!--                                    <div class="no-messages">-->
+                    <!--                                        <i class="material-icons md-48">forum</i>-->
+                    <!--                                        <p>Seems people are shy to start the chat. Break the ice send the first message.</p>-->
+                    <!--                                    </div>-->
+                    <!--                                </div>-->
+                    <!--                            </div>-->
+                    <!--                        </div>-->
+                    <!--                        <div class="container">-->
+                    <!--                            <div class="col-md-12">-->
+                    <!--                                <div class="bottom">-->
+                    <!--                                    <form class="position-relative w-100">-->
+                    <!--                                        <textarea class="form-control" placeholder="Start typing for reply..." rows="1"></textarea>-->
+                    <!--&lt;!&ndash;                                        <button class="btn emoticons"><i class="material-icons">insert_emoticon</i></button>&ndash;&gt;-->
+                    <!--                                        <button type="submit" class="btn send"><i class="material-icons">send</i></button>-->
+                    <!--                                    </form>-->
+                    <!--                                    <label>-->
+                    <!--                                        <input type="file">-->
+                    <!--                                        <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>-->
+                    <!--                                    </label>-->
+                    <!--                                </div>-->
+                    <!--                            </div>-->
+                    <!--                        </div>-->
+                    <!--                    </div>-->
                     <!-- End of Chat -->
                     <!-- Start of Call -->
-<!--                    <div class="call" id="call2">-->
-<!--                        <div class="content">-->
-<!--                            <div class="container">-->
-<!--                                <div class="col-md-12">-->
-<!--                                    <div class="inside">-->
-<!--                                        <div class="panel">-->
-<!--                                            <div class="participant">-->
-<!--                                                <img class="avatar-xxl" src="img/avatars/avatar-female-2.jpg" alt="avatar">-->
-<!--                                                <span>Connecting</span>-->
-<!--                                            </div>-->
-<!--                                            <div class="options">-->
-<!--                                                <button class="btn option"><i class="material-icons md-30">mic</i></button>-->
-<!--                                                <button class="btn option"><i class="material-icons md-30">videocam</i></button>-->
-<!--                                                <button class="btn option call-end"><i class="material-icons md-30">call_end</i></button>-->
-<!--                                                <button class="btn option"><i class="material-icons md-30">person_add</i></button>-->
-<!--                                                <button class="btn option"><i class="material-icons md-30">volume_up</i></button>-->
-<!--                                            </div>-->
-<!--                                            <button class="btn back" name="2"><i class="material-icons md-24">chat</i></button>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
+                    <!--                    <div class="call" id="call2">-->
+                    <!--                        <div class="content">-->
+                    <!--                            <div class="container">-->
+                    <!--                                <div class="col-md-12">-->
+                    <!--                                    <div class="inside">-->
+                    <!--                                        <div class="panel">-->
+                    <!--                                            <div class="participant">-->
+                    <!--                                                <img class="avatar-xxl" src="img/avatars/avatar-female-2.jpg" alt="avatar">-->
+                    <!--                                                <span>Connecting</span>-->
+                    <!--                                            </div>-->
+                    <!--                                            <div class="options">-->
+                    <!--                                                <button class="btn option"><i class="material-icons md-30">mic</i></button>-->
+                    <!--                                                <button class="btn option"><i class="material-icons md-30">videocam</i></button>-->
+                    <!--                                                <button class="btn option call-end"><i class="material-icons md-30">call_end</i></button>-->
+                    <!--                                                <button class="btn option"><i class="material-icons md-30">person_add</i></button>-->
+                    <!--                                                <button class="btn option"><i class="material-icons md-30">volume_up</i></button>-->
+                    <!--                                            </div>-->
+                    <!--                                            <button class="btn back" name="2"><i class="material-icons md-24">chat</i></button>-->
+                    <!--                                        </div>-->
+                    <!--                                    </div>-->
+                    <!--                                </div>-->
+                    <!--                            </div>-->
+                    <!--                        </div>-->
+                    <!--                    </div>-->
                     <!-- End of Call -->
                 </div>
                 <!-- End of Babble -->
                 <!-- Start of Babble -->
                 <div class="babble tab-pane fade" id="list-request" role="tabpanel" aria-labelledby="list-request-list">
                     <!-- Start of Chat -->
-<!--                    <div class="chat" id="chat3">-->
-<!--                        <div class="top">-->
-<!--                            <div class="container">-->
-<!--                                <div class="col-md-12">-->
-<!--                                    <div class="inside">-->
-<!--                                        <a href="#"><img class="avatar-md" src="img/avatars/avatar-female-6.jpg" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar"></a>-->
-<!--                                        <div class="status">-->
-<!--                                            <i class="material-icons offline">fiber_manual_record</i>-->
-<!--                                        </div>-->
-<!--                                        <div class="data">-->
-<!--                                            <h5><a href="#">Louis Martinez</a></h5>-->
-<!--                                            <span>Inactive</span>-->
-<!--                                        </div>-->
-<!--                                        <button class="btn disabled d-md-block d-none" disabled><i class="material-icons md-30">phone_in_talk</i></button>-->
-<!--                                        <button class="btn disabled d-md-block d-none" disabled><i class="material-icons md-36">videocam</i></button>-->
-<!--                                        <button class="btn d-md-block disabled d-none" disabled><i class="material-icons md-30">info</i></button>-->
-<!--                                        <div class="dropdown">-->
-<!--                                            <button class="btn disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled><i class="material-icons md-30">more_vert</i></button>-->
-<!--                                            <div class="dropdown-menu dropdown-menu-right">-->
-<!--                                                <button class="dropdown-item"><i class="material-icons">phone_in_talk</i>Voice Call</button>-->
-<!--                                                <button class="dropdown-item"><i class="material-icons">videocam</i>Video Call</button>-->
-<!--                                                <hr>-->
-<!--                                                <button class="dropdown-item"><i class="material-icons">clear</i>Clear History</button>-->
-<!--                                                <button class="dropdown-item"><i class="material-icons">block</i>Block Contact</button>-->
-<!--                                                <button class="dropdown-item"><i class="material-icons">delete</i>Delete Contact</button>-->
-<!--                                            </div>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="content empty">-->
-<!--                            <div class="container">-->
-<!--                                <div class="col-md-12">-->
-<!--                                    <div class="no-messages request">-->
-<!--                                        <a href="#"><img class="avatar-xl" src="img/avatars/avatar-female-6.jpg" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar"></a>-->
-<!--                                        <h5>Louis Martinez would like to add you as a contact. <span>Hi Keith, I'd like to add you as a contact.</span></h5>-->
-<!--                                        <div class="options">-->
-<!--                                            <button class="btn button"><i class="material-icons">check</i></button>-->
-<!--                                            <button class="btn button"><i class="material-icons">close</i></button>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="container">-->
-<!--                            <div class="col-md-12">-->
-<!--                                <div class="bottom">-->
-<!--                                    <form class="position-relative w-100">-->
-<!--                                        <textarea class="form-control" placeholder="Messaging unavailable" rows="1" disabled></textarea>-->
-<!--                                        <button class="btn emoticons disabled" disabled><i class="material-icons">insert_emoticon</i></button>-->
-<!--                                        <button class="btn send disabled" disabled><i class="material-icons">send</i></button>-->
-<!--                                    </form>-->
-<!--                                    <label>-->
-<!--                                        <input type="file" disabled>-->
-<!--                                        <span class="btn attach disabled d-sm-block d-none"><i class="material-icons">attach_file</i></span>-->
-<!--                                    </label>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
+                    <!--                    <div class="chat" id="chat3">-->
+                    <!--                        <div class="top">-->
+                    <!--                            <div class="container">-->
+                    <!--                                <div class="col-md-12">-->
+                    <!--                                    <div class="inside">-->
+                    <!--                                        <a href="#"><img class="avatar-md" src="img/avatars/avatar-female-6.jpg" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar"></a>-->
+                    <!--                                        <div class="status">-->
+                    <!--                                            <i class="material-icons offline">fiber_manual_record</i>-->
+                    <!--                                        </div>-->
+                    <!--                                        <div class="data">-->
+                    <!--                                            <h5><a href="#">Louis Martinez</a></h5>-->
+                    <!--                                            <span>Inactive</span>-->
+                    <!--                                        </div>-->
+                    <!--                                        <button class="btn disabled d-md-block d-none" disabled><i class="material-icons md-30">phone_in_talk</i></button>-->
+                    <!--                                        <button class="btn disabled d-md-block d-none" disabled><i class="material-icons md-36">videocam</i></button>-->
+                    <!--                                        <button class="btn d-md-block disabled d-none" disabled><i class="material-icons md-30">info</i></button>-->
+                    <!--                                        <div class="dropdown">-->
+                    <!--                                            <button class="btn disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled><i class="material-icons md-30">more_vert</i></button>-->
+                    <!--                                            <div class="dropdown-menu dropdown-menu-right">-->
+                    <!--                                                <button class="dropdown-item"><i class="material-icons">phone_in_talk</i>Voice Call</button>-->
+                    <!--                                                <button class="dropdown-item"><i class="material-icons">videocam</i>Video Call</button>-->
+                    <!--                                                <hr>-->
+                    <!--                                                <button class="dropdown-item"><i class="material-icons">clear</i>Clear History</button>-->
+                    <!--                                                <button class="dropdown-item"><i class="material-icons">block</i>Block Contact</button>-->
+                    <!--                                                <button class="dropdown-item"><i class="material-icons">delete</i>Delete Contact</button>-->
+                    <!--                                            </div>-->
+                    <!--                                        </div>-->
+                    <!--                                    </div>-->
+                    <!--                                </div>-->
+                    <!--                            </div>-->
+                    <!--                        </div>-->
+                    <!--                        <div class="content empty">-->
+                    <!--                            <div class="container">-->
+                    <!--                                <div class="col-md-12">-->
+                    <!--                                    <div class="no-messages request">-->
+                    <!--                                        <a href="#"><img class="avatar-xl" src="img/avatars/avatar-female-6.jpg" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar"></a>-->
+                    <!--                                        <h5>Louis Martinez would like to add you as a contact. <span>Hi Keith, I'd like to add you as a contact.</span></h5>-->
+                    <!--                                        <div class="options">-->
+                    <!--                                            <button class="btn button"><i class="material-icons">check</i></button>-->
+                    <!--                                            <button class="btn button"><i class="material-icons">close</i></button>-->
+                    <!--                                        </div>-->
+                    <!--                                    </div>-->
+                    <!--                                </div>-->
+                    <!--                            </div>-->
+                    <!--                        </div>-->
+                    <!--                        <div class="container">-->
+                    <!--                            <div class="col-md-12">-->
+                    <!--                                <div class="bottom">-->
+                    <!--                                    <form class="position-relative w-100">-->
+                    <!--                                        <textarea class="form-control" placeholder="Messaging unavailable" rows="1" disabled></textarea>-->
+                    <!--                                        <button class="btn emoticons disabled" disabled><i class="material-icons">insert_emoticon</i></button>-->
+                    <!--                                        <button class="btn send disabled" disabled><i class="material-icons">send</i></button>-->
+                    <!--                                    </form>-->
+                    <!--                                    <label>-->
+                    <!--                                        <input type="file" disabled>-->
+                    <!--                                        <span class="btn attach disabled d-sm-block d-none"><i class="material-icons">attach_file</i></span>-->
+                    <!--                                    </label>-->
+                    <!--                                </div>-->
+                    <!--                            </div>-->
+                    <!--                        </div>-->
+                    <!--                    </div>-->
                     <!-- End of Chat -->
                 </div>
                 <!-- End of Babble -->
@@ -902,11 +1032,11 @@
 <!-- Bootstrap/Swipe core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<script src="js/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script>window.jQuery || document.write('<script src="js/vendor/jquery-slim.min.js"><\/script>')</script>
-<script src="js/vendor/popper.min.js"></script>
-<script src="js/swipe.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<script src="/js/jquery-3.3.1.slim.min.js" ></script>
+<!--<script>window.jQuery || document.write('<script src="js/vendor/jquery-slim.min.js"><\/script>')</script>-->
+<script src="/js/vendor/popper.min.js"></script>
+<script src="/js/swipe.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
 <script>
     // const alertMessage = document.getElementsByClassName('alert-message');
     function showAlert(message, alertDiv, type = 'warning') {
@@ -945,7 +1075,7 @@
                 return;
             }
         }
-        
+
         try {
             // Đảm bảo cuộn đến cuối
             const scrollHeight = el.scrollHeight;
@@ -966,9 +1096,8 @@
     let isGroupConversation = false; // Cờ để xác định cuộc trò chuyện hiện tại là nhóm hay không
     let editSubscription = null;
     let deleteSubscription = null;
+    let pendingDeleteMessageId = null;
     let messageSubscriptions = {
-        // public: null,
-        // private: null,
         edit: null,
         delete: null
     };
@@ -1006,7 +1135,7 @@
                 setTimeout(reconnectWebSocket, 5000);
             }
         };
-        
+
         stompClient = Stomp.over(socket);
 
         // Bật log debug của STOMP để xem chi tiết gói tin
@@ -1068,54 +1197,6 @@
     function subscribeToContextMenuUpdates(options) {
         console.log("Bắt đầu đăng ký kênh cập nhật menu ngữ cảnh");
 
-    //     if (stompClient) {
-    //         const currentUserId = sessionStorage.getItem('userId');
-    //         if (currentUserId) {
-    //             // Đăng ký nhận thông báo khi có thay đổi về cuộc trò chuyện
-    //             stompClient.subscribe(`/user/${currentUserId}/queue/conversation-changes`, onConversationChange);
-    //
-    //             // Đăng ký nhận thông báo khi có thay đổi về liên hệ
-    //             stompClient.subscribe(`/user/${currentUserId}/queue/contact-changes`, onContactChange);
-    //
-    //             // Đăng ký nhận thông báo khi có tin nhắn bị chỉnh sửa
-    //             stompClient.subscribe(`/user/${currentUserId}/queue/message-edited`, function(payload) {
-    //                 try {
-    //                     const message = JSON.parse(payload.body);
-    //                     console.log("Nhận thông báo chỉnh sửa tin nhắn:", message);
-    //                     handleMessageEdit(message);
-    //                 } catch (error) {
-    //                     console.error("Lỗi xử lý thông báo chỉnh sửa tin nhắn:", error);
-    //                 }
-    //             });
-    //
-    //             // Đăng ký nhận thông báo khi có tin nhắn bị xóa
-    //             stompClient.subscribe(`/user/${currentUserId}/queue/message-deleted`, function(payload) {
-    //                 try {
-    //                     const message = JSON.parse(payload.body);
-    //                     console.log("Nhận thông báo xóa tin nhắn:", message);
-    //                     handleMessageDelete(message);
-    //                 } catch (error) {
-    //                     console.error("Lỗi xử lý thông báo xóa tin nhắn:", error);
-    //                 }
-    //             });
-    //
-    //             // Đăng ký nhận thông báo khi lịch sử cuộc trò chuyện bị xóa
-    //             stompClient.subscribe(`/user/${currentUserId}/queue/conversation-cleared`, function(payload) {
-    //                 try {
-    //                     const data = JSON.parse(payload.body);
-    //                     console.log("Nhận thông báo xóa lịch sử cuộc trò chuyện:", data);
-    //                     handleConversationHistoryCleared(data.conversationId);
-    //                 } catch (error) {
-    //                     console.error("Lỗi xử lý thông báo xóa lịch sử cuộc trò chuyện:", error);
-    //                 }
-    //             });
-    //
-    //             console.log("Đang đăng ký WebSocket với userId: " + currentUserId);
-    //             console.log("Đường dẫn đăng ký message-edited: /user/" + currentUserId + "/queue/message-edited");
-    //             console.log("Đường dẫn đăng ký message-deleted: /user/" + currentUserId + "/queue/message-deleted");
-    //         }
-    //     }
-    // }
         if (stompClient) {
             // Lấy userId từ biến toàn cục hoặc từ sessionStorage
             let userId = currentUserId || sessionStorage.getItem('userId');
@@ -1515,11 +1596,11 @@
                 reconnectWebSocket();
             }
         }, 25000);
-        
+
         // Lưu interval vào window để có thể xóa khi cần
         window.heartbeatInterval = heartbeatInterval;
     }
-    
+
     // Hàm kết nối lại WebSocket
     function reconnectWebSocket() {
         if (stompClient) {
@@ -1531,10 +1612,10 @@
         }
         isConnected = false;
         stompClient = null;
-        
+
         // Xóa tất cả subscriptions đã lưu
         messageSubscriptions = {};
-        
+
         // Kết nối lại sau 2 giây
         setTimeout(connectWebSocket, 2000);
     }
@@ -1555,7 +1636,7 @@
         // Quan trọng: Đảm bảo định dạng topic khớp với định dạng server đang sử dụng
         const groupTopic = `/topic/group.${groupId}`;
         console.log(`Đăng ký nhóm với ID: ${groupId}, path=${groupTopic}`);
-        
+
         try {
             const subscription = stompClient.subscribe(groupTopic, function(payload) {
                 console.log(`NHẬN TIN NHẮN NHÓM từ ${groupTopic}:`, payload);
@@ -1565,20 +1646,19 @@
 
             // Lưu subscription để có thể hủy đăng ký khi cần
             messageSubscriptions[`group_${groupId}`] = subscription;
-            
+
             // Gửi tin nhắn test để kiểm tra kết nối (chỉ log, không gửi thực)
             console.log(`Muốn gửi tin nhắn đến nhóm, sử dụng destination: /app/chat.group`);
-            
+
             // In ra danh sách đăng ký hiện tại
             console.log(`Danh sách đăng ký hiện tại:`, Object.keys(messageSubscriptions));
-            
+
             return subscription;
         } catch (error) {
             console.error(` LỖI khi đăng ký nhóm ${groupId}:`, error);
         }
     }
 
-    // Đăng ký nhận tin nhắn riêng tư cho một người dùng cụ thể
     // Đăng ký nhận tin nhắn riêng tư cho một người dùng cụ thể
     function subscribeToPrivateMessages(conversationId) {
         if (!isConnected || !stompClient) {
@@ -1808,10 +1888,6 @@
                 // Kiểm tra xem tin nhắn có phải từ người gửi hiện tại không
                 const isFromCurrentSender = message.sender === currentUsername || messageSenderId === currentUserId?.toString();
 
-                // QUAN TRỌNG: Tin nhắn riêng tư đã được nhận thông qua topic /topic/private.${conversationId}
-                // Nên mặc định nó thuộc về cuộc trò chuyện hiện tại do đã subscribe đúng topic
-                // Tuy nhiên vẫn nên kiểm tra lại để chắc chắn
-
                 // Kiểm tra xem tin nhắn có phải cho cuộc trò chuyện hiện tại không
                 let isForCurrentConversation = false;
 
@@ -1979,16 +2055,16 @@
             console.error("Cấu trúc tin nhắn nhóm không hợp lệ:", message);
             return;
         }
-        
+
         // Kiểm tra xem tin nhắn có phải từ người gửi hiện tại không
         const isFromCurrentSender = message.sender === currentUsername || message.senderId === currentUserId?.toString();
-        
+
         // Xác định ID của nhóm để so sánh
         const groupId = message.conversationId || message.groupId || message.recipient;
-        
+
         // Kiểm tra xem tin nhắn có thuộc cuộc trò chuyện nhóm hiện tại không
         const isForCurrentGroup = currentConversationId && currentConversationId.toString() === groupId?.toString();
-        
+
         // Log thông tin chi tiết để debug
         console.log("Thông tin tin nhắn nhóm:", {
             messageGroupId: groupId,
@@ -1998,11 +2074,11 @@
             isForCurrentGroup: isForCurrentGroup,
             isFromCurrentSender: isFromCurrentSender
         });
-        
+
         // Nếu không phải từ người dùng hiện tại, cập nhật danh sách cuộc trò chuyện
         if (!isFromCurrentSender) {
             updateConversationList(message.sender || message.senderName);
-            
+
             // Hiển thị thông báo nếu tin nhắn không phải đang xem cuộc trò chuyện nhóm này
             if (!isForCurrentGroup && Notification.permission === 'granted') {
                 new Notification('Tin nhắn nhóm mới', {
@@ -2010,19 +2086,19 @@
                 });
             }
         }
-        
+
         // Hiển thị tin nhắn nếu đang xem cuộc trò chuyện nhóm này
         if (isForCurrentGroup) {
             console.log("Hiển thị tin nhắn cho cuộc trò chuyện nhóm hiện tại");
-            
+
             // Đánh dấu tin nhắn đã đọc nếu cần
             if (message.messageId && !isFromCurrentSender) {
                 markMessageAsRead(message.messageId);
             }
-            
+
             // Hiển thị tin nhắn
             displayMessage(message);
-            
+
             // Đảm bảo cuộn xuống sau khi hiển thị tin nhắn
             setTimeout(() => {
                 const chatContainer = document.getElementById('content');
@@ -2032,7 +2108,7 @@
             }, 100);
         } else {
             console.log("Tin nhắn không thuộc cuộc trò chuyện nhóm hiện tại, không hiển thị");
-            
+
             // Cập nhật số tin nhắn chưa đọc
             const conversationElement = document.querySelector(`[data-conversation-id="${groupId}"]`);
             if (conversationElement) {
@@ -2049,7 +2125,7 @@
     // Gửi tin nhắn
     function sendMessage(event) {
         event.preventDefault();
-        
+
         if (!stompClient || !isConnected) {
             console.error("WebSocket chưa được kết nối, không thể gửi tin nhắn");
             const errorElement = document.getElementById('message-error');
@@ -2057,20 +2133,20 @@
                 errorElement.textContent = "Không thể gửi tin nhắn do mất kết nối. Đang kết nối lại...";
                 errorElement.style.display = 'block';
             }
-            
+
             // Thử kết nối lại
             reconnectWebSocket();
             return;
         }
-        
+
         const messageInput = document.getElementById('message-input');
         if (!messageInput) {
             console.error("Không tìm thấy phần tử message-input");
             return;
         }
-        
+
         const messageContent = messageInput.value.trim();
-        
+
         if (!messageContent) {
             console.log("Không gửi tin nhắn rỗng");
             return;
@@ -2083,11 +2159,11 @@
             errorElement.style.display = 'none';
             errorElement.textContent = '';
         }
-        
+
         // Tạo timestamp theo định dạng ISO
         const now = new Date();
         const timeISO = now.toISOString();
-        
+
         // Thiết lập loại tin nhắn mặc định
         let messageType = 'CHAT';
         let destination = '/app/chat.sendMessage';
@@ -2120,7 +2196,7 @@
         console.log("SenderId:", currentUserId);
         console.log("ConversationId:", currentConversationId);
         console.log("IsGroupConversation:", isGroupConversation);
-        
+
         // Phân biệt rõ ràng giữa tin nhắn nhóm và cá nhân dựa trên biến isGroupConversation
         if (isGroupConversation) {
             // TIN NHẮN NHÓM
@@ -2129,7 +2205,7 @@
             chatMessage.type = messageType;
             chatMessage.groupId = currentConversationId.toString();
             chatMessage.recipient = currentConversationId.toString(); // Đặt recipient = groupId để controller có thể đọc
-            
+
             console.log("TIN NHẮN NHÓM:");
             console.log("Destination:", destination);
             console.log("GroupId:", chatMessage.groupId);
@@ -2190,7 +2266,7 @@
                 displayMessage(chatMessage);
             }
         }
-        
+
         try {
             // Gửi tin nhắn qua WebSocket
             console.log(`Gửi tin nhắn ${messageType} tới ${destination}:`, chatMessage);
@@ -2203,13 +2279,13 @@
                 errorElement.style.display = 'block';
             }
         }
-        
+
         // Focus lại vào input để người dùng có thể tiếp tục gõ
         if (messageInput) {
             messageInput.focus();
         }
     }
-    
+
     // Hàm xử lý submit form riêng biệt để đảm bảo không reload trang
     function handleFormSubmit(event) {
         event.preventDefault();
@@ -2239,12 +2315,12 @@
                 'Authorization': 'Bearer ' + sessionStorage.getItem('token')
             }
         })
-        .then(response => {
-            if (response.ok) {
-                console.log(`Đã đánh dấu tin nhắn ${messageId} là đã đọc`);
-            }
-        })
-        .catch(error => console.error('Lỗi khi đánh dấu tin nhắn đã đọc:', error));
+            .then(response => {
+                if (response.ok) {
+                    console.log(`Đã đánh dấu tin nhắn ${messageId} là đã đọc`);
+                }
+            })
+            .catch(error => console.error('Lỗi khi đánh dấu tin nhắn đã đọc:', error));
     }
 
     // Hàm hiển thị tin nhắn trên giao diện
@@ -2288,7 +2364,7 @@
 
         // Xác định xem đây có phải là tin nhắn của người dùng hiện tại không
         const isMe = message.isMe || message.sender === currentUsername || message.senderId === currentUserId?.toString();
-        
+
         // Định dạng thởi gian
         let time;
         try {
@@ -2411,7 +2487,7 @@
 
             const editButton = document.createElement('button');
             editButton.className = 'dropdown-item';
-            editButton.textContent = 'Edit';
+            editButton.textContent = 'UPDATE';
             editButton.onclick = function() { editMessage(messageId); };
             dropdownMenu.appendChild(editButton);
 
@@ -2459,7 +2535,7 @@
         }
 
         console.log("test: ",username);
-        
+
         // Kiểm tra flag kết nối WebSocket đã được đặt khi đăng nhập
         const shouldConnectWebSocket = sessionStorage.getItem("autoConnectWebSocket");
         if (shouldConnectWebSocket === "true") {
@@ -2469,7 +2545,7 @@
             // Xóa flag để không kết nối lại vào lần tải trang tiếp theo
             sessionStorage.removeItem("autoConnectWebSocket");
         }
-        
+
         fetchUserIdByUsername(username);
     });
 
@@ -2496,10 +2572,10 @@
                     return;
                 }
                 sessionStorage.setItem("userId", user.userId);
-                
+
                 // Thiết lập biến toàn cục currentUserId và user
                 currentUserId = user.userId;
-                
+
                 // Lưu thông tin người dùng vào sessionStorage để truy cập sau này
                 const userData = {
                     id: user.userId,
@@ -2509,7 +2585,7 @@
                     email: user.email
                 };
                 sessionStorage.setItem("user", JSON.stringify(userData));
-                
+
                 // Cập nhật UI
                 document.getElementById("firstName").value = user.firstName;
                 document.getElementById("lastName").value = user.lastName;
@@ -2771,7 +2847,7 @@
             const chatsList = document.getElementById('chats');
             chatsList.innerHTML = "<p>Error loading conversations</p>";
         }
-        
+
         // Cuộn đến tin nhắn mới nhất sau khi tải tin nhắn
         setTimeout(() => {
             const chatContainer = document.getElementById('content');
@@ -2781,7 +2857,7 @@
             }
         }, 300); // Đợi 300ms để đảm bảo tin nhắn đã được tải và hiển thị
     }
-    
+
     function formatTime(dateTimeString) {
         const date = new Date(dateTimeString);
         const hours = date.getHours();
@@ -2830,10 +2906,10 @@
                             <div class="dropdown">
                                 <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
                                 <div class="dropdown-menu">
-                                    <button class="dropdown-item clear-history" th:text="#{clear.history}"><i class="material-icons">clear</i>Clear History</button>
-                                    <button class="dropdown-item block-contact" th:text="#{block.contact}"><i class="material-icons">block</i>Block Contact</button>
-                                    <button class="dropdown-item delete-contact" th:text="#{delete.contact}"><i class="material-icons">delete</i>Delete Contact</button>
-                                    <button class="dropdown-item rename-conversation" th:text="#{rename}"><i class="material-icons">edit</i>Rename</button>
+                                    <button class="dropdown-item clear-history" th:text="#{clear.history}"><i class="material-icons" data-toggle="modal" data-target="#modalClearHistory">clear</i>Clear History</button>
+                                    <button class="dropdown-item block-contact" th:text="#{block.contact}"><i class="material-icons" data-toggle="modal" data-target="#modalBlockContact">block</i>Block Contact</button>
+                                    <button class="dropdown-item delete-contact" th:text="#{delete.contact}"><i class="material-icons" data-toggle="modal" data-target="#modalDeleteContact" >delete</i>Delete Contact</button>
+                                    <button class="dropdown-item rename-conversation" th:text="#{rename}" data-toggle="modal" data-target="#modalRename"><i class="material-icons">edit</i>Rename</button>
                                 </div>
                             </div>
                         </div>
@@ -2849,13 +2925,13 @@
                     <input type="file">
                     <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
                 </label>`;
-                                    
+
             // Thêm event handler cho form ngay sau khi tạo
             const messageForm = document.getElementById('message-form');
             if (messageForm) {
                 // Xóa event listener cũ trước khi thêm cái mới (tránh duplicate)
                 messageForm.removeEventListener('submit', handleFormSubmit);
-                
+
                 // Thêm event listener mới với hàm xử lý riêng biệt để ngăn form submit
                 messageForm.addEventListener('submit', handleFormSubmit);
             }
@@ -2864,7 +2940,7 @@
             currentConversationId = conversationId;
             currentRecipientId = userId;
             currentRecipientUsername = conversationName;
-                                    
+
             const messages = await response.json();
             if (!messages || messages.length === 0) {
                 content.innerHTML = "<p>No messages yet</p>";
@@ -2887,8 +2963,8 @@
                                                                 <i class="material-icons md-30">more_vert</i>
                                                             </button>
                                                             <div class="dropdown-menu">
-                                                                <button class="dropdown-item" onclick="editMessage('${message.id}')">Update</button>
-                                                                <button class="dropdown-item" onclick="deleteMessage('${message.id}')">Delete</button>
+                                                                <button class="dropdown-item" onclick="editMessage('${message.id}')" data-toggle="modal" data-target="#modalUpdateMessage">Update</button>
+                                                                <button class="dropdown-item" onclick="deleteMessage('${message.id}')" data-toggle="modal" data-target="#modalConfirm">Delete</button>
                                                             </div>
                                                         </div>
 														<div class="text me">
@@ -2934,7 +3010,7 @@
             console.error("Error fetching messages:", error);
             content.innerHTML = "<p>Error loading messages</p>";
         }
-        
+
         // Cuộn đến tin nhắn mới nhất sau khi tải tin nhắn
         setTimeout(() => {
             const chatContainer = document.getElementById('content');
@@ -2944,7 +3020,7 @@
             }
         }, 300); // Đợi 300ms để đảm bảo tin nhắn đã được tải và hiển thị
     }
-    
+
     function escapeHtml(text) {
         const map = {
             '&': '&amp;',
@@ -3006,19 +3082,45 @@
             .catch(error => console.log(error));
         console.log("this response from change profile");
     });
+    document.getElementById("deleteAccountBtn").addEventListener("click", function () {
+
+
+        const token = sessionStorage.getItem("token");
+        const userId = sessionStorage.getItem("userId");
+
+        fetch(`${baseURL}/users/delete/${userId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to delete account. Status: ${response.status}`);
+                }
+                // Clear session and redirect
+                // sessionStorage.clear();
+                // alert("Your account has been deleted.");
+                window.location.href = "/login"; // or your logout/homepage
+            })
+            .catch(error => {
+                console.error("Error deleting account:", error);
+                alert("Unable to delete account. Please try again later.");
+            });
+    });
     function handleConversationClick(conversationId, userId, conversationName, isGroup = false) {
         console.log(`Clicked on conversation: ID=${conversationId}, Name=${conversationName}, IsGroup=${isGroup}`);
-        
+
         // Đánh dấu cuộc trò chuyện đang được chọn trong UI
         document.querySelectorAll('.discussions .person').forEach(item => {
             item.classList.remove('active');
         });
-        
+
         const selectedConversation = document.querySelector(`.person[data-conversation-id="${conversationId}"]`);
         if (selectedConversation) {
             selectedConversation.classList.add('active');
         }
-        
+
         // Reset và cập nhật biến toàn cục
         currentConversationId = conversationId;
         // currentRecipientId = isGroup ? null : userId;
@@ -3038,7 +3140,7 @@
             // Đây là cuộc trò chuyện cá nhân, lấy thông tin người nhận
             if (selectedConversation && selectedConversation.hasAttribute('data-members')) {
                 const recipients = selectedConversation.getAttribute('data-members').split(',');
-                currentRecipientId = recipients.find(id => id != currentUserId);
+                currentRecipientId = recipients.find(id => id !== currentUserId);
                 currentRecipientUsername = conversationName;
             } else {
                 console.log("Sử dụng userId từ tham số:", userId);
@@ -3078,8 +3180,8 @@
                                 <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
                                 <div class="dropdown-menu">
                                     <button class="dropdown-item clear-history" data-conversation-id="${conversationId}" th:text="#{clear.history}"><i class="material-icons">clear</i>Clear History</button>
-                                    <button class="dropdown-item block-contact" data-user-id="${userId}" th:text="#{block.contact}"><i class="material-icons">block</i>Block Contact</button>
-                                    <button class="dropdown-item delete-contact" data-contact-id="${userId}" th:text="#{delete.contact}"><i class="material-icons">delete</i>Delete Contact</button>
+                                    <button class="dropdown-item block-contact" data-user-id="${currentRecipientId}" th:text="#{block.contact}"><i class="material-icons">block</i>Block Contact</button>
+                                    <button class="dropdown-item delete-contact" data-contact-id="${currentRecipientId}" th:text="#{delete.contact}"><i class="material-icons">delete</i>Delete Contact</button>
                                     <button class="dropdown-item rename-conversation" data-conversation-id="${conversationId}" th:text="#{rename}"><i class="material-icons">edit</i>Rename</button>
                                 </div>
                             </div>
@@ -3093,39 +3195,62 @@
                 // Clear history button
                 const clearHistoryButton = document.querySelector('.clear-history');
                 if (clearHistoryButton) {
-                    clearHistoryButton.addEventListener('click', function() {
+                    clearHistoryButton.addEventListener('click', function () {
                         console.log("Đã nhấp vào nút xóa lịch sử");
+
                         const convId = this.getAttribute('data-conversation-id') || currentConversationId;
                         if (!convId) {
                             console.error("Không thể xác định cuộc trò chuyện");
                             return;
                         }
-                        clearConversationHistory(convId);
+
+                        // Save convId temporarily
+                        document.getElementById('confirmClearHistory').setAttribute('data-conversation-id', convId);
+                        // clearConversationHistory(convId);
+                        // Show modal
+                        const modal = new bootstrap.Modal(document.getElementById('modalClearHistory'));
+                        modal.show();
                     });
                 } else {
                     console.error("Không tìm thấy nút Clear History");
                 }
 
+                document.getElementById('confirmClearHistory').addEventListener('click', function () {
+                    const convId = this.getAttribute('data-conversation-id');
+                    clearConversationHistory(convId);
+
+                    // Close modal
+                    // const modalElement = document.getElementById('modalClearHistory');
+                    // const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    // modalInstance.hide();
+                });
+
                 // Block contact button
                 const blockContactButton = document.querySelector('.block-contact');
                 if (blockContactButton) {
-                    blockContactButton.addEventListener('click', function() {
-                        console.log("Đã nhấp vào nút chặn liên hệ");
+                    blockContactButton.addEventListener('click', function () {
                         const uid = this.getAttribute('data-user-id') || currentRecipientId;
+                        console.log(currentRecipientId);
                         if (!uid) {
                             console.error("Không thể xác định người dùng");
                             return;
                         }
-                        blockContact(uid);
+
+                        document.getElementById('confirmBlockContact').setAttribute('data-user-id', uid);
+
+                        const modal = new bootstrap.Modal(document.getElementById('modalBlockContact'));
+                        modal.show();
                     });
                 } else {
                     console.error("Không tìm thấy nút Block Contact");
                 }
 
+
                 // Delete contact button
+                let pendingDeleteUserId = null;
                 const deleteContactButton = document.querySelector('.delete-contact');
                 if (deleteContactButton) {
-                    deleteContactButton.addEventListener('click', function() {
+                    deleteContactButton.addEventListener('click', function () {
                         console.log("Đã nhấp vào nút xóa liên hệ");
                         const contactId = this.getAttribute('data-contact-id') || currentRecipientId;
                         if (!contactId) {
@@ -3162,22 +3287,33 @@
                                 console.error("Lỗi khi tìm contactId:", error);
                                 showToast("Không thể xóa liên hệ: " + error.message, true);
                             });
+                        pendingDeleteUserId = contactId;
+                        const modal = new bootstrap.Modal(document.getElementById('modalDeleteContact'));
+                        modal.show();
                     });
                 } else {
                     console.error("Không tìm thấy nút Delete Contact");
                 }
-
-                // Rename conversation button
                 const renameConversationButton = document.querySelector('.rename-conversation');
                 if (renameConversationButton) {
-                    renameConversationButton.addEventListener('click', function() {
+                    renameConversationButton.addEventListener('click', function () {
                         console.log("Đã nhấp vào nút đổi tên cuộc trò chuyện");
+
                         const convId = this.getAttribute('data-conversation-id') || currentConversationId;
                         if (!convId) {
                             console.error("Không thể xác định cuộc trò chuyện");
                             return;
                         }
-                        renameConversation(convId);
+
+                        // Lưu convId vào một biến toàn cục hoặc dataset
+                        document.getElementById('renameForm').setAttribute('data-conversation-id', convId);
+
+                        // (Tuỳ chọn) điền tên hiện tại vào input
+                        document.getElementById('renameDiscussion').value = currentRecipientUsername || '';
+
+                        // Hiển thị modal
+                        const modal = new bootstrap.Modal(document.getElementById('modalRename'));
+                        modal.show();
                     });
                 } else {
                     console.error("Không tìm thấy nút Rename");
@@ -3195,13 +3331,13 @@
                     <input type="file">
                     <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
                 </label>`;
-                
+
                 // Thêm event handler cho form ngay sau khi tạo
                 const messageForm = document.getElementById('message-form');
                 if (messageForm) {
                     // Xóa event listener cũ trước khi thêm cái mới (tránh duplicate)
                     messageForm.removeEventListener('submit', handleFormSubmit);
-                    
+
                     // Thêm event listener mới với hàm xử lý riêng biệt để ngăn form submit
                     messageForm.addEventListener('submit', handleFormSubmit);
                 }
@@ -3252,6 +3388,108 @@
                 }
             }, 5000);
         }
+        document.getElementById('confirmDeleteContact').addEventListener('click', () => {
+            if (!pendingDeleteUserId) return;
+
+            const token = sessionStorage.getItem("token");
+
+            fetch(`${baseURL}/contacts/delete`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    userOne: currentUserId,
+                    userTwo: pendingDeleteUserId
+                })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Không thể xóa liên hệ");
+                    showToast("Đã xóa liên hệ");
+                    // Refresh UI
+                    if (sessionStorage.getItem("userId")) {
+                        fetchConversations(sessionStorage.getItem("userId"));
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi khi xóa liên hệ:", error);
+                    showToast("Lỗi khi xóa liên hệ: " + error.message, true);
+                });
+
+            // Hide modal
+            // const modal = bootstrap.Modal.getInstance(document.getElementById('modalDeleteContact'));
+            // modal.hide();
+        });
+        function deleteContact(contactId) {
+            const token = sessionStorage.getItem("token");
+
+            fetch(`${baseURL}/contacts`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    userOne: currentUserId,
+                    userTwo: contactId
+                })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Không thể xóa liên hệ");
+                    showToast("Đã xóa liên hệ");
+                    // Refresh UI
+                    if (sessionStorage.getItem("userId")) {
+                        fetchConversations(sessionStorage.getItem("userId"));
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi khi xóa liên hệ:", error);
+                    showToast("Lỗi khi xóa liên hệ: " + error.message, true);
+                });
+        }
+
+        document.getElementById('renameForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const newName = document.getElementById('renameDiscussion').value.trim();
+            if (!newName) return;
+            console.log(newName);
+            const token = sessionStorage.getItem("token");
+
+            fetch(`${baseURL}/conversations/${currentConversationId}/rename`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: newName })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Rename failed");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Rename successful:", data);
+                    // Update UI
+                    const conversationElement = document.querySelector(`.person[data-conversation-id="${currentConversationId}"] .name`);
+                    if (conversationElement) {
+                        conversationElement.textContent = newName;
+                    }
+
+                    // Update title if current
+                    const topTitle = document.querySelector('#top .data h5 a');
+                    if (topTitle && currentConversationId === currentConversationId) {
+                        topTitle.textContent = newName;
+                    }
+
+                    // $('#modalRename').modal('hide');
+                })
+                .catch(error => {
+                    console.error("Rename error:", error);
+                    showToast("Failed to rename conversation", true);
+                });
+        });
 
         // Hàm cập nhật UI profile
         function updateProfileUI(userData) {
@@ -3344,7 +3582,7 @@
         // Gửi tin nhắn
         function sendMessage(event) {
             event.preventDefault();
-            
+
             if (!stompClient || !isConnected) {
                 console.error("WebSocket chưa được kết nối, không thể gửi tin nhắn");
                 const errorElement = document.getElementById('message-error');
@@ -3352,25 +3590,25 @@
                     errorElement.textContent = "Không thể gửi tin nhắn do mất kết nối. Đang kết nối lại...";
                     errorElement.style.display = 'block';
                 }
-                
+
                 // Thử kết nối lại
                 reconnectWebSocket();
                 return;
             }
-            
+
             const messageInput = document.getElementById('message-input');
             if (!messageInput) {
                 console.error("Không tìm thấy phần tử message-input");
                 return;
             }
-            
+
             const messageContent = messageInput.value.trim();
-            
+
             if (!messageContent) {
                 console.log("Tin nhắn trống, không gửi");
                 return;
             }
-            
+
             // Reset input và error message nếu có
             messageInput.value = '';
             const errorElement = document.getElementById('message-error');
@@ -3378,11 +3616,11 @@
                 errorElement.style.display = 'none';
                 errorElement.textContent = '';
             }
-            
+
             // Tạo timestamp theo định dạng ISO
             const now = new Date();
             const timeISO = now.toISOString();
-            
+
             // Mặc định là tin nhắn công khai
             let messageType = 'PUBLIC';
             let destination = '/app/chat.sendMessage';
@@ -3524,6 +3762,11 @@
                 .catch(error => console.error('Lỗi khi đánh dấu tin nhắn đã đọc:', error));
         }
     }
+    document.getElementById('confirmClearHistory').addEventListener('click', function () {
+        const convId = this.getAttribute('data-conversation-id');
+        clearConversationHistory(convId);
+    });
+
     document.getElementById('uploadInput').addEventListener('change', async function () {
         const file = this.files[0];
         if (!file) return;
@@ -3570,10 +3813,6 @@
             return;
         }
 
-        if (!confirm('Bạn có chắc chắn muốn xóa lịch sử cuộc trò chuyện này?')) {
-            return;
-        }
-
         const token = sessionStorage.getItem("token");
 
         fetch(`${baseURL}/messages/conversation/${conversationId}/clear`, {
@@ -3597,6 +3836,7 @@
                     };
                     stompClient.send("/app/conversation-change", {}, JSON.stringify(notificationMsg));
                 }
+
                 // Xóa tin nhắn khỏi UI
                 const messageContainer = document.getElementById('show-message');
                 if (messageContainer) {
@@ -3609,6 +3849,11 @@
                 showToast("Không thể xóa lịch sử cuộc trò chuyện", true);
             });
     }
+    document.getElementById('confirmBlockContact').addEventListener('click', function () {
+        const userId = this.getAttribute('data-user-id');
+        console.log("blockcontact", userId);
+        blockContact(userId);
+    });
 
     function blockContact(userId) {
         // Lấy currentUserId từ biến toàn cục hoặc từ sessionStorage
@@ -3623,10 +3868,6 @@
 
         if (!userId) {
             console.error("No user selected");
-            return;
-        }
-
-        if (!confirm('Bạn có chắc chắn muốn chặn người liên hệ này?')) {
             return;
         }
 
@@ -3660,14 +3901,18 @@
 
                 showToast("Đã chặn người liên hệ");
 
-                // Tải lại danh sách cuộc trò chuyện
-                if (currentUserId) {
-                    fetchConversations(currentUserId);
-                }
+                // Refresh conversation list
+                fetchConversations(currentUser);
             })
-            .catch(error => console.error('Error blocking user:', error));
-        showToast("Không thể chặn người liên hệ", true);
+            .catch(error => {
+                console.error('Error blocking user:', error);
+                showToast("Không thể chặn người liên hệ", true);
+            });
+
+        // const modal = bootstrap.Modal.getInstance(document.getElementById('modalBlockContact'));
+        // if (modal) modal.hide();
     }
+
 
     function handleContactChange(data){
         console.log("Xu ly thong bao thay doi lien he: ", data);
@@ -3936,106 +4181,47 @@
     }
 
     /**
-     * Cập nhật thông tin liên hệ
-     */
-    function updateContact(contactId) {
-        if (!contactId) {
-            console.error("No contact selected");
-            return;
-        }
-
-        const token = sessionStorage.getItem("token");
-        const currentUserId = sessionStorage.getItem("userId");
-
-        if (!token || !currentUserId) {
-            console.error("Not logged in");
-            return;
-        }
-
-        // Lấy thông tin hiện tại của liên hệ
-        fetch(`${baseURL}/contacts/${contactId}`, {
-            method: "GET",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Lỗi: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(contact => {
-                // Hiển thị form cập nhật với thông tin hiện tại
-                const nickname = prompt('Nhập biệt danh mới cho liên hệ:', contact.nickname || '');
-
-                if (nickname === null) {
-                    // Người dùng bấm Cancel
-                    return;
-                }
-
-                // Cập nhật thông tin liên hệ - chỉ thay đổi nickname và giữ nguyên các thông tin khác
-                const updatedContact = {
-                    ...contact,
-                    nickname: nickname.trim()
-                };
-
-                // Gửi yêu cầu cập nhật
-                return fetch(`${baseURL}/contacts/${contactId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedContact)
-                });
-            })
-            .then(response => {
-                if (!response || !response.ok) {
-                    throw new Error("Không thể cập nhật liên hệ");
-                }
-                showToast("Đã cập nhật thông tin liên hệ");
-
-                // Tải lại danh sách cuộc trò chuyện
-                if (currentUserId) {
-                    fetchConversations(currentUserId);
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi khi cập nhật liên hệ:', error);
-                showToast("Không thể cập nhật thông tin liên hệ", true);
-            });
-    }
-
-    /**
      * Xóa một mục (tin nhắn)
      */
     function deleteMessage(messageId) {
         if (!messageId || !currentConversationId) {
-            console.error("Không thể xóa tin nhắn: thiếu thông tin cần thiết");
+            console.error("No message selected");
             return;
         }
 
-        if (!confirm('Bạn có chắc chắn muốn xóa tin nhắn này?')) {
+        if (messageId.startsWith('temp-')) {
+            console.log("Không thể xóa tin nhắn tạm thời");
+            showToast("Không thể xóa tin nhắn chưa được lưu", true);
             return;
         }
 
+        // Store pending messageId and show modal
+        pendingDeleteMessageId = messageId;
+        document.querySelector('#modalConfirm .title h1').innerText = "Bạn có chắc chắn muốn xóa tin nhắn này?";
+        $('#modalConfirm').modal('show');
+    }
+    document.getElementById("confirmDelete").addEventListener("click", function () {
+        if (!pendingDeleteMessageId) return;
+
+        const messageId = pendingDeleteMessageId;
         const token = sessionStorage.getItem("token");
 
         // Gọi API để xóa tin nhắn
         fetch(`${baseURL}/messages/${messageId}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Lỗi: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Lỗi: ${response.status}`);
 
-                // Gửi thông báo WebSocket về việc xóa tin nhắn
+                const messageElementToUpdate = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElementToUpdate) messageElementToUpdate.remove();
+
+                showToast("Đã xóa tin nhắn");
+
                 if (stompClient && stompClient.connected) {
                     const deleteNotification = {
                         type: 'DELETE',
@@ -4056,6 +4242,9 @@
                     console.warn("WebSocket không kết nối, không thể gửi thông báo xóa");
                 }
 
+                $('#modalConfirm').modal('hide');
+
+
                 // Xóa tin nhắn khỏi UI
                 const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
                 if (messageElement) {
@@ -4067,85 +4256,99 @@
                 console.error("Lỗi khi xóa tin nhắn:", error);
                 showToast("Không thể xóa tin nhắn", true);
             });
-    }
+    });
+
+    document.getElementById("cancelDelete").addEventListener("click", function () {
+        $('#modalConfirm').modal('hide');
+    });
+
     /**
      * Chỉnh sửa tin nhắn
      */
+    let currentEditMessageId = null;
+
     function editMessage(messageId) {
         if (!messageId) {
             console.error("No message selected");
             return;
         }
 
-        // Tìm phần tử tin nhắn
         const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
         if (!messageElement) {
             console.error("Message element not found");
             return;
         }
 
-        // Tìm phần tử chứa nội dung tin nhắn
         const messageContent = messageElement.querySelector('p');
         if (!messageContent) {
             console.error("Message content element not found");
             return;
         }
 
-        // Lấy nội dung hiện tại
         const currentContent = messageContent.textContent;
+        const inputField = document.getElementById('editMessage');
+        inputField.value = currentContent;
 
-        // Hiển thị prompt để nhập nội dung mới
-        const newContent = prompt('Nhập nội dung mới cho tin nhắn:', currentContent);
+        // Store the messageId globally for use on form submit
+        currentEditMessageId = messageId;
 
-        // Nếu người dùng bấm Cancel hoặc không thay đổi nội dung
-        if (!newContent || newContent.trim() === currentContent) {
+        // Open Bootstrap modal
+        const modal = new bootstrap.Modal(document.getElementById('modalUpdateMessage'));
+        modal.show();
+    }
+
+    // Handle form submit
+    document.getElementById('updateMessage').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const newContent = document.getElementById('editMessage').value.trim();
+        const messageId = currentEditMessageId;
+        const token = sessionStorage.getItem("token");
+
+        if (!messageId || !newContent) {
+            showToast("Message content cannot be empty", true);
             return;
         }
 
-        const token = sessionStorage.getItem("token");
+        try {
+            const response = await fetch(`${baseURL}/messages/${messageId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content: newContent })
+            });
 
-        // Gửi yêu cầu cập nhật tin nhắn
-        fetch(`${baseURL}/messages/${messageId}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                content: newContent.trim()
-            })
-        })
-            // .then(response => {
-            //     if (!response.ok) {
-            //         throw new Error(`Lỗi: ${response.status}`);
-            //     }
-            //
-            //     // Cập nhật nội dung tin nhắn trên UI
-            //     messageContent.textContent = newContent.trim();
-            //     showToast("Đã cập nhật tin nhắn");
-            // })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Lỗi: ${response.status}`);
-                }
-                return response.json(); // Phải có return ở đây để tiếp tục chuỗi promise
-            })
-            .then(updatedMessage => {
-                // Cập nhật nội dung tin nhắn trên UI
-                messageContent.textContent = newContent.trim();
-                showToast("Đã cập nhật tin nhắn");
+            if (!response.ok) {
+                throw new Error(`Update failed: ${response.status}`);
+            }
 
-                // Gửi thông báo WebSocket về việc chỉnh sửa tin nhắn
-                if (stompClient && stompClient.connected) {
-                    const editNotification = {
-                        type: 'UPDATE',
-                        messageId: messageId,
-                        conversationId: currentConversationId,
-                        newContent: newContent.trim(),
-                        senderId: currentUserId,
-                        senderName: currentUsername,
-                        timestamp: new Date().toISOString()
-                    };
+            const updatedMessage = await response.json();
+
+            // Update message in DOM
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"] p`);
+            if (messageElement) {
+                messageElement.textContent = newContent;
+            }
+
+            showToast("Message updated successfully");
+
+            // Ẩn modal sau khi cập nhật thành công
+            // const modal = bootstrap.Modal.getInstance(document.getElementById('modalUpdateMessage'));
+            // if (modal) modal.hide();
+
+            // Notify via WebSocket
+            if (stompClient && stompClient.connected) {
+                const editNotification = {
+                    type: 'UPDATE',
+                    messageId: messageId,
+                    conversationId: currentConversationId,
+                    newContent: newContent,
+                    senderId: currentUserId,
+                    senderName: currentUsername,
+                    timestamp: new Date().toISOString()
+                };
 
                     // stompClient.send(`/app/chat/${currentConversationId}/edit`, {}, JSON.stringify(editNotification));
                     stompClient.send(`/app/conversations/${currentConversationId}/edit`, {}, JSON.stringify(editNotification));
@@ -4153,13 +4356,13 @@
                 } else {
                     console.warn("WebSocket không kết nối, không thể gửi thông báo chỉnh sửa");
                 }
-            })
-            .catch(error => {
+            }
+            catch(error) {
                 console.error("Lỗi khi cập nhật tin nhắn:", error);
                 showToast("Không thể cập nhật tin nhắn", true);
-            });
+            };
 
-    }
+    })
     document.addEventListener('DOMContentLoaded', function() {
         if (sessionStorage.getItem("token") && sessionStorage.getItem("userId")) {
             currentUserId = sessionStorage.getItem("userId");
@@ -4477,9 +4680,11 @@
                     // Cleanup session
                     sessionStorage.removeItem('token');
                     sessionStorage.removeItem('userId');
-
+                    sessionStorage.removeItem('username');
+                    sessionStorage.removeItem('user');
                     // Redirect to login page
-                    window.location.href = 'http://localhost:8080/login';
+                    window.location.href = '/login';
+                    // await fetch('http://localhost:8080/login');
                 } else {
                     alert(`Logout failed: ${responseBody}`);
                 }
@@ -4489,7 +4694,53 @@
             }
         });
     });
+    document.addEventListener('DOMContentLoaded', () => {
+        const logoutBtn = document.getElementById('logout1');
 
+        if (!logoutBtn) {
+            console.error('Logout button not found');
+            return;
+        }
+
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                console.warn('No token found in sessionStorage');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseURL}/auth/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        // 'Content-Type': 'application/json',
+                    },
+                });
+
+                const responseBody = await response.text();
+                console.log('Response status:', response.status, 'Body:', responseBody);
+
+                if (response.ok) {
+                    // Cleanup session
+                    sessionStorage.removeItem('token');
+                    sessionStorage.removeItem('userId');
+                    sessionStorage.removeItem('username');
+                    sessionStorage.removeItem('user');
+                    // Redirect to login page
+                    window.location.href = '/login';
+                    // await fetch('http://localhost:8080/login');
+                } else {
+                    alert(`Logout failed: ${responseBody}`);
+                }
+            } catch (error) {
+                console.error('Logout request failed:', error);
+                alert('An error occurred during logout. Please try again.');
+            }
+        });
+    });
 </script>
 </body>
 </html>

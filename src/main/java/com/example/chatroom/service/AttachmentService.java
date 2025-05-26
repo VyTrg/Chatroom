@@ -13,5 +13,5 @@ public interface AttachmentService {
 
     List<Attachment> getAttachmentsByMessageId(Long messageId);
 
-
+    Attachment sendAttachment(Long senderId, Long conversationId, MultipartFile file);
 }
