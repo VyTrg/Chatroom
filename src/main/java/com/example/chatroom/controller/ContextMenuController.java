@@ -72,7 +72,7 @@ public class ContextMenuController {
             for (String recipientId : recipientIds) {
                 messagingTemplate.convertAndSendToUser(
                     recipientId,
-                    "/queue/messages",
+                    "/queue/conversation-changes",
                     payload
                 );
                 System.out.println("Đã gửi thông báo thay đổi cuộc trò chuyện đến người dùng: " + recipientId);
@@ -110,7 +110,7 @@ public class ContextMenuController {
                 System.out.println("Đã gửi thông báo thay đổi liên hệ đến người dùng: " + userIdStr);
 
                 Map<String, Object> confirmation = new HashMap<>();
-                confirmation.put("type", "CONFIMATION");
+                confirmation.put("type", "CONFIRMATION");
                 confirmation.put("action", type);
                 confirmation.put("status", "SUCCESS");
                 confirmation.put("contactId", contactIdStr);
@@ -148,14 +148,23 @@ public class ContextMenuController {
                 .map(cm -> cm.getUser().getId().toString())  // Lấy ID người dùng và chuyển sang String
                 .filter(userId -> !userId.equals(senderId)) // Lọc ra người gửi thông báo
                 .collect(Collectors.toList());
-                
+
+            System.out.println("Gửi thông báo xóa tin nhắn đến topic: /topic/conversations/" + conversationId + "/edit");
+            System.out.println("Nội dung payload: " + payload);
             System.out.println("Sẽ gửi thông báo chỉnh sửa tin nhắn đến " + recipientIds.size() + " người dùng");
             
             // Gửi thông báo đến tất cả người dùng trong cuộc trò chuyện (ngoại trừ người gửi)
-            messagingTemplate.convertAndSend(
-                "/topic/conversations/" + conversationId + "/edit",
-                payload
-            );
+//            messagingTemplate.convertAndSend(
+//                "/topic/conversations/" + conversationId + "/edit",
+//                payload
+//            );
+            for (String recipientId : recipientIds) {
+                messagingTemplate.convertAndSendToUser(
+                        recipientId,
+                        "/queue/message-edited",
+                        payload
+                );
+            }
             System.out.println("Đã gửi thông báo chỉnh sửa tin nhắn thành công");
         } catch (Exception e) {
             System.err.println("Lỗi xử lý chỉnh sửa tin nhắn: " + e.getMessage());
@@ -182,12 +191,14 @@ public class ContextMenuController {
                 .collect(Collectors.toList());
                 
             System.out.println("Sẽ gửi thông báo xóa tin nhắn đến " + recipientIds.size() + " người dùng");
-            
-            // Gửi thông báo đến tất cả người dùng trong cuộc trò chuyện (ngoại trừ người gửi)
-            messagingTemplate.convertAndSend(
-                "/topic/conversations/" + conversationId + "/delete",
-                payload
-            );
+
+            for (String recipientId : recipientIds) {
+                messagingTemplate.convertAndSendToUser(
+                        recipientId,
+                        "/queue/message-deleted",
+                        payload
+                );
+            }
             System.out.println("Đã gửi thông báo xóa tin nhắn thành công");
         } catch (Exception e) {
             System.err.println("Lỗi xử lý xóa tin nhắn: " + e.getMessage());
