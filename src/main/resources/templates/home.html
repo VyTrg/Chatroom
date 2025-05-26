@@ -2926,38 +2926,25 @@
 
         // Reset và cập nhật biến toàn cục
         currentConversationId = conversationId;
-        // currentRecipientId = isGroup ? null : userId;
-        // currentRecipientUsername = isGroup ? null : conversationName;
         isGroupConversation = isGroup;
 
-        // Xử lý khác nhau cho cuộc trò chuyện nhóm và cá nhân
         if (isGroup) {
-            // Đây là nhóm, reset thông tin người nhận cá nhân
+            // Nhóm: không có recipient cá nhân
             currentRecipientId = null;
             currentRecipientUsername = conversationName;
-
-            // THÊM DÒNG NÀY - Đăng ký nhận tin nhắn nhóm
-            console.log(`Đăng ký nhận tin nhắn cho nhóm ID=${conversationId}`);
             subscribeToGroupMessages(conversationId);
         } else {
-            // Đây là cuộc trò chuyện cá nhân, lấy thông tin người nhận
-            if (selectedConversation && selectedConversation.hasAttribute('data-members')) {
-                const recipients = selectedConversation.getAttribute('data-members').split(',');
-                currentRecipientId = recipients.find(id => id !== currentUserId);
-                currentRecipientUsername = conversationName;
-            } else {
-                console.log("Sử dụng userId từ tham số:", userId);
-                currentRecipientId = userId;
-                currentRecipientUsername = conversationName;
+            // Cá nhân: lấy đúng participantId (khác với currentUserId)
+            let recipientId = userId;
+            if (!recipientId || recipientId === currentUserId) {
+                // Nếu userId truyền vào là chính mình, tìm participant khác trong conversation
+                const conversationElem = document.querySelector(`[data-conversation-id="${conversationId}"]`);
+                if (conversationElem && conversationElem.dataset.recipientId && conversationElem.dataset.recipientId !== currentUserId.toString()) {
+                    recipientId = conversationElem.dataset.recipientId;
+                }
             }
-            //
-            // // Đăng ký nhận tin nhắn riêng tư với người dùng này
-            // if (currentRecipientId) {
-            //     console.log(`Đăng ký nhận tin nhắn riêng tư từ người dùng ID=${currentRecipientId}`);
-            //     subscribeToPrivateMessages(currentRecipientId);
-            // }
-            // THAY ĐỔI: Sử dụng đăng ký tin nhắn riêng tư theo conversationId
-            console.log(`Đăng ký nhận tin nhắn riêng tư cho cuộc trò chuyện ID=${conversationId}`);
+            currentRecipientId = recipientId;
+            currentRecipientUsername = conversationName;
             subscribeToPrivateMessages(conversationId);
         }
 
@@ -3268,11 +3255,12 @@
 
                     // Update title if current
                     const topTitle = document.querySelector('#top .data h5 a');
-                    if (topTitle && currentConversationId === currentConversationId) {
+                    if (topTitle) {
                         topTitle.textContent = newName;
                     }
 
-                    $('#modalRename').modal('hide');
+
+                    // $('#modalRename').modal('hide');
                 })
                 .catch(error => {
                     console.error("Rename error:", error);
