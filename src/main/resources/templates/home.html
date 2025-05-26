@@ -1178,21 +1178,21 @@
         }
 
         // Tìm userId từ username
-        fetchUserIdByUsername(currentUsername)
-            .then(userId => {
-                if (!userId) {
-                    console.error("Không tìm thấy userId cho username:", currentUsername);
-                    return;
-                }
-                currentUserId = userId;
-                console.log(`Đã lấy userId=${userId} cho username=${currentUsername}`);
-
-                // Tải danh sách cuộc trò chuyện cho người dùng
-                return fetchConversations(userId);
-            })
-            .catch(error => {
-                console.error("Lỗi khi lấy dữ liệu người dùng:", error);
-            });
+        // fetchUserIdByUsername(currentUsername)
+        //     .then(userId => {
+        //         if (!userId) {
+        //             console.error("Không tìm thấy userId cho username:", currentUsername);
+        //             return;
+        //         }
+        //         currentUserId = userId;
+        //         console.log(`Đã lấy userId=${userId} cho username=${currentUsername}`);
+        //
+        //         // Tải danh sách cuộc trò chuyện cho người dùng
+        //         return fetchConversations(userId);
+        //     })
+        //     .catch(error => {
+        //         console.error("Lỗi khi lấy dữ liệu người dùng:", error);
+        //     });
     }
     function subscribeToContextMenuUpdates(options) {
         console.log("Bắt đầu đăng ký kênh cập nhật menu ngữ cảnh");
@@ -3037,10 +3037,10 @@
             profileNameElement.textContent = `${userData.firstName} ${userData.lastName}`;
         }
 
-        const avatarImages = document.querySelectorAll("img.avatar-xl");
-        avatarImages.forEach(img => {
-            img.src = userData.image || 'img/avatars/default-avatar.png';
-        });
+        // const avatarImages = document.querySelectorAll("img.avatar-xl");
+        // avatarImages.forEach(img => {
+        //     img.src = userData.image || 'img/avatars/default-avatar.png';
+        // });
     }
     document.getElementById("change_profile").addEventListener("submit", function () {
         console.log("changeProfile called");
@@ -3478,18 +3478,8 @@
                 });
         });
 
-        // Hàm cập nhật UI profile
-        function updateProfileUI(userData) {
-            const profileNameElement = document.querySelector(".profile h1");
-            if (profileNameElement) {
-                profileNameElement.textContent = `${userData.firstName} ${userData.lastName}`;
-            }
 
-            const avatarImages = document.querySelectorAll("img.avatar-xl");
-            avatarImages.forEach(img => {
-                img.src = userData.image || 'img/avatars/default-avatar.png';
-            });
-        }
+
 
         // // Xử lý khi nhận tin nhắn công khai
         // function onPublicMessageReceived(payload) {
