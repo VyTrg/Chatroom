@@ -2,6 +2,7 @@ package com.example.chatroom.controller;
 
 import com.example.chatroom.chat.MessageType;
 import com.example.chatroom.chat.NotificationMessage;
+import com.example.chatroom.dto.ConversationWithRoleDTO;
 import com.example.chatroom.model.ContactWith;
 import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.ConversationMember;
@@ -42,8 +43,8 @@ public class ConversationController {
     private SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/conversations/user/{userId}")
-    public List<Conversation> getConversationsForUser(@PathVariable Long userId) {
-        return conversationService.getConversationsForUser(userId);
+    public List<ConversationWithRoleDTO> getConversationsForUser(@PathVariable Long userId) {
+        return conservationService.getAllConversationsForUserWithRole(userId);
     }
 
     @DeleteMapping("/conversations/{conversationId}")

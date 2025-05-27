@@ -1,5 +1,6 @@
 package com.example.chatroom.repository;
 
+import com.example.chatroom.dto.ConversationWithRoleDTO;
 import com.example.chatroom.model.Conversation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,14 +24,42 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
             @Param("userId1") Long userId1,
             @Param("userId2") Long userId2);
 
+
+
+
     // Tìm tất cả cuộc hội thoại mà một người dùng tham gia
     @Query(value = "SELECT c.* FROM conversation c " +
             "INNER JOIN conversation_member cm ON c.id = cm.conversation_id " +
             "WHERE cm.user_id = :userId " +
+
             "ORDER BY c.created_at DESC",
             nativeQuery = true)
     List<Conversation> findAllConversationsForUser(@Param("userId") Long userId);
 
+
+
+
+    @Query("SELECT new com.example.chatroom.dto.ConversationWithRoleDTO(" +
+            "c.id, c.name, c.isGroup, c.imageUrl, c.createdAt, cm.role, " +
+            "CASE WHEN c.isGroup = false THEN " +
+            "(SELECT cm2.user.id FROM ConversationMember cm2 " +
+            "WHERE cm2.conversation.id = c.id AND cm2.user.id != :userId) " +
+            "ELSE NULL END, " +
+            "CASE WHEN c.isGroup = false THEN " +
+            "(SELECT b.blocker.id FROM Block b " +
+            "WHERE (b.blocker.id = :userId AND b.blocked.id = " +
+            "(SELECT cm2.user.id FROM ConversationMember cm2 " +
+            "WHERE cm2.conversation.id = c.id AND cm2.user.id != :userId)) " +
+            "OR (b.blocked.id = :userId AND b.blocker.id = " +
+            "(SELECT cm2.user.id FROM ConversationMember cm2 " +
+            "WHERE cm2.conversation.id = c.id AND cm2.user.id != :userId))) " +
+            "ELSE NULL END, " +
+            ":userId) " +
+            "FROM Conversation c " +
+            "JOIN ConversationMember cm ON cm.conversation.id = c.id " +
+            "WHERE cm.user.id = :userId " +
+            "ORDER BY c.createdAt DESC")
+    List<ConversationWithRoleDTO> findAllConversationsForUserWithRole(@Param("userId") Long userId);
     // Tìm các cuộc hội thoại nhóm mà một người dùng tham gia (native query)
     @Query(value = "SELECT c.* FROM conversation c JOIN conversation_member cm ON cm.conversation_id = c.id " +
             "WHERE cm.user_id = :userId AND c.is_group = 1 ORDER BY c.created_at DESC",

@@ -716,6 +716,26 @@
             </div>
         </div>
 
+        <div class="modal fade" id="modalUnblock" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="requests">
+                    <div class="title">
+                        <h1>Clear chat history?</h1>
+                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                            <i class="material-icons">close</i>
+                        </button>
+                    </div>
+                    <div class="content">
+                        <form id="modalUnblockForm">
+                            <div class="form-group user-tag">
+                                <button type="button" id="confirmModalUnblock" class="btn button w-100" style="margin: 10px">Accept</button>
+                                <button type="button" class="btn button w-100" data-dismiss="modal" style="margin: 10px">Decline</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!--      delete message  confirm dialog-->
         <div class="modal fade" id="modalConfirm" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -772,9 +792,10 @@
                             <div class="form-group user-tag">
                                 <div id="alert-message1" class="alert"></div>
                                 <label for="user" th:text="#{add.friend}">Email/Username</label>
-                                <input type="text" class="form-control" id="user" required>
+
                             </div>
                             <div class="tag-area tag-input-wrapper user-tag" id="userTag">
+                                <input type="text" class="form-control" id="user" required>
                                 <!--                                <label for="welcome" th:text="#{add.friend.message}">Message:</label>-->
                                 <!--                                <textarea class="text-control" id="welcome"></textarea>-->
                             </div>
@@ -2814,15 +2835,15 @@
                 const latestText = latestMessage ? truncateText(latestMessage.messageText) : 'No messages yet...';
                 const unreadCount = latestMessage && latestMessage.isRead === false && latestMessage.sender.id !== userId ? 1 : 0;
                 const imageUrl = conversation.imageUrl || 'img/avatars/default-avatar.png';
-
-                const isGroup = conversation.isGroup === true;
+                console.log('conversation:',conversation);
+                const isGroup = conversation.isGroup;
                 const chatCard = `
                 <a href="#list-chat" class="filterDiscussions all single" data-toggle="list" role="tab"
                    data-conversation-id="${conversation.id}"
                    data-recipient-id="${conversation.participantId || ''}"
                    data-recipient-name="${conversation.name}"
                    data-is-group="${isGroup}"
-                   onclick="handleConversationClick(${conversation.id}, ${conversation.participantId || 'null'}, '${conversation.name}', ${isGroup});">
+                   onclick="handleConversationClick(${conversation.id}, ${conversation.participantId || 'null'}, '${conversation.name}', ${conversation.isGroup}, ${conversation.otherUserId}, ${conversation.blockerId})">
                     <img class="avatar-md" src="${imageUrl}" data-toggle="tooltip" data-placement="top" title="${conversation.name}" alt="avatar">
                     <div class="status">                        <i class="material-icons online">fiber_manual_record</i>
                     </div>
@@ -2894,37 +2915,37 @@
                 throw new Error("Failed to fetch messages");
             }
 
-            const topConservation = document.getElementById("top");
-            topConservation.innerHTML = `
-                <div class="container">
-                    <div class="col-md-12">
-                        <div class="inside">
-                            <div class="data">
-                                <h5><a href="#">${conversationName}</a></h5>
-                                <span th:text="#{status.online}">Active now</span>
-                            </div>
-                            <div class="dropdown">
-                                <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
-                                <div class="dropdown-menu">
-                                    <button class="dropdown-item clear-history" th:text="#{clear.history}"><i class="material-icons" data-toggle="modal" data-target="#modalClearHistory">clear</i>Clear History</button>
-                                    <button class="dropdown-item block-contact" th:text="#{block.contact}"><i class="material-icons" data-toggle="modal" data-target="#modalBlockContact">block</i>Block Contact</button>
-                                    <button class="dropdown-item delete-contact" th:text="#{delete.contact}"><i class="material-icons" data-toggle="modal" data-target="#modalDeleteContact" >delete</i>Delete Contact</button>
-                                    <button class="dropdown-item rename-conversation" th:text="#{rename}" data-toggle="modal" data-target="#modalRename"><i class="material-icons">edit</i>Rename</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            const sendMessage = document.getElementById("send-message");
-            sendMessage.innerHTML = `
-                <form class="position-relative w-100" id="message-form">
-                    <textarea id="message-input" class="form-control" placeholder="Nhập tin nhắn..." rows="1"></textarea>
-                    <button type="submit" class="btn send"><i class="material-icons">send</i></button>
-                </form>
-                <label>
-                    <input type="file">
-                    <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
-                </label>`;
+            // const topConservation = document.getElementById("top");
+            // topConservation.innerHTML = `
+            //     <div class="container">
+            //         <div class="col-md-12">
+            //             <div class="inside">
+            //                 <div class="data">
+            //                     <h5><a href="#">${conversationName}</a></h5>
+            //                     <span th:text="#{status.online}">Active now</span>
+            //                 </div>
+            //                 <div class="dropdown">
+            //                     <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
+            //                     <div class="dropdown-menu">
+            //                         <button class="dropdown-item clear-history" th:text="#{clear.history}"><i class="material-icons" data-toggle="modal" data-target="#modalClearHistory">clear</i>Clear History</button>
+            //                         <button class="dropdown-item block-contact" th:text="#{block.contact}"><i class="material-icons" data-toggle="modal" data-target="#modalBlockContact">block</i>Block Contact</button>
+            //                         <button class="dropdown-item delete-contact" th:text="#{delete.contact}"><i class="material-icons" data-toggle="modal" data-target="#modalDeleteContact" >delete</i>Delete Contact</button>
+            //                         <button class="dropdown-item rename-conversation" th:text="#{rename}" data-toggle="modal" data-target="#modalRename"><i class="material-icons">edit</i>Rename</button>
+            //                     </div>
+            //                 </div>
+            //             </div>
+            //         </div>
+            //     </div>`;
+            // const sendMessage = document.getElementById("send-message");
+            // sendMessage.innerHTML = `
+            //     <form class="position-relative w-100" id="message-form">
+            //         <textarea id="message-input" class="form-control" placeholder="Nhập tin nhắn..." rows="1"></textarea>
+            //         <button type="submit" class="btn send"><i class="material-icons">send</i></button>
+            //     </form>
+            //     <label>
+            //         <input type="file">
+            //         <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
+            //     </label>`;
 
             // Thêm event handler cho form ngay sau khi tạo
             const messageForm = document.getElementById('message-form');
@@ -2993,8 +3014,6 @@
                                                                 <i class="material-icons md-30">more_vert</i>
                                                             </button>
                                                             <div class="dropdown-menu">
-                                                                <button class="dropdown-item" onclick="editMessage('${message.id}')">Update</button>
-                                                                <button class="dropdown-item" onclick="deleteMessage('${message.id}')">Delete</button>
                                                             </div>
                                                         </div>
 													</div>
@@ -3108,9 +3127,9 @@
                 alert("Unable to delete account. Please try again later.");
             });
     });
-    function handleConversationClick(conversationId, userId, conversationName, isGroup = false) {
+    function handleConversationClick(conversationId, userId, conversationName, isGroup=false, otherId, block=null) {
         console.log(`Clicked on conversation: ID=${conversationId}, Name=${conversationName}, IsGroup=${isGroup}`);
-
+        console.log("type group", block)  ;
         // Đánh dấu cuộc trò chuyện đang được chọn trong UI
         document.querySelectorAll('.discussions .person').forEach(item => {
             item.classList.remove('active');
@@ -3132,7 +3151,7 @@
             subscribeToGroupMessages(conversationId);
         } else {
             // Cá nhân: lấy đúng participantId (khác với currentUserId)
-            let recipientId = userId;
+            let recipientId = otherId;
             if (!recipientId || recipientId === currentUserId) {
                 // Nếu userId truyền vào là chính mình, tìm participant khác trong conversation
                 const conversationElem = document.querySelector(`[data-conversation-id="${conversationId}"]`);
@@ -3150,31 +3169,63 @@
             currentRecipientId,
             currentRecipientUsername,
             currentUserId,
-            currentUsername
+            currentUsername,
+            isGroupConversation
         });
 
         const topElement = document.getElementById('top');
         if (topElement) {
             topElement.innerHTML = `
-                <div class="container">
-                    <div class="col-md-12">
-                        <div class="inside">
-                            <div class="data">
-                                <h5><a href="#">${conversationName}</a></h5>
-                                <span>${isGroup ? 'Nhóm chat' : 'Trực tuyến'}</span>
-                            </div>
-                            <div class="dropdown">
-                                <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
-                                <div class="dropdown-menu">
-                                    <button class="dropdown-item clear-history" data-conversation-id="${conversationId}" th:text="#{clear.history}"><i class="material-icons">clear</i>Clear History</button>
-                                    <button class="dropdown-item block-contact" data-user-id="${currentRecipientId}" th:text="#{block.contact}"><i class="material-icons">block</i>Block Contact</button>
-                                    <button class="dropdown-item delete-contact" data-contact-id="${currentRecipientId}" th:text="#{delete.contact}"><i class="material-icons">delete</i>Delete Contact</button>
-                                    <button class="dropdown-item rename-conversation" data-conversation-id="${conversationId}" th:text="#{rename}"><i class="material-icons">edit</i>Rename</button>
-                                </div>
-                            </div>
+        <div class="container">
+            <div class="col-md-12">
+                <div class="inside">
+                    <div class="data">
+                        <h5><a href="#">${conversationName}</a></h5>
+                        <span>${isGroup ? 'Group chat' : 'Online'}</span>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item clear-history" data-conversation-id="${conversationId}" th:text="#{clear.history}"><i class="material-icons">clear</i>Clear History</button>
+                            ${isGroup ?
+                `<button class="dropdown-item add-member" data-user-id="${otherId}" data-toggle="modal" data-target="#startnewchat"><i class="material-icons">group_add</i>Add Member</button>`
+                :
+                (block && block === otherId ?
+                        ''
+                        : (block ?
+                            `<button class="dropdown-item unblock-contact" data-user-id="${otherId}" data-toggle="modal" data-target="#modalUnblock"><i class="material-icons">block</i>Unblock</button>`
+                            : `<button class="dropdown-item block-contact" data-user-id="${otherId}"><i class="material-icons">block</i>Block Contact</button>`)
+                )
+            }
+
+                            <button class="dropdown-item delete-contact" data-contact-id="${conversationId}" th:text="#{delete.contact}" data-toggle="modal" data-target="#modalDeleteContact"><i class="material-icons">delete</i>Delete Contact</button>
+                            <button class="dropdown-item rename-conversation" data-conversation-id="${conversationId}" th:text="#{rename}"><i class="material-icons">edit</i>Rename</button>
                         </div>
                     </div>
-                </div>`;
+                </div>
+            </div>
+        </div>`;
+            const sendMessage = document.getElementById("send-message");
+            if (sendMessage) {
+                if (block == null) {
+                    sendMessage.innerHTML = `
+            <form class="position-relative w-100" id="message-form">
+                <textarea id="message-input" class="form-control" placeholder="Type message ..." rows="1"></textarea>
+                <button type="submit" class="btn send"><i class="material-icons">send</i></button>
+            </form>
+            <label>
+                <input type="file">
+                <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
+            </label>`;
+                } else {
+                    sendMessage.innerHTML = `
+            <form class="position-relative w-100" id="message-form">
+                <textarea id="message-input" class="form-control" placeholder="This contact is block." rows="1" disabled "></textarea>
+            </form>
+            <label>
+            </label>`;
+                }
+            }
 
             // Ngay sau khi cập nhật DOM, gắn các event listener
             setTimeout(() => {
@@ -3225,8 +3276,8 @@
 
                         document.getElementById('confirmBlockContact').setAttribute('data-user-id', uid);
 
-                        const modal = new bootstrap.Modal(document.getElementById('modalBlockContact'));
-                        modal.show();
+                        // const modal = new bootstrap.Modal(document.getElementById('modalBlockContact'));
+                        // modal.show();
                     });
                 } else {
                     console.error("Không tìm thấy nút Block Contact");
@@ -3235,6 +3286,7 @@
 
                 // Delete contact button
                 let pendingDeleteUserId = null;
+
                 const deleteContactButton = document.querySelector('.delete-contact');
                 if (deleteContactButton) {
                     deleteContactButton.addEventListener('click', function () {
@@ -3244,43 +3296,55 @@
                             console.error("Không thể xác định liên hệ");
                             return;
                         }
-                        // deleteContact(contactId);
+
+                        pendingDeleteUserId = contactId;
+
+                        // Show modal
+                        // const modal = new bootstrap.Modal(document.getElementById('modalDeleteContact'));
+                        // modal.show();
+                    });
+                } else {
+                    console.error("Không tìm thấy nút Delete Contact");
+                }
+
+                const confirmDeleteBtn = document.getElementById('confirmDeleteContact');
+                if (confirmDeleteBtn) {
+                    confirmDeleteBtn.addEventListener('click', function () {
+                        if (!pendingDeleteUserId) {
+                            console.error("Không có ID người dùng để xóa");
+                            return;
+                        }
+
                         const token = sessionStorage.getItem("token");
                         const currentUserId = sessionStorage.getItem("userId");
 
-                        // Bước 1: Lấy contactId dựa trên userId
-                        fetch(`${baseURL}/contacts/find-by-users?userId=${currentUserId}&contactId=${userId}`, {
-                            method: 'GET',
+                        // Step 1: Attempt delete
+                        fetch(`${baseURL}/contacts/${pendingDeleteUserId}`, {
+                            method: 'DELETE',
                             headers: {
                                 'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json'
                             }
                         }).then(response => {
-                                if (!response.ok) {
-                                    throw new Error("Không thể tìm thấy thông tin liên hệ");
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                if (data && data.id) {
-                                    console.log("Đã tìm thấy contactId:", data.id);
-                                    // Bước 2: Xóa liên hệ với contactId đúng
-                                    deleteContact(data.id);
-                                } else {
-                                    throw new Error("Không tìm thấy ID liên hệ");
-                                }
-                            })
+                            if (!response.ok) {
+                                throw new Error("Không thể xóa liên hệ");
+                            }
+                            showToast("Đã xóa liên hệ thành công");
+                            // Optionally refresh UI or conversation list
+                            fetchConversations(currentUserId);
+                        })
                             .catch(error => {
-                                console.error("Lỗi khi tìm contactId:", error);
+                                console.error("Lỗi khi xóa liên hệ:", error);
                                 showToast("Không thể xóa liên hệ: " + error.message, true);
                             });
-                        pendingDeleteUserId = contactId;
-                        const modal = new bootstrap.Modal(document.getElementById('modalDeleteContact'));
-                        modal.show();
+
+                        // Close the modal
+                        // const modalElement = document.getElementById('modalDeleteContact');
+                        // const modal = bootstrap.Modal.getInstance(modalElement);
+                        // modal.hide();
                     });
-                } else {
-                    console.error("Không tìm thấy nút Delete Contact");
                 }
+
                 const renameConversationButton = document.querySelector('.rename-conversation');
                 if (renameConversationButton) {
                     renameConversationButton.addEventListener('click', function () {
@@ -3309,15 +3373,15 @@
 
             const sendMessageElement = document.getElementById("send-message");
             if (sendMessageElement) {
-                sendMessageElement.innerHTML = `
-                <form class="position-relative w-100" id="message-form">
-                    <textarea id="message-input" class="form-control"  rows="1"></textarea>
-                    <button type="submit" class="btn send"><i class="material-icons">send</i></button>
-                </form>
-                <label>
-                    <input type="file">
-                    <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
-                </label>`;
+                // sendMessageElement.innerHTML = `
+                // <form class="position-relative w-100" id="message-form">
+                //     <textarea id="message-input" class="form-control"  rows="1"></textarea>
+                //     <button type="submit" class="btn send"><i class="material-icons">send</i></button>
+                // </form>
+                // <label>
+                //     <input type="file">
+                //     <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
+                // </label>`;
 
                 // Thêm event handler cho form ngay sau khi tạo
                 const messageForm = document.getElementById('message-form');
@@ -3375,64 +3439,64 @@
                 }
             }, 5000);
         }
-        document.getElementById('confirmDeleteContact').addEventListener('click', () => {
-            if (!pendingDeleteUserId) return;
-
-            const token = sessionStorage.getItem("token");
-
-            fetch(`${baseURL}/contacts/delete`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    userOne: currentUserId,
-                    userTwo: pendingDeleteUserId
-                })
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error("Không thể xóa liên hệ");
-                    showToast("Đã xóa liên hệ");
-                    // Refresh UI
-                    if (sessionStorage.getItem("userId")) {
-                        fetchConversations(sessionStorage.getItem("userId"));
-                    }
-                })
-                .catch(error => {
-                    console.error("Lỗi khi xóa liên hệ:", error);
-                    showToast("Lỗi khi xóa liên hệ: " + error.message, true);
-                });
-
-            // Hide modal
-            // const modal = bootstrap.Modal.getInstance(document.getElementById('modalDeleteContact'));
-            // modal.hide();
-        });
-        function deleteContact(contactId) {
-            const token = sessionStorage.getItem("token");
-
-            fetch(`${baseURL}/contacts`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    userOne: currentUserId,
-                    userTwo: contactId
-                })
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error("Không thể xóa liên hệ");
-                    showToast("Đã xóa liên hệ");
-                    // Refresh UI
-                    if (sessionStorage.getItem("userId")) {
-                        fetchConversations(sessionStorage.getItem("userId"));
-                    }
-                })
-                .catch(error => {
-                    console.error("Lỗi khi xóa liên hệ:", error);
-                    showToast("Lỗi khi xóa liên hệ: " + error.message, true);
-                });
-        }
+        // document.getElementById('confirmDeleteContact').addEventListener('click', () => {
+        //     if (!pendingDeleteUserId) return;
+        //
+        //     const token = sessionStorage.getItem("token");
+        //
+        //     fetch(`${baseURL}/contacts/delete`, {
+        //         method: 'POST',
+        //         headers: {
+        //             'Authorization': `Bearer ${token}`
+        //         },
+        //         body: JSON.stringify({
+        //             userOne: currentUserId,
+        //             userTwo: pendingDeleteUserId
+        //         })
+        //     })
+        //         .then(response => {
+        //             if (!response.ok) throw new Error("Không thể xóa liên hệ");
+        //             showToast("Đã xóa liên hệ");
+        //             // Refresh UI
+        //             if (sessionStorage.getItem("userId")) {
+        //                 fetchConversations(sessionStorage.getItem("userId"));
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.error("Lỗi khi xóa liên hệ:", error);
+        //             showToast("Lỗi khi xóa liên hệ: " + error.message, true);
+        //         });
+        //
+        //     // Hide modal
+        //     // const modal = bootstrap.Modal.getInstance(document.getElementById('modalDeleteContact'));
+        //     // modal.hide();
+        // });
+        // function deleteContact(contactId) {
+        //     const token = sessionStorage.getItem("token");
+        //
+        //     fetch(`${baseURL}/contacts`, {
+        //         method: 'PUT',
+        //         headers: {
+        //             'Authorization': `Bearer ${token}`
+        //         },
+        //         body: JSON.stringify({
+        //             userOne: currentUserId,
+        //             userTwo: contactId
+        //         })
+        //     })
+        //         .then(response => {
+        //             if (!response.ok) throw new Error("Không thể xóa liên hệ");
+        //             showToast("Đã xóa liên hệ");
+        //             // Refresh UI
+        //             if (sessionStorage.getItem("userId")) {
+        //                 fetchConversations(sessionStorage.getItem("userId"));
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.error("Lỗi khi xóa liên hệ:", error);
+        //             showToast("Lỗi khi xóa liên hệ: " + error.message, true);
+        //         });
+        // }
 
         document.getElementById('renameForm').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -3889,7 +3953,56 @@
         // const modal = bootstrap.Modal.getInstance(document.getElementById('modalBlockContact'));
         // if (modal) modal.hide();
     }
+    let unblockUserId = null
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('unblock-contact')) {
+            unblockUserId = e.target.getAttribute('data-user-id');
+        }
+    });
 
+    // Handle unblock confirmation
+    document.getElementById("confirmModalUnblock").addEventListener("click", function () {
+        const currentUser = currentUserId || sessionStorage.getItem("userId");
+        const token = sessionStorage.getItem("token");
+
+        if (!currentUser || !unblockUserId || !token) {
+            showToast("Thông tin không đầy đủ để thực hiện bỏ chặn", true);
+            return;
+        }
+
+        fetch(`${baseURL}/unblock?blocker=${currentUser}&blocked=${unblockUserId}`, {
+            method: 'DELETE', // or 'POST' if that's what your controller expects
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                if (!response.ok) throw new Error("Không thể bỏ chặn");
+
+                // WebSocket notify
+                // if (stompClient && stompClient.connected) {
+                //     const notificationMsg = {
+                //         type: "UNBLOCKED",
+                //         userId: unblockUserId,
+                //         initiatorId: currentUser
+                //     };
+                //     stompClient.send("/app/contact-change", {}, JSON.stringify(notificationMsg));
+                // }
+
+                showToast("Đã bỏ chặn người liên hệ");
+
+                // Refresh the conversation list/UI
+                fetchConversations(currentUser);
+
+                // Hide modal
+                // const modal = bootstrap.Modal.getInstance(document.getElementById('modalUnblock'));
+                // if (modal) modal.hide();
+            })
+            .catch(err => {
+                console.error("Unblock error:", err);
+                showToast("Không thể bỏ chặn người liên hệ", true);
+            });
+    });
 
     function handleContactChange(data){
         console.log("Xu ly thong bao thay doi lien he: ", data);
@@ -4568,7 +4681,7 @@
                 newUser = userData.id;
                 // Insert tag before the input (replace recipientList with a suitable container if different)
                 const container = document.querySelector('.form-group.user-tag');
-                container.insertBefore(tag, document.getElementById('user'));
+                container.insertBefore(tag, inputUser);
                 inputUser.setAttribute('type','hidden');
                 // inputUser.
             } catch (error) {
@@ -4718,6 +4831,95 @@
             }
         });
     });
+    document.querySelector(".btn.attach").addEventListener("click", () => {
+        document.getElementById("file-input").click();
+    });
+
+    document.getElementById("file-input").addEventListener("change", function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        const senderId = sessionStorage.getItem("userId");
+        const conversationId = sessionStorage.getItem("conversationId");
+        const token = sessionStorage.getItem("token");
+
+        if (!senderId || !conversationId || !token) {
+            console.error("Missing senderId, conversationId, or token");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("senderId", senderId);
+        formData.append("conversationId", conversationId);
+        formData.append("file", file);
+
+        fetch(`${baseURL}/send`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            body: formData
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Upload failed");
+                return res.json();
+            })
+            .then(data => {
+                console.log("Upload successful:", data);
+
+                const messageContainer = document.createElement("div");
+                messageContainer.className = "text-main";
+
+                messageContainer.innerHTML = `
+                <div class="text-group">
+                    <div class="text">
+                        <div class="attachment">
+                            <button class="btn attach">
+                                <i class="material-icons md-18">insert_drive_file</i>
+                            </button>
+                            <div class="file">
+                                <h5>
+                                    <a href="${data.downloadUrl || '#'}" target="_blank">
+                                        ${data.filename || 'Tệp đính kèm'}
+                                    </a>
+                                </h5>
+                                <span>${formatFileSize(data.size)} ${getFileTypeLabel(data.filename)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <span>${formatTimestamp(new Date())}</span>
+            `;
+
+                document.getElementById("chat-body").appendChild(messageContainer);
+                messageContainer.scrollIntoView({ behavior: "smooth" });
+
+                // Optional: Reset file input
+                this.value = '';
+            })
+            .catch(error => {
+                console.error("Lỗi khi gửi tệp:", error);
+                showToast("Lỗi khi gửi tệp: " + error.message, true);
+            });
+    });
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    function getFileTypeLabel(filename = '') {
+        const ext = filename.split('.').pop().toLowerCase();
+        const docTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+        return docTypes.includes(ext) ? 'Document' : 'File';
+    }
+
+    function formatTimestamp(date) {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+
 </script>
 </body>
 </html>

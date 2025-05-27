@@ -1,13 +1,11 @@
 package com.example.chatroom.service;
 
+import com.example.chatroom.dto.ConversationWithRoleDTO;
 import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.ConversationMember;
 import com.example.chatroom.model.Message;
 import com.example.chatroom.model.User;
-import com.example.chatroom.repository.ConversationMemberRepository;
-import com.example.chatroom.repository.ConversationRepository;
-import com.example.chatroom.repository.MessageRepository;
-import com.example.chatroom.repository.UserRepository;
+import com.example.chatroom.repository.*;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +29,8 @@ public class ConservationServiceImpl implements ConservationService {
     @Autowired
     private UserRepository userRepository;
     private EntityManager entityManager;
+    @Autowired
+    private BlockRepository blockRepository;
 
     @Override
     public List<Conversation> getAllConversationsForUser(Long userId) {
@@ -78,6 +78,13 @@ public class ConservationServiceImpl implements ConservationService {
 
         return conversation;
     }
+
+    @Override
+    public List<ConversationWithRoleDTO> getAllConversationsForUserWithRole(Long userId) {
+        return conversationRepository.findAllConversationsForUserWithRole(userId);
+    }
+
+
 
 
 }

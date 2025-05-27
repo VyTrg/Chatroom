@@ -56,7 +56,8 @@ public class ContactWithServiceImpl implements ContactWithService{
 
     @Override
     public void deleteContactWith(ContactWith contactWith) {
-        contactWithRepository.delete(contactWith);
+        contactWith.setDeletedAt( LocalDateTime.now());
+        contactWithRepository.save(contactWith);
     }
 
     @Override

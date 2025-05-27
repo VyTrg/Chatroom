@@ -1,5 +1,6 @@
 package com.example.chatroom.service;
 
+import com.example.chatroom.dto.ConversationWithRoleDTO;
 import com.example.chatroom.model.Conversation;
 
 import java.util.List;
@@ -9,4 +10,5 @@ public interface ConservationService {
 
     Conversation createGroupConversation(List<Long> userIds, String conversationName);
 
+    List<ConversationWithRoleDTO> getAllConversationsForUserWithRole(Long userId);
 }
