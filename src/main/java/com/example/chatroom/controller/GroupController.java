@@ -13,7 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -86,31 +89,74 @@ public class GroupController {
     }
 
     // API thêm thành viên vào group đã có, cho phép phân quyền
-    @PostMapping("/add-member")
-    public ResponseEntity<?> addMemberToGroup(
-            @RequestParam Long groupId,
-            @RequestParam Long userId,
-            @RequestParam(defaultValue = "member") String role
-    ) {
-        Conversation group = conversationRepository.findById(groupId).orElse(null);
-        if (group == null || !Boolean.TRUE.equals(group.getIsGroup())) {
-            return ResponseEntity.badRequest().body("Group không tồn tại hoặc không phải group");
+    @PostMapping("/add-members")
+    public ResponseEntity<?> addMembersToGroup(@RequestBody Map<String, Object> body) {
+        Map<String, Object> error = new HashMap<>();
+
+        try {
+            Long groupId = Long.valueOf(body.get("groupId").toString());
+
+            @SuppressWarnings("unchecked")
+            List<Object> userIdsRaw = (List<Object>) body.get("userIds");
+
+            if (userIdsRaw == null || userIdsRaw.isEmpty()) {
+                error.put("error", "error");
+                return ResponseEntity.badRequest().body(error);
+            }
+
+            List<Long> userIds = userIdsRaw.stream()
+                    .map(id -> Long.valueOf(id.toString()))
+                    .toList();
+
+            String role = "member";
+
+            Conversation group = conversationRepository.findById(groupId).orElse(null);
+            if (group == null || !Boolean.TRUE.equals(group.getIsGroup())) {
+                error.put("error", "error");
+                return ResponseEntity.badRequest().body(error);
+            }
+
+            List<User> users = userRepository.findAllById(userIds);
+            if (users.size() != userIds.size()) {
+                error.put("error", "Invalid Users");
+                return ResponseEntity.badRequest().body(error);
+            }
+
+            List<String> addedUsers = new ArrayList<>();
+            List<String> alreadyMembers = new ArrayList<>();
+
+            for (User user : users) {
+                boolean exists = conversationMemberRepository.existsByUserIdAndConversationId(user.getId(), groupId);
+                if (exists) {
+                    error.put("error", "Users have been in group");
+                    return ResponseEntity.badRequest().body(error);
+                }
+
+                ConversationMember cm = new ConversationMember();
+                cm.setConversation(group);
+                cm.setUser(user);
+                cm.setRole(role);
+                cm.setJoinedAt(LocalDateTime.now());
+
+                conversationMemberRepository.save(cm);
+                addedUsers.add(user.getUsername());
+                String name = user.getFirstName() + " " + user.getLastName();
+                group.setName(group.getName() + "," + name);
+
+            }
+            conversationRepository.save(group);
+            Map<String, Object> response = new HashMap<>();
+            response.put("groupId", groupId);
+            response.put("addedUsers", addedUsers);
+            response.put("alreadyMembers", alreadyMembers);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            error.put("error", "Error" + e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            return ResponseEntity.badRequest().body("User không tồn tại!");
-        }
-        // Kiểm tra nếu user đã là thành viên
-        boolean exists = conversationMemberRepository.existsByConversationAndUser(group, user);
-        if (exists) {
-            return ResponseEntity.badRequest().body("User đã là thành viên của group");
-        }
-        ConversationMember cm = new ConversationMember();
-        cm.setConversation(group);
-        cm.setUser(user);
-        cm.setRole(role); // "member" hoặc "admin"
-        cm.setJoinedAt(LocalDateTime.now());
-        conversationMemberRepository.save(cm);
-        return ResponseEntity.ok("Đã thêm user " + userId + " vào group " + groupId + " với quyền: " + role);
     }
+
+
+
 }

@@ -76,4 +76,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     @Query(value = "SELECT * FROM conversation WHERE LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%'))",
             nativeQuery = true)
     List<Conversation> findByNameContainingIgnoreCase(@Param("keyword") String keyword);
+
+    @Query("SELECT cm.conversation FROM ConversationMember cm WHERE cm.user.id = :userId")
+    boolean existsByConversationAndUser(Long conversationoId, Long userId);
 }

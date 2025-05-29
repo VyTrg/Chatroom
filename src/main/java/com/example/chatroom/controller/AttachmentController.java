@@ -29,7 +29,7 @@ public class AttachmentController {
     }
 
     @GetMapping("/message/{messageId}")
-    public ResponseEntity<List<Attachment>> getAttachments(@PathVariable Long messageId) {
+    public ResponseEntity<Attachment> getAttachments(@PathVariable Long messageId) {
         return ResponseEntity.ok(attachmentService.getAttachmentsByMessageId(messageId));
     }
 
