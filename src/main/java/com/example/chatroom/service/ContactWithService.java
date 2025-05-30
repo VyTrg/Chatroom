@@ -18,4 +18,8 @@ public interface ContactWithService {
     ContactWith getContactWithById(Long id);
     
     ContactWith getContactWithByUserIds(Long userId1, Long userId2);
+    
+    ContactWith findContactBetweenUsers(Long userId, Long contactId);
+    
+    ContactWith save(ContactWith contact);
 }

@@ -56,25 +56,48 @@ public class ContactWithServiceImpl implements ContactWithService{
 
     @Override
     public void deleteContactWith(ContactWith contactWith) {
-        contactWith.setDeletedAt( LocalDateTime.now());
+        contactWith.setDeletedAt(LocalDateTime.now());
         contactWithRepository.save(contactWith);
     }
 
     @Override
     public ContactWith getContactWithById(Long id) {
-        Optional<ContactWith> contactWithOptional = contactWithRepository.findById(id);
-        return contactWithOptional.orElse(null);
+        return contactWithRepository.findContactWithsById(id);
+    }
+
+    @Override
+    public ContactWith getContactWithByUserIds(Long userId1, Long userId2) {
+        ContactWith contact = contactWithRepository.findContactWithsByContactOne_IdAndContactTwo_Id(userId1, userId2);
+        if (contact == null) {
+            contact = contactWithRepository.findContactWithsByContactOne_IdAndContactTwo_Id(userId2, userId1);
+        }
+        return contact;
     }
     
     @Override
-    public ContactWith getContactWithByUserIds(Long userId1, Long userId2) {
-        // Kiểm tra tìm kiếm theo cả hai hướng
-        ContactWith contact = contactWithRepository.findContactWithsByContactOne_IdAndContactTwo_Id(userId1, userId2);
-        if (contact != null) {
-            return contact;
+    public ContactWith findContactBetweenUsers(Long userId, Long contactId) {
+//        // Tìm contact theo cả hai chiều (userId -> contactId hoặc contactId -> userId)
+//        ContactWith contact = contactWithRepository.findContactWithsByContactOne_IdAndContactTwo_Id(userId, contactId);
+//        if (contact == null) {
+//            contact = contactWithRepository.findContactWithsByContactOne_IdAndContactTwo_Id(contactId, userId);
+//        }
+//        return contact;
+//        // Sử dụng phương thức @Query đã được định nghĩa trong repository
+//        Optional<ContactWith> contactOpt = contactWithRepository.findContactBetweenUsers(userId, contactId);
+//        return contactOpt.orElse(null);
+//    }
+        List<ContactWith> contacts = contactWithRepository.findContactBetweenUsers(userId, contactId);
+        // Lọc contact không bị xóa (deletedAt == null) hoặc lấy contact mới nhất
+        if (contacts.isEmpty()) {
+            return null;
         }
-        
-        // Nếu không tìm thấy theo hướng thứ nhất, thử hướng thứ hai
-        return contactWithRepository.findContactWithsByContactOne_IdAndContactTwo_Id(userId2, userId1);
+        // Có thể sắp xếp theo thời gian tạo để lấy mới nhất
+        contacts.sort((c1, c2) -> c2.getCreatedAt().compareTo(c1.getCreatedAt()));
+        return contacts.get(0);
+    }
+
+    @Override
+    public ContactWith save(ContactWith contact) {
+        return contactWithRepository.save(contact);
     }
 }

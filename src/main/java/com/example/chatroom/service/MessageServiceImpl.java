@@ -45,6 +45,13 @@ public class MessageServiceImpl implements MessageService {
     }
     
     @Override
+    public void deleteAllMessagesByConversationId(Long conversationId) {
+        // Xóa tất cả tin nhắn trong cuộc trò chuyện
+        List<Message> messages = messageRepository.findMessagesByConversationId(conversationId);
+        messageRepository.deleteAll(messages);
+    }
+    
+    @Override
     public Message updateMessage(Long messageId, String newContent) {
         Optional<Message> messageOpt = messageRepository.findById(messageId);
         if (messageOpt.isPresent()) {

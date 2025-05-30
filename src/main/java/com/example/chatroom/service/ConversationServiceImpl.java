@@ -49,4 +49,14 @@ public class ConversationServiceImpl implements ConversationService {
     public List<ConversationMember> getConversationMembers(Long conversationId) {
         return conversationMemberRepository.findAllByConversationId(conversationId);
     }
+    
+    @Override
+    public List<Conversation> findByContactId(Long contactId) {
+        return conversationRepository.findByContactId(contactId);
+    }
+    
+    @Override
+    public Conversation save(Conversation conversation) {
+        return conversationRepository.save(conversation);
+    }
 }

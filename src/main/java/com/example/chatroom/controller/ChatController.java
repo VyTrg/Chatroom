@@ -1,6 +1,7 @@
 package com.example.chatroom.controller;
 
 import com.example.chatroom.chat.ChatMessage;
+import com.example.chatroom.chat.MessageType;
 import com.example.chatroom.model.ConversationMember;
 import com.example.chatroom.model.Message;
 import com.example.chatroom.model.User;
@@ -65,8 +66,15 @@ public class ChatController {
         }
         if (sender != null && recipient != null) {
             try {
+                // Log thông tin người gửi và người nhận để debug
+                log.info("[PRIVATE] Sending from {} (ID={}) to {} (ID={})",
+                        sender.getUsername(), sender.getId(),
+                        recipient.getUsername(), recipient.getId());
+
                 // Lưu tin nhắn vào database
                 Conversation conversation = chatService.findOrCreatePrivateConversation(sender, recipient);
+                log.info("[PRIVATE] Using conversation ID: {}", conversation.getId());
+
                 Message message = new Message();
                 message.setSender(sender);
                 message.setConversation(conversation);
@@ -74,36 +82,41 @@ public class ChatController {
                 message.setCreatedAt(LocalDateTime.now());
                 message.setIsRead(false);
                 Message savedMessage = chatService.saveMessage(message);
-                
-                // Add the message ID and conversation ID to the chat message
+
+                // Thêm thông tin đầy đủ vào chatMessage để gửi qua WebSocket
                 chatMessage.setMessageId(savedMessage.getId().toString());
                 chatMessage.setConversationId(conversation.getId().toString());
-                
-//                // Send message to recipient
-//                String recipientUsername = recipient.getUsername();
-//                System.out.println("[PRIVATE] Sending from " + chatMessage.getSender() + " to " + recipientUsername);
-//                messagingTemplate.convertAndSendToUser(recipientUsername, "/queue/private", chatMessage);
+                chatMessage.setType(MessageType.CHAT);
+                chatMessage.setTimestamp(savedMessage.getCreatedAt().toString());
+                chatMessage.setSenderId(sender.getId().toString());
 
+                // Gửi tin nhắn qua topic của cuộc trò chuyện
                 String conversationTopic = "/topic/private." + conversation.getId();
-                System.out.println("[PRIVATE] Sending to topic: " + conversationTopic);
-
+                log.info("[PRIVATE] Sending to topic: {} with content: {}", conversationTopic, chatMessage.getContent());
                 messagingTemplate.convertAndSend(conversationTopic, chatMessage);
 
+                // Gửi tin nhắn riêng trực tiếp đến người nhận
+                log.info("[PRIVATE] Sending direct message to recipient: {}", recipient.getId());
+                messagingTemplate.convertAndSendToUser(
+                        recipient.getId().toString(),
+                        "/queue/messages",
+                        chatMessage
+                );
 
-//                // Also send a copy to the sender so they can see their own messages
-//                messagingTemplate.convertAndSendToUser(chatMessage.getSender(), "/queue/private", chatMessage);
-                
-                log.info("[PRIVATE] Message saved with ID: {} and sent from {} to {} with content: {}", 
-                        savedMessage.getId(),
-                        chatMessage.getSender(), 
-//                        recipientUsername,
-                        chatMessage.getSender(),
-                        chatMessage.getContent());
+                // Gửi tin nhắn riêng trực tiếp đến người gửi
+                log.info("[PRIVATE] Also sending direct message to sender: {}", sender.getId());
+                messagingTemplate.convertAndSendToUser(
+                        sender.getId().toString(),
+                        "/queue/messages",
+                        chatMessage
+                );
+
+                log.info("[PRIVATE] Message saved with ID: {} and sent successfully", savedMessage.getId());
             } catch (Exception e) {
                 log.error("[PRIVATE] Error sending private message: {}", e.getMessage(), e);
             }
         } else {
-            log.error("[PRIVATE] Failed to send message - sender or recipient not found. Sender: {}, Recipient ID: {}", 
+            log.error("[PRIVATE] Failed to send message - sender or recipient not found. Sender: {}, Recipient ID: {}",
                     chatMessage.getSender(), chatMessage.getRecipientId());
         }
     }
@@ -124,18 +137,20 @@ public class ChatController {
                 message.setCreatedAt(LocalDateTime.now());
                 message.setIsRead(false);
                 Message savedMessage = chatService.saveMessage(message);
-                
+
                 // Add the message ID and conversation ID to the chat message
                 chatMessage.setMessageId(savedMessage.getId().toString());
                 chatMessage.setConversationId(group.getId().toString());
-                
-                log.info("[GROUP] Message saved with ID: {} and sent to group {} from {}", 
-                         savedMessage.getId(), groupId, chatMessage.getSender());
-                
+                chatMessage.setType(MessageType.CHAT);
+                chatMessage.setTimestamp(savedMessage.getCreatedAt().toString());
+
+                log.info("[GROUP] Message saved with ID: {} and sent to group {} from {}",
+                        savedMessage.getId(), groupId, chatMessage.getSender());
+
                 messagingTemplate.convertAndSend("/topic/group." + groupId, chatMessage);
             } else {
-                log.error("[GROUP] Failed to send message - group or sender not found. Group ID: {}, Sender: {}", 
-                          groupId, chatMessage.getSender());
+                log.error("[GROUP] Failed to send message - group or sender not found. Group ID: {}, Sender: {}",
+                        groupId, chatMessage.getSender());
             }
         } catch (Exception e) {
             log.error("[GROUP] Error sending group message: {}", e.getMessage(), e);

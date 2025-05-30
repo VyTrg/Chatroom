@@ -3198,7 +3198,7 @@
                 )
             }
 
-                            <button class="dropdown-item delete-contact" data-contact-id="${conversationId}" th:text="#{delete.contact}" data-toggle="modal" data-target="#modalDeleteContact"><i class="material-icons">delete</i>Delete Contact</button>
+                            <button class="dropdown-item delete-contact" data-contact-id="${otherId}" th:text="#{delete.contact}" data-toggle="modal" data-target="#modalDeleteContact"><i class="material-icons">delete</i>Delete Contact</button>
                             <button class="dropdown-item rename-conversation" data-conversation-id="${conversationId}" th:text="#{rename}"><i class="material-icons">edit</i>Rename</button>
                         </div>
                     </div>
@@ -3291,13 +3291,14 @@
                 if (deleteContactButton) {
                     deleteContactButton.addEventListener('click', function () {
                         console.log("Đã nhấp vào nút xóa liên hệ");
-                        const contactId = this.getAttribute('data-contact-id') || currentRecipientId;
-                        if (!contactId) {
+                        const userId = this.getAttribute('data-contact-id') || currentRecipientId;
+                        if (!userId) {
                             console.error("Không thể xác định liên hệ");
                             return;
                         }
 
-                        pendingDeleteUserId = contactId;
+                        console.log("ID người dùng cần xóa liên hệ:", userId);
+                        pendingDeleteUserId = userId;
 
                         // Show modal
                         // const modal = new bootstrap.Modal(document.getElementById('modalDeleteContact'));
@@ -3307,6 +3308,44 @@
                     console.error("Không tìm thấy nút Delete Contact");
                 }
 
+                // const confirmDeleteBtn = document.getElementById('confirmDeleteContact');
+                // if (confirmDeleteBtn) {
+                //     confirmDeleteBtn.addEventListener('click', function () {
+                //         if (!pendingDeleteUserId) {
+                //             console.error("Không có ID người dùng để xóa");
+                //             return;
+                //         }
+                //
+                //         const token = sessionStorage.getItem("token");
+                //         const currentUserId = sessionStorage.getItem("userId");
+                //
+                //         // Step 1: Attempt delete
+                //         fetch(`${baseURL}/contacts/delete-contact?userId=${currentUserId}&contactId=${pendingDeleteUserId}`, {
+                //             method: 'DELETE',
+                //             headers: {
+                //                 'Authorization': `Bearer ${token}`,
+                //                 'Content-Type': 'application/json'
+                //             }
+                //         }).then(response => {
+                //             if (!response.ok) {
+                //                 throw new Error("Không thể xóa liên hệ");
+                //             }
+                //             showToast("Đã xóa liên hệ thành công");
+                //             // Optionally refresh UI or conversation list
+                //             fetchConversations(currentUserId);
+                //         })
+                //             .catch(error => {
+                //                 console.error("Lỗi khi xóa liên hệ:", error);
+                //                 showToast("Không thể xóa liên hệ: " + error.message, true);
+                //             });
+                //
+                //         // Close the modal
+                //         // const modalElement = document.getElementById('modalDeleteContact');
+                //         // const modal = bootstrap.Modal.getInstance(modalElement);
+                //         // modal.hide();
+                //     });
+                // }
+
                 const confirmDeleteBtn = document.getElementById('confirmDeleteContact');
                 if (confirmDeleteBtn) {
                     confirmDeleteBtn.addEventListener('click', function () {
@@ -3315,33 +3354,16 @@
                             return;
                         }
 
-                        const token = sessionStorage.getItem("token");
-                        const currentUserId = sessionStorage.getItem("userId");
+                        // Gọi hàm deleteContact đã cải tiến
+                        deleteContact(pendingDeleteUserId);
 
-                        // Step 1: Attempt delete
-                        fetch(`${baseURL}/contacts/${pendingDeleteUserId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
-                            }
-                        }).then(response => {
-                            if (!response.ok) {
-                                throw new Error("Không thể xóa liên hệ");
-                            }
-                            showToast("Đã xóa liên hệ thành công");
-                            // Optionally refresh UI or conversation list
-                            fetchConversations(currentUserId);
-                        })
-                            .catch(error => {
-                                console.error("Lỗi khi xóa liên hệ:", error);
-                                showToast("Không thể xóa liên hệ: " + error.message, true);
-                            });
-
-                        // Close the modal
-                        // const modalElement = document.getElementById('modalDeleteContact');
-                        // const modal = bootstrap.Modal.getInstance(modalElement);
-                        // modal.hide();
+                        // Đóng modal
+                        const modalElement = document.getElementById('modalDeleteContact');
+                        if (modalElement) {
+                            // const modal = bootstrap.Modal.getInstance(modalElement);
+                            // if (modal) modal.hide();
+                            $(modalElement).modal('hide');
+                        }
                     });
                 }
 
@@ -4016,7 +4038,7 @@
         }
     }
 
-    function deleteContact(contactId) {
+    function deleteContact(userId) {
         // Lấy currentUserId từ biến toàn cục hoặc từ sessionStorage
         let currentUser = currentUserId || sessionStorage.getItem("userId");
 
@@ -4027,20 +4049,16 @@
             return;
         }
 
-        if (!contactId) {
-            console.error("No contact selected");
-            return;
-        }
-
-        if (!confirm('Bạn có chắc chắn muốn xóa người liên hệ này? Điều này cũng sẽ xóa cuộc trò chuyện và lịch sử tin nhắn.')) {
+        if (!userId) {
+            console.error("No user selected");
             return;
         }
 
         const token = sessionStorage.getItem("token");
 
-        // Thực hiện xóa liên hệ
-        fetch(`${baseURL}/contacts/${contactId}`, {
-            method: 'DELETE',
+        // Bước 1: Tìm contactId dựa trên userId và currentUser
+        fetch(`${baseURL}/contacts/find-by-users?userId=${currentUser}&contactId=${userId}`, {
+            method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -4050,97 +4068,130 @@
                 if (!response.ok) {
                     throw new Error(`Lỗi ${response.status}: ${response.statusText}`);
                 }
-                return response.text().then(text => text ? JSON.parse(text) : {});
+                return response.json();
             })
-            .then(data => {
-                console.log("Đã xóa liên hệ thành công, tìm cuộc trò chuyện liên quan");
+            .then(contactData => {
+                if (!contactData || !contactData.id) {
+                    throw new Error("Không tìm thấy thông tin liên hệ");
+                }
 
-                // Tìm cuộc trò chuyện liên quan đến liên hệ này
-                return fetch(`${baseURL}/conversations/by-contact/${contactId}`, {
-                    method: 'GET',
+                const contactId = contactData.id;
+                console.log("Đã tìm thấy contactId:", contactId);
+
+                // Bước 2: Thực hiện xóa liên hệ
+                // fetch(`${baseURL}/contacts/delete-contact?conversationId=${conversationId}`, {
+                const targetConversationId = currentConversationId;
+                console.log("Xóa liên hệ với conversationId:", targetConversationId);
+
+                // Kiểm tra nếu có conversationId
+                if (!targetConversationId) {
+                    throw new Error("Không tìm thấy ID cuộc trò chuyện hiện tại");
+                }
+
+                fetch(`${baseURL}/contacts/delete-contact?conversationId=${targetConversationId}&contactId=${contactId}`, {
+                    method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
-                });
-            })
-            .then(response => {
-                if (!response.ok) {
-                    console.log("Không tìm thấy cuộc trò chuyện liên quan hoặc có lỗi:", response.status);
-                    // Không tìm thấy không phải lỗi nghiêm trọng, tiếp tục xử lý
-                    return { conversations: [] };
-                }
-                return response.json();
-            })
-            .then(data => {
-                const deletePromises = [];
-
-                // Xóa tất cả cuộc trò chuyện liên quan
-                if (data.conversations && data.conversations.length > 0) {
-                    data.conversations.forEach(conversation => {
-                        console.log("Xóa cuộc trò chuyện:", conversation.id);
-                        deletePromises.push(
-                            fetch(`${baseURL}/conversations/${conversation.id}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'Authorization': `Bearer ${token}`,
-                                    'Content-Type': 'application/json'
-                                }
-                            })
-                        );
-                    });
-                }
-
-                // Nếu có cuộc trò chuyện cần xóa, chờ tất cả hoàn thành
-                if (deletePromises.length > 0) {
-                    return Promise.all(deletePromises);
-                }
-                // Kiểm tra nếu có cuộc trò chuyện đang được xem bị xóa
-                if (data.conversations && data.conversations.length > 0) {
-                    data.conversations.forEach(conversation => {
-                        // Nếu đang xem cuộc trò chuyện bị xóa, dọn dẹp UI
-                        if (currentConversationId === conversation.id) {
-                            // Xóa nội dung chat
-                            const messageContainer = document.getElementById('show-message');
-                            if (messageContainer) {
-                                messageContainer.innerHTML = '';
-                            }
-
-                            const topElement = document.getElementById("top");
-                            if (topElement) {
-                                topElement.innerHTML = '';
-                            }
-
-                            const sendMessageElement = document.getElementById("send-message");
-                            if (sendMessageElement) {
-                                sendMessageElement.innerHTML = '';
-                            }
-
-                            // Reset biến toàn cục
-                            currentConversationId = null;
-                            currentRecipientId = null;
-                            currentRecipientUsername = null;
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Lỗi ${response.status}: ${response.statusText}`);
                         }
+                        return response.text().then(text => text ? JSON.parse(text) : {});
+                    })
+                    .then(data => {
+                        console.log("Đã xóa liên hệ thành công, tìm cuộc trò chuyện liên quan");
+
+                        // Tìm cuộc trò chuyện liên quan đến người dùng này
+                        return fetch(`${baseURL}/conversations/user/${userId}`, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            console.log("Không tìm thấy cuộc trò chuyện liên quan hoặc có lỗi:", response.status);
+                            // Không tìm thấy không phải lỗi nghiêm trọng, tiếp tục xử lý
+                            return { conversations: [] };
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const deletePromises = [];
+
+                        // Xóa tất cả cuộc trò chuyện liên quan
+                        if (data.conversations && data.conversations.length > 0) {
+                            data.conversations.forEach(conversation => {
+                                console.log("Xóa cuộc trò chuyện:", conversation.id);
+                                deletePromises.push(
+                                    fetch(`${baseURL}/conversations/${conversation.id}`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Authorization': `Bearer ${token}`,
+                                            'Content-Type': 'application/json'
+                                        }
+                                    })
+                                );
+                            });
+                        }
+
+                        // Nếu có cuộc trò chuyện cần xóa, chờ tất cả hoàn thành
+                        if (deletePromises.length > 0) {
+                            return Promise.all(deletePromises);
+                        }
+                        // Kiểm tra nếu có cuộc trò chuyện đang được xem bị xóa
+                        if (data.conversations && data.conversations.length > 0) {
+                            data.conversations.forEach(conversation => {
+                                // Nếu đang xem cuộc trò chuyện bị xóa, dọn dẹp UI
+                                if (currentConversationId === conversation.id) {
+                                    // Xóa nội dung chat
+                                    const messageContainer = document.getElementById('show-message');
+                                    if (messageContainer) {
+                                        messageContainer.innerHTML = '';
+                                    }
+
+                                    const topElement = document.getElementById("top");
+                                    if (topElement) {
+                                        topElement.innerHTML = '';
+                                    }
+
+                                    const sendMessageElement = document.getElementById("send-message");
+                                    if (sendMessageElement) {
+                                        sendMessageElement.innerHTML = '';
+                                    }
+
+                                    // Reset biến toàn cục
+                                    currentConversationId = null;
+                                    currentRecipientId = null;
+                                    currentRecipientUsername = null;
+                                }
+                            });
+                        }
+                        return Promise.resolve();
+                    })
+                    .then(() => {
+                        // Gửi thông báo WebSocket
+                        if (stompClient && stompClient.connected) {
+                            const notificationMsg = {
+                                type: "DELETE",
+                                contactId: contactId,
+                                userId: userId,
+                                initiatorId: currentUser
+                            };
+                            stompClient.send("/app/contact-change", {}, JSON.stringify(notificationMsg));
+                        }
+
+                        showToast("Đã xóa người liên hệ và cuộc trò chuyện liên quan");
+
+                        // Tải lại danh sách cuộc trò chuyện và danh sách liên hệ
+                        fetchConversations(currentUser);
+                        fetchUserData(currentUser);
                     });
-                }
-                return Promise.resolve();
-            })
-            .then(() => {
-                // Gửi thông báo WebSocket
-                if (stompClient && stompClient.connected) {
-                    const notificationMsg = {
-                        type: "DELETE",
-                        contactId: contactId,
-                        initiatorId: currentUser
-                    };
-                    stompClient.send("/app/contact-change", {}, JSON.stringify(notificationMsg));
-                }
-
-                showToast("Đã xóa người liên hệ và cuộc trò chuyện liên quan");
-
-                // Tải lại danh sách cuộc trò chuyện và danh sách liên hệ
-                fetchConversations(currentUser);
-                fetchUserData(currentUser);
             })
             .catch(error => {
                 console.error('Error deleting contact:', error);

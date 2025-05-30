@@ -31,6 +31,9 @@ public class Conversation {
 
     @Column(nullable = false, name = "created_at")
     private LocalDateTime createdAt;
+    
+    @Column(nullable = true, name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     public Conversation() {
         this.createdAt = LocalDateTime.now();

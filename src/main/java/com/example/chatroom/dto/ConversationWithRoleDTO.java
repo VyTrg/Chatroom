@@ -17,6 +17,8 @@ public class ConversationWithRoleDTO {
     private Boolean isGroup;
     private String imageUrl;
     private LocalDateTime createdAt;
+    private LocalDateTime deletedAt; // Conversation deleted_at field
+    private LocalDateTime contactDeletedAt; // Contact_with deleted_at field
     private String role;
     private Long otherUserId;
     private Long blockerId;
@@ -24,15 +26,20 @@ public class ConversationWithRoleDTO {
 
     // Constructor
     public ConversationWithRoleDTO(Long id, String name, Boolean isGroup, String imageUrl,
-                                   LocalDateTime createdAt, String role, Long otherUserId, Long blockerId, Long userId) {
+                                   LocalDateTime createdAt, LocalDateTime deletedAt, LocalDateTime contactDeletedAt, 
+                                   String role, Long otherUserId, Long blockerId, Long userId) {
         this.id = id;
         this.name = name;
         this.isGroup = isGroup;
         this.imageUrl = imageUrl;
         this.createdAt = createdAt;
-        this.role = role;
+        this.deletedAt = deletedAt;
+        this.contactDeletedAt = contactDeletedAt;
+        this.role = role!= null ? role : "MEMBER";
         this.otherUserId = otherUserId;
         this.blockerId = blockerId;
         this.userId = userId;
+    }
+    public ConversationWithRoleDTO() {
     }
 }

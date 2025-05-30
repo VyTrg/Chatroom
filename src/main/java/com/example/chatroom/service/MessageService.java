@@ -17,4 +17,6 @@ public interface MessageService {
     void deleteAllMessagesInConversation(Long conversationId);
     
     Message updateMessage(Long messageId, String newContent);
+    
+    void deleteAllMessagesByConversationId(Long conversationId);
 }

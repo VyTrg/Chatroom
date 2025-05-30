@@ -14,4 +14,8 @@ public interface ConversationService {
     Conversation renameConversation(Long conversationId, String newName);
 
     List<ConversationMember> getConversationMembers(Long conversationId);
+    
+    List<Conversation> findByContactId(Long contactId);
+    
+    Conversation save(Conversation conversation);
 }
