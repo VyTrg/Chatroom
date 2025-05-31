@@ -67,7 +67,7 @@ public class AttachmentServiceImpl implements AttachmentService {
     @Override
     public Attachment sendAttachment(Long senderId, Long conversationId, MultipartFile file) {
         Message message = new Message();
-        message.setMessageText(null);
+        message.setMessageText("[File Attachment]");
 
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("Sender not found"));

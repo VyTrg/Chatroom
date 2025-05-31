@@ -4857,7 +4857,7 @@
         const payload = recipient.map(id => parseInt(id));
 
         try {
-            const response = await fetch(`/api/conversations/group?conversationName=${encodeURIComponent(topic || '')}`, {
+            const response = await fetch(`/api/group-conversations/group?conversationName=${encodeURIComponent(topic || '')}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
