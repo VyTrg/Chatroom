@@ -16,6 +16,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     // Tìm cuộc hội thoại riêng tư giữa hai người dùng
     @Query(value = "SELECT TOP 1 c.* FROM dbo.conversation c " +
             "WHERE c.is_group = 0 " +
+            "AND c.deleted_at IS NULL " +
             "AND EXISTS (SELECT 1 FROM dbo.conversation_member cm1 WHERE cm1.conversation_id = c.id AND cm1.user_id = :userId1) " +
             "AND EXISTS (SELECT 1 FROM dbo.conversation_member cm2 WHERE cm2.conversation_id = c.id AND cm2.user_id = :userId2) " +
             "AND (SELECT COUNT(*) FROM dbo.conversation_member cm WHERE cm.conversation_id = c.id) = 2 " +
@@ -93,4 +94,8 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
             "WHERE (cw.contactOne.id = :userId1 AND cw.contactTwo.id = :userId2) " +
             "OR (cw.contactOne.id = :userId2 AND cw.contactTwo.id = :userId1)")
     Optional<ContactWith> findContactBetweenUsers(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
+
+    @Query("SELECT cm.conversation FROM ConversationMember cm WHERE cm.user.id = :userId")
+    boolean existsByConversationAndUser(Long conversationoId, Long userId);
+
 }

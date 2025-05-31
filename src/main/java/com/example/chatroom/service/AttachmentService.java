@@ -11,7 +11,7 @@ import java.util.List;
 public interface AttachmentService {
     Attachment uploadAttachment(MultipartFile file, Long messageId) throws IOException;
 
-    List<Attachment> getAttachmentsByMessageId(Long messageId);
+    Attachment getAttachmentsByMessageId(Long messageId);
 
     Attachment sendAttachment(Long senderId, Long conversationId, MultipartFile file);
 }

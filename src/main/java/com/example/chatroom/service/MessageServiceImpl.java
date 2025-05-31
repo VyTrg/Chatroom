@@ -63,4 +63,16 @@ public class MessageServiceImpl implements MessageService {
             throw new NoSuchElementException("Không tìm thấy tin nhắn với ID: " + messageId);
         }
     }
+    
+    @Override
+    public void markMessageAsRead(Long messageId) {
+        Optional<Message> messageOpt = messageRepository.findById(messageId);
+        if (messageOpt.isPresent()) {
+            Message message = messageOpt.get();
+            message.setIsRead(true);
+            messageRepository.save(message);
+        } else {
+            throw new NoSuchElementException("Không tìm thấy tin nhắn với ID: " + messageId);
+        }
+    }
 }

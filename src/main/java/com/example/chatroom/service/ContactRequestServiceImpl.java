@@ -87,8 +87,8 @@ public class ContactRequestServiceImpl implements ContactRequestService {
         User contactTwo = userRepository.findById(userTwo)
                 .orElseThrow(() -> new IllegalArgumentException("User with ID " + userTwo + " not found"));
         ContactRequest contactRequest = new ContactRequest();
-        contactRequest.setReceiver(contactOne);
-        contactRequest.setSender(contactTwo);
+        contactRequest.setReceiver(contactTwo);
+        contactRequest.setSender(contactOne);
         contactRequest.setIsAccepted(null);
         contactRequest.setDeleteAt(null);
         contactRequestRepository.save(contactRequest);

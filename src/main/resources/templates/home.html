@@ -792,10 +792,10 @@
                             <div class="form-group user-tag">
                                 <div id="alert-message1" class="alert"></div>
                                 <label for="user" th:text="#{add.friend}">Email/Username</label>
-
+                                <input type="text" class="form-control" id="user" required>
                             </div>
                             <div class="tag-area tag-input-wrapper user-tag" id="userTag">
-                                <input type="text" class="form-control" id="user" required>
+
                                 <!--                                <label for="welcome" th:text="#{add.friend.message}">Message:</label>-->
                                 <!--                                <textarea class="text-control" id="welcome"></textarea>-->
                             </div>
@@ -807,6 +807,28 @@
         </div>
         <!-- End of Add Friends -->
         <!-- Start of Create Chat -->
+        <div class="modal fade" id="addmember" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="requests">
+                    <div class="title">
+                        <h1>Add new member</h1>
+                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+                    </div>
+                    <div class="content">
+                        <form id="addmemberForm">
+                            <div class="form-group ">
+                                <label for="participant" th:text="#{recipient}">Recipients:</label>
+                                <div id="alert-message4" class="alert" ></div>
+                                <div id="recipient-list1" class="tag-area tag-input-wrapper">
+                                    <input type="text" class="form-control" id="participant1">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn button w-100" >Add member</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="modal fade" id="startnewchat" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="requests">
@@ -817,23 +839,16 @@
                     <div class="content">
                         <form id="groupchat">
                             <div class="form-group ">
-
                                 <label for="participant" th:text="#{recipient}">Recipients:</label>
                                 <div id="alert-message2" class="alert" ></div>
                                 <div id="recipient-list" class="tag-area tag-input-wrapper">
                                     <input type="text" class="form-control" id="participant">
-
-
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="topic" th:text="#{topic}">Topic:</label>
                                 <input type="text" class="form-control" id="topic" required>
                             </div>
-                            <!--                            <div class="form-group">-->
-                            <!--                                <label for="message" th:text="#{add.friend.message}">Message:</label>-->
-                            <!--                                <textarea class="text-control" id="message"></textarea>-->
-                            <!--                            </div>-->
                             <button type="submit" class="btn button w-100" th:text="#{start.conversation}">Start New Chat</button>
                         </form>
                     </div>
@@ -1059,6 +1074,7 @@
 <script src="/js/swipe.min.js"></script>
 <script src="/js/bootstrap.min.js"></script>
 <script>
+    let currentConversationId = null;
     // const alertMessage = document.getElementsByClassName('alert-message');
     function showAlert(message, alertDiv, type = 'warning') {
         const alertMessage = document.getElementById(alertDiv);
@@ -1110,13 +1126,11 @@
     let stompClient = null;
     let currentUsername = null;
     let currentUserId = null;
-    let currentConversationId = null;
+    let wsConnected = false;
     let currentRecipientUsername = null;
     let currentRecipientId = null;
     let isConnected = false;
     let isGroupConversation = false; // Cờ để xác định cuộc trò chuyện hiện tại là nhóm hay không
-    let editSubscription = null;
-    let deleteSubscription = null;
     let pendingDeleteMessageId = null;
     let messageSubscriptions = {
         edit: null,
@@ -1178,6 +1192,7 @@
 
     // Xử lý khi kết nối thành công
     function onConnected() {
+        wsConnected = true;
         console.log("Kết nối WebSocket thành công!");
         isConnected = true;
 
@@ -1280,6 +1295,7 @@
 
     // Xử lý lỗi kết nối
     function onError(error) {
+        wsConnected = false;
         console.error("Lỗi kết nối WebSocket:", error);
         isConnected = false;
 
@@ -1711,6 +1727,11 @@
             // Format topic dựa trên conversationId
             const privateTopic = `/topic/private.${conversationId}`;
 
+            // Đăng ký kênh nhận tin nhắn riêng tư
+            console.log(`Đăng ký kênh tin nhắn cho conversationId (${typeof conversationId}): ${conversationId}`);
+            console.log(`Đăng ký kênh nhận tin nhắn riêng tư cho conversation ID: ${conversationId}`);
+            messageSubscriptions[`private_${conversationId}`] = stompClient.subscribe(privateTopic, onPrivateMessageReceived);
+
             console.log(`[TEST] ĐĂNG KÝ TIN NHẮN RIÊNG TƯ - TOPIC: ${privateTopic}`);
 
             // Đăng ký kênh chỉnh sửa tin nhắn
@@ -1914,7 +1935,8 @@
 
                 if (messageConversationId && currentConversationId) {
                     // Kiểm tra trực tiếp bằng conversationId - đây là cách chính xác nhất
-                    isForCurrentConversation = messageConversationId === currentConversationId.toString();
+                    // isForCurrentConversation = messageConversationId === currentConversationId.toString();
+                    isForCurrentConversation = Number(messageConversationId) === Number(currentConversationId);
                     console.log("Kiểm tra theo conversationId:", messageConversationId, currentConversationId, isForCurrentConversation);
                 }
 
@@ -2147,6 +2169,11 @@
     function sendMessage(event) {
         event.preventDefault();
 
+        if (!wsConnected) {
+            console.log("WebSocket chưa kết nối, đang đợi...");
+            return;
+        }
+
         if (!stompClient || !isConnected) {
             console.error("WebSocket chưa được kết nối, không thể gửi tin nhắn");
             const errorElement = document.getElementById('message-error');
@@ -2242,12 +2269,12 @@
             // ĐẢM BẢO conversationId được đặt rõ ràng trong tin nhắn
             if (!chatMessage.conversationId || chatMessage.conversationId === 'undefined') {
                 console.warn("ConversationId không hợp lệ trong tin nhắn riêng tư:", chatMessage.conversationId);
-                chatMessage.conversationId = currentConversationId.toString();
                 console.log("Đã đặt lại conversationId =", chatMessage.conversationId);
             }
 
             // Thiết lập thông tin người nhận
             chatMessage.recipientId = currentRecipientId.toString();
+            chatMessage.conversationId = currentConversationId.toString();
             chatMessage.recipient = currentRecipientUsername;
 
             // Log thông tin chi tiết để debug
@@ -2522,6 +2549,11 @@
             const timeSpan = document.createElement('span');
             timeSpan.textContent = time;
             textMainDiv.appendChild(timeSpan);
+        }
+
+        if (message.messageId && !isMe && (message.senderId !== currentUserId?.toString())) {
+            console.log(`Marking message ${message.messageId} as read`);
+            markMessageAsRead(message.messageId);
         }
 
         // Thêm tin nhắn vào container
@@ -2830,9 +2862,23 @@
             });
 
             conversations.forEach(conversation => {
+                console.log('conversation:', conversation.id, 'deletedAt:', conversation.deletedAt);
+
+                // Bỏ qua cuộc trò chuyện đã bị xóa
+                if (conversation.deletedAt !== null) {
+                    console.log('Skipping deleted conversation:', conversation.id);
+                    return; // Bỏ qua cuộc trò chuyện này
+                }
                 const latestMessage = latestMessageMap.get(conversation.id) || null;
                 const latestTime = latestMessage ? formatTime(latestMessage.createdAt) : '';
-                const latestText = latestMessage ? truncateText(latestMessage.messageText) : 'No messages yet...';
+                let latestText;
+                if (latestMessage && latestMessage.messageText === null) {
+                    latestText = "Attached file";
+                } else if (latestMessage === null) {
+                    latestText = "No messages yet...";
+                } else{
+                    latestText = truncateText(latestMessage.messageText);
+                }
                 const unreadCount = latestMessage && latestMessage.isRead === false && latestMessage.sender.id !== userId ? 1 : 0;
                 const imageUrl = conversation.imageUrl || 'img/avatars/default-avatar.png';
                 console.log('conversation:',conversation);
@@ -2972,10 +3018,70 @@
                 const isOwnMessage = message.sender.id === userId;
                 const time = formatTime(message.createdAt);
                 console.log("Sender ID:", message.sender.id, "Current User ID:", sessionStorage.getItem("userId"));
-                if (isOwnMessage) {
+                if(message.messageText === null){
+                    fetch(`${baseURL}/attachments/message/${message.id}`, {
+                        headers: {
+                            "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+                        }
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("Failed to fetch attachment");
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            const fileUrl = data.fileUrl || '#';
+                            const fullName = decodeURIComponent(fileUrl.split('/').pop());
+                            const fileName = fullName.split('_').slice(3).join('_');
 
-                    //send message
-                    const messageHTML = `
+                            let messageHTML = '';
+                            if (isOwnMessage) {
+                                messageHTML = `
+                        <div class="message me">
+                            <div class="text-main">
+                                <div class="text-group me align-items-center ml-2">
+                                    <div class="text me">
+                                        <a href="${fileUrl}" target="_blank" download>${fileName}</a>
+                                        <button class="btn attach">
+                                            <i class="material-icons md-18">insert_drive_file</i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <span>${message.isread ? '<i class="material-icons">check</i>' : ''}${time}</span>
+                            </div>
+                        </div>`;
+                            } else {
+                                messageHTML = `
+                        <div class="message"">
+												<div class="text-main">
+													    <div class="user-name mb-1">
+															<strong>${escapeHtml(message.sender?.username || message.sender || "Unknown")}</strong>
+														</div>
+													    <div class="text-group d-flex align-items-center mr-2" >
+														<div class="text">
+														<button class="btn attach">
+                                                            <i class="material-icons" style="color: #bdbac2; background: white">insert_drive_file</i>
+                                                        </button>
+															<a href="${fileUrl}" target="_blank" download>${fileName}</a>
+														</div>
+													</div>
+													<span>${message.isread ? '<i class="material-icons">check</i>' : ''}${time}</span>
+												</div>
+											</div>`;
+                            }
+
+                            content.insertAdjacentHTML('beforeend', messageHTML);
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                        });
+                }
+                else{
+                    if (isOwnMessage) {
+
+                        //send message
+                        const messageHTML = `
                                         <div class="message me" data-message-id="${message.id}">
 												<div class="text-main">
 													<div class="text-group me align-items-center ml-2" >
@@ -2996,10 +3102,10 @@
 												</div>
 											</div>
     `;
-                    content.insertAdjacentHTML('beforeend', messageHTML);
-                } else {
-                    // Received Message
-                    const messageHTML = `
+                        content.insertAdjacentHTML('beforeend', messageHTML);
+                    } else {
+                        // Received Message
+                        const messageHTML = `
                                 <div class="message" data-message-id="${message.id}">
 												<div class="text-main">
 													    <div class="user-name mb-1">
@@ -3009,20 +3115,15 @@
 														<div class="text">
 															<p>${escapeHtml(message.messageText)}</p>
 														</div>
-                                                        <div class="dropdown ml-2" >
-                                                            <button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                                <i class="material-icons md-30">more_vert</i>
-                                                            </button>
-                                                            <div class="dropdown-menu">
-                                                            </div>
-                                                        </div>
 													</div>
 													<span>${message.isread ? '<i class="material-icons">check</i>' : ''}${time}</span>
 												</div>
 											</div>
 `;
-                    content.insertAdjacentHTML('beforeend', messageHTML);
+                        content.insertAdjacentHTML('beforeend', messageHTML);
+                    }
                 }
+
             });
 
         } catch (error) {
@@ -3141,7 +3242,8 @@
         }
 
         // Reset và cập nhật biến toàn cục
-        currentConversationId = conversationId;
+        currentConversationId = Number(conversationId);
+        console.log(`Đã cập nhật currentConversationId: ${currentConversationId}, kiểu dữ liệu: ${typeof currentConversationId}`);
         isGroupConversation = isGroup;
 
         if (isGroup) {
@@ -3188,7 +3290,7 @@
                         <div class="dropdown-menu">
                             <button class="dropdown-item clear-history" data-conversation-id="${conversationId}" th:text="#{clear.history}"><i class="material-icons">clear</i>Clear History</button>
                             ${isGroup ?
-                `<button class="dropdown-item add-member" data-user-id="${otherId}" data-toggle="modal" data-target="#startnewchat"><i class="material-icons">group_add</i>Add Member</button>`
+                `<button class="dropdown-item add-member" data-conversation-id="${conversationId}" data-toggle="modal" data-target="#addmember"><i class="material-icons">group_add</i>Add Member</button>`
                 :
                 (block && block === otherId ?
                         ''
@@ -3213,10 +3315,12 @@
                 <textarea id="message-input" class="form-control" placeholder="Type message ..." rows="1"></textarea>
                 <button type="submit" class="btn send"><i class="material-icons">send</i></button>
             </form>
-            <label>
-                <input type="file">
-                <span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
-            </label>`;
+            <form>
+            <label id="file-send">
+                <input type="file" id="file-input">
+                <span class="btn attach d-sm-block d-none" data-conversation-id="${conversationId}"><i class="material-icons">attach_file</i></span>
+            </label>
+            </form>`;
                 } else {
                     sendMessage.innerHTML = `
             <form class="position-relative w-100" id="message-form">
@@ -3562,6 +3666,7 @@
                     console.error("Rename error:", error);
                     showToast("Failed to rename conversation", true);
                 });
+
         });
 
 
@@ -3824,6 +3929,79 @@
                 })
                 .catch(error => console.error('Lỗi khi đánh dấu tin nhắn đã đọc:', error));
         }
+        // document.addEventListener("DOMContentLoaded", function () {
+            const fileInput = document.getElementById("file-input");
+            // const attachButton = document.querySelector("#file-send .btn.attach");
+
+            // Click span -> open file picker
+            // attachButton.addEventListener("click", function () {
+            //     fileInput.click();
+            // });
+
+            // When file is selected
+            fileInput.addEventListener("change", function () {
+                const file = this.files[0];
+                if (!file) return;
+
+                const senderId = sessionStorage.getItem("userId");
+                const conversationId = currentConversationId;
+                const token = sessionStorage.getItem("token");
+
+                if (!senderId || !conversationId || !token) {
+                    console.error("Missing senderId, conversationId, or token");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("senderId", senderId);
+                formData.append("conversationId", conversationId);
+                formData.append("file", file);
+
+                fetch(`${baseURL}/attachments/send`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: formData
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error("Upload failed");
+                        return res.json();
+                    })
+                    .then(data => {
+                        const fileUrl = data.fileUrl || '#';
+                        const fullName = decodeURIComponent(fileUrl.split('/').pop());
+                        const fileName = fullName.split('_').slice(3).join('_');
+
+                        const messageContainer = document.createElement("div");
+                        messageContainer.className = "message me";
+
+                        messageContainer.innerHTML = `
+                                           <div class="text-main">
+													<div class="text-group me align-items-center ml-2" >
+														<div class="text me">
+														    <button class="btn attach">
+                                                                <i class="material-icons md-18">insert_drive_file</i>
+                                                             </button>
+															<a href="${fileUrl}" target="_blank" download>
+                                                                  ${fileName}
+                                                             </a>
+														</div>
+													</div>
+												</div>
+        `;
+
+                        document.getElementById("show-message").appendChild(messageContainer);
+                        messageContainer.scrollIntoView({ behavior: "smooth" });
+
+                        fileInput.value = ''; // Clear input
+                    })
+                    .catch(error => {
+                        console.error("Lỗi khi gửi tệp:", error);
+                    });
+            });
+        // });
+
     }
     document.getElementById('confirmClearHistory').addEventListener('click', function () {
         const convId = this.getAttribute('data-conversation-id');
@@ -4338,7 +4516,7 @@
 
         // Store pending messageId and show modal
         pendingDeleteMessageId = messageId;
-        document.querySelector('#modalConfirm .title h1').innerText = "Bạn có chắc chắn muốn xóa tin nhắn này?";
+        document.querySelector('#modalConfirm .title h1').innerText = "Delete message?";
         $('#modalConfirm').modal('show');
     }
     document.getElementById("confirmDelete").addEventListener("click", function () {
@@ -4617,6 +4795,8 @@
     const formGroupChat = document.getElementById('groupchat');
     const formNewFriend = document.getElementById('newFriend');
     const userTag = document.getElementById('userTag');
+    const addUser = document.getElementById('add');
+    const members = [];
     input.addEventListener('keydown', async function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -4703,6 +4883,108 @@
             console.error('Fetch error:', error);
         }
     });
+    const inputAddMember = document.getElementById('participant1');
+    const recipientListAdd = document.getElementById('recipient-list1');
+    const formAddMember = document.getElementById('addmemberForm');
+    const alertBoxAdd = document.getElementById('alert-message4');
+
+    let addMemberList = [];
+    let currentGroupId = null;
+
+    inputAddMember.addEventListener('keydown', async function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const search = inputAddMember.value.trim();
+            if (search === '') {
+                showAlert('Please enter a username or email.', 'alert-message4', 'warning');
+                return;
+            }
+
+            try {
+                const currentUserId = sessionStorage.getItem('userId');
+                const response = await fetch(`/api/users/search-contacts?info=${encodeURIComponent(search)}&user=${currentUserId}`);
+
+                if (!response.ok) {
+                    showAlert('User not found.', 'alert-message4', 'warning');
+                    return;
+                }
+
+                const user = await response.json();
+
+                // Ngăn thêm trùng người
+                if (addMemberList.includes(user.id.toString())) {
+                    showAlert('User already added.', 'alert-message4', 'info');
+                    inputAddMember.value = '';
+                    return;
+                }
+
+                addMemberList.push(user.id.toString());
+
+                const tag = document.createElement('div');
+                tag.className = 'recipient-tag';
+                tag.innerHTML = `
+                <img class="avatar-sm" src="${user.profilePicture || 'img/avatars/default-avatar.png'}" alt="avatar">
+                <h5>${user.username}</h5>
+                <button class="btn"><i class="material-icons">close</i></button>
+            `;
+
+                // Gán userId vào thuộc tính dataset để xóa dễ
+                tag.dataset.userid = user.id;
+                recipientListAdd.insertBefore(tag, inputAddMember);
+                inputAddMember.value = '';
+            } catch (error) {
+                showAlert('Fetch error.', 'alert-message4', 'warning');
+                console.error('Fetch error:', error);
+                inputAddMember.value = '';
+            }
+        }
+    });
+
+    // Xóa user khỏi list khi bấm nút close
+    recipientListAdd.addEventListener('click', function (e) {
+        const isCloseBtn = e.target.closest('button');
+        if (isCloseBtn && isCloseBtn.closest('.recipient-tag')) {
+            const tag = isCloseBtn.closest('.recipient-tag');
+            const userId = tag.dataset.userid;
+            tag.remove();
+            addMemberList = addMemberList.filter(id => id !== userId);
+        }
+    });
+
+    // Gửi form
+    formAddMember.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        if (addMemberList.length === 0) {
+            showAlert('Please enter at least one member.', 'alert-message4', 'warning');
+            return;
+        }
+        console.log("dang them thanh vien moi vao group", currentConversationId);
+        const group = currentConversationId;
+        const payload = addMemberList.map(id => parseInt(id));
+        console.log("List userId to add:", payload);
+
+        const response = await fetch('/api/group/add-members', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json',"Authorization": `Bearer ${sessionStorage.getItem('token')}` },
+            body: JSON.stringify({groupId: group, userIds: payload}),
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+            const errorMessage = result?.error || "Error adding members";
+            showAlert(errorMessage, 'alert-message4', 'warning');
+            return;
+        }
+
+        showAlert('Add members successfully!', 'alert-message4', 'success');
+
+        formAddMember.reset();
+        addMemberList = [];
+        recipientListAdd.querySelectorAll('.recipient-tag').forEach(tag => tag.remove());
+
+    });
+
     let newUser = null;
     inputUser.addEventListener('keydown', async function (e) {
         if (e.key === 'Enter') {
@@ -4723,7 +5005,7 @@
                 // Assuming recipient is an array to store user IDs
                 // recipient.push(userData.id.toString());
                 const tag = document.createElement('div');
-                tag.className = 'user-tag recipient-tag';
+                tag.className = 'recipient-tag';
                 tag.innerHTML = `
                 <img class="avatar-sm" src="${userData.profilePicture || 'img/avatars/default-avatar.png'}" alt="avatar">
                 <h5>${userData.username}</h5>
@@ -4731,9 +5013,10 @@
             `;
                 newUser = userData.id;
                 // Insert tag before the input (replace recipientList with a suitable container if different)
-                const container = document.querySelector('.form-group.user-tag');
-                container.insertBefore(tag, inputUser);
-                inputUser.setAttribute('type','hidden');
+                const container = document.querySelector('.form-group .user-tag');
+                inputUser.setAttribute('placeholder', userData.username);
+                inputUser.setAttribute('disabled', true);
+
                 // inputUser.
             } catch (error) {
                 showAlert('Please enter a username or email.', 'alert-message1');
@@ -4789,188 +5072,128 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-        const logoutBtn = document.getElementById('logout');
+        const form = document.querySelector('#addmemberForm');
+        const participantInput = document.querySelector('#participant1');
+        const alertMessage = document.querySelector('#alert-message4');
 
-        if (!logoutBtn) {
-            console.error('Logout button not found');
-            return;
-        }
+        form.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent the default form submission behavior
 
-        logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
+            // Retrieve the input value
+            const participantValue = participantInput.value.trim();
 
-            const token = sessionStorage.getItem('token');
-            if (!token) {
-                console.warn('No token found in sessionStorage');
+            // Basic validation: Check if the input is not empty
+            if (participantValue === '') {
+                showAlert('Please enter a recipient name.', 'warning', "Please enter member");
                 return;
             }
 
-            try {
-                const response = await fetch(`${baseURL}/auth/logout`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        // 'Content-Type': 'application/json',
-                    },
-                });
+            // Perform additional actions (e.g., send data to the server or process locally)
+            console.log(`Adding member: ${participantValue}`);
 
-                const responseBody = await response.text();
-                console.log('Response status:', response.status, 'Body:', responseBody);
+            // Clear the input field and success feedback
+            participantInput.value = '';
+            showAlert('Member added successfully!', 'success', "");
 
-                if (response.ok) {
-                    // Cleanup session
-                    sessionStorage.removeItem('token');
-                    sessionStorage.removeItem('userId');
-                    sessionStorage.removeItem('username');
-                    sessionStorage.removeItem('user');
-                    // Redirect to login page
-                    window.location.href = '/login';
-                    // await fetch('http://localhost:8080/login');
-                } else {
-                    alert(`Logout failed: ${responseBody}`);
-                }
-            } catch (error) {
-                console.error('Logout request failed:', error);
-                alert('An error occurred during logout. Please try again.');
-            }
+            // You can close the modal here if needed
+            // $('#addmember').modal('hide'); // Assuming jQuery is available
         });
-    });
-    document.addEventListener('DOMContentLoaded', () => {
-        const logoutBtn = document.getElementById('logout1');
 
-        if (!logoutBtn) {
-            console.error('Logout button not found');
-            return;
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutBtn = document.getElementById('logout');
 
-        logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-
-            const token = sessionStorage.getItem('token');
-            if (!token) {
-                console.warn('No token found in sessionStorage');
+            if (!logoutBtn) {
+                console.error('Logout button not found');
                 return;
             }
 
-            try {
-                const response = await fetch(`${baseURL}/auth/logout`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        // 'Content-Type': 'application/json',
-                    },
-                });
+            logoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
 
-                const responseBody = await response.text();
-                console.log('Response status:', response.status, 'Body:', responseBody);
-
-                if (response.ok) {
-                    // Cleanup session
-                    sessionStorage.removeItem('token');
-                    sessionStorage.removeItem('userId');
-                    sessionStorage.removeItem('username');
-                    sessionStorage.removeItem('user');
-                    // Redirect to login page
-                    window.location.href = '/login';
-                    // await fetch('http://localhost:8080/login');
-                } else {
-                    alert(`Logout failed: ${responseBody}`);
+                const token = sessionStorage.getItem('token');
+                if (!token) {
+                    console.warn('No token found in sessionStorage');
+                    return;
                 }
-            } catch (error) {
-                console.error('Logout request failed:', error);
-                alert('An error occurred during logout. Please try again.');
-            }
-        });
-    });
-    document.querySelector(".btn.attach").addEventListener("click", () => {
-        document.getElementById("file-input").click();
-    });
 
-    document.getElementById("file-input").addEventListener("change", function () {
-        const file = this.files[0];
-        if (!file) return;
+                try {
+                    const response = await fetch(`${baseURL}/auth/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            // 'Content-Type': 'application/json',
+                        },
+                    });
 
-        const senderId = sessionStorage.getItem("userId");
-        const conversationId = sessionStorage.getItem("conversationId");
-        const token = sessionStorage.getItem("token");
+                    const responseBody = await response.text();
+                    console.log('Response status:', response.status, 'Body:', responseBody);
 
-        if (!senderId || !conversationId || !token) {
-            console.error("Missing senderId, conversationId, or token");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("senderId", senderId);
-        formData.append("conversationId", conversationId);
-        formData.append("file", file);
-
-        fetch(`${baseURL}/send`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}`
-            },
-            body: formData
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Upload failed");
-                return res.json();
-            })
-            .then(data => {
-                console.log("Upload successful:", data);
-
-                const messageContainer = document.createElement("div");
-                messageContainer.className = "text-main";
-
-                messageContainer.innerHTML = `
-                <div class="text-group">
-                    <div class="text">
-                        <div class="attachment">
-                            <button class="btn attach">
-                                <i class="material-icons md-18">insert_drive_file</i>
-                            </button>
-                            <div class="file">
-                                <h5>
-                                    <a href="${data.downloadUrl || '#'}" target="_blank">
-                                        ${data.filename || 'Tệp đính kèm'}
-                                    </a>
-                                </h5>
-                                <span>${formatFileSize(data.size)} ${getFileTypeLabel(data.filename)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <span>${formatTimestamp(new Date())}</span>
-            `;
-
-                document.getElementById("chat-body").appendChild(messageContainer);
-                messageContainer.scrollIntoView({ behavior: "smooth" });
-
-                // Optional: Reset file input
-                this.value = '';
-            })
-            .catch(error => {
-                console.error("Lỗi khi gửi tệp:", error);
-                showToast("Lỗi khi gửi tệp: " + error.message, true);
+                    if (response.ok) {
+                        // Cleanup session
+                        sessionStorage.removeItem('token');
+                        sessionStorage.removeItem('userId');
+                        sessionStorage.removeItem('username');
+                        sessionStorage.removeItem('user');
+                        // Redirect to login page
+                        window.location.href = '/login';
+                        // await fetch('http://localhost:8080/login');
+                    } else {
+                        alert(`Logout failed: ${responseBody}`);
+                    }
+                } catch (error) {
+                    console.error('Logout request failed:', error);
+                    alert('An error occurred during logout. Please try again.');
+                }
             });
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutBtn = document.getElementById('logout1');
+
+            if (!logoutBtn) {
+                console.error('Logout button not found');
+                return;
+            }
+
+            logoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+
+                const token = sessionStorage.getItem('token');
+                if (!token) {
+                    console.warn('No token found in sessionStorage');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${baseURL}/auth/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            // 'Content-Type': 'application/json',
+                        },
+                    });
+
+                    const responseBody = await response.text();
+                    console.log('Response status:', response.status, 'Body:', responseBody);
+
+                    if (response.ok) {
+                        // Cleanup session
+                        sessionStorage.removeItem('token');
+                        sessionStorage.removeItem('userId');
+                        sessionStorage.removeItem('username');
+                        sessionStorage.removeItem('user');
+                        // Redirect to login page
+                        window.location.href = '/login';
+                        // await fetch('http://localhost:8080/login');
+                    } else {
+                        alert(`Logout failed: ${responseBody}`);
+                    }
+                } catch (error) {
+                    console.error('Logout request failed:', error);
+                    alert('An error occurred during logout. Please try again.');
+                }
+            });
+        });
     });
-
-    function formatFileSize(bytes) {
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    }
-
-    function getFileTypeLabel(filename = '') {
-        const ext = filename.split('.').pop().toLowerCase();
-        const docTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
-        return docTypes.includes(ext) ? 'Document' : 'File';
-    }
-
-    function formatTimestamp(date) {
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-
-
 </script>
 </body>
 </html>

@@ -15,6 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -56,44 +60,48 @@ public class AttachmentServiceImpl implements AttachmentService {
     }
 
     @Override
-    public List<Attachment> getAttachmentsByMessageId(Long messageId) {
+    public Attachment getAttachmentsByMessageId(Long messageId) {
         return attachmentRepository.findByMessageId(messageId);
     }
 
     @Override
     public Attachment sendAttachment(Long senderId, Long conversationId, MultipartFile file) {
-        // Create and populate the Message entity
         Message message = new Message();
         message.setMessageText(null);
+
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("Sender not found"));
         message.setSender(sender);
+
         Conversation conversation = conversationRepository.findById(conversationId)
-                .orElseThrow(() -> new RuntimeException("Conversation not found"));// Create user reference
-        message.setConversation(conversation); // Create conversation reference
-        message.setIsRead(false); // Default unread status
+                .orElseThrow(() -> new RuntimeException("Conversation not found"));
+        message.setConversation(conversation);
+        message.setIsRead(false);
         message.setCreatedAt(LocalDateTime.now());
 
-        // Save the Message entity
         Message savedMessage = messageRepository.save(message);
 
-        // Upload the file to Cloudinary
-        Map<?, ?> uploadResult = null;
         try {
-            uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
-                    "folder", "attachment"
+            String publicId = "attachment_" + senderId + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                    "folder", "message_attachment",
+                    "public_id", publicId,
+                    "resource_type", "auto"
             ));
+
+            Attachment attachment = new Attachment();
+            attachment.setMessage(savedMessage);
+            attachment.setFileUrl(uploadResult.get("secure_url").toString());
+            attachment.setFileType(file.getContentType());
+            attachment.setUploadAt(LocalDateTime.now());
+
+            return attachmentRepository.save(attachment);
+
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("File upload failed", e);
         }
-
-        // Create and save the Attachment entity linked to the saved message
-        Attachment attachment = new Attachment();
-        attachment.setMessage(savedMessage);
-        attachment.setFileUrl(uploadResult.get("secure_url").toString());
-        attachment.setFileType(file.getContentType());
-        attachment.setUploadAt(LocalDateTime.now());
-
-        return attachmentRepository.save(attachment);
     }
+
+
 }

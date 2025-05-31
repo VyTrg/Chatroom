@@ -41,6 +41,4 @@ public interface ConversationMemberRepository extends JpaRepository<Conversation
 
     // Lấy thành viên nhóm
     List<ConversationMember> findAllByConversationId(Long conversationId);
-
-    boolean existsByConversationAndUser(Conversation group, User user);
 }

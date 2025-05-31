@@ -210,6 +210,17 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    public boolean isUserInConversation(User user, Conversation conversation) {
+        if (user == null || conversation == null) {
+            System.out.println("[isUserInConversation] user or conversation is null! user=" + user + ", conversation=" + conversation);
+            return false;
+        }
+        boolean result = conversationMemberRepository.existsByUserIdAndConversationId(user.getId(), conversation.getId());
+        System.out.println("[isUserInConversation] userId=" + user.getId() + ", conversationId=" + conversation.getId() + ", exists=" + result);
+        return result;
+    }
+
+    @Override
     public List<Message> getMessagesByConversationId(Long conversationId) {
         if (messageRepository == null) {
             // Nếu repository chưa được cấu hình, trả về rỗng

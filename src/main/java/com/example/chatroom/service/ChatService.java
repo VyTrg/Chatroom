@@ -49,6 +49,8 @@ public interface ChatService {
      */
     boolean isUserInGroup(User user, Conversation group);
 
+    boolean isUserInConversation(User user, Conversation conversation);
+
 //     Đánh dấu tin nhắn đã đọc
     void markMessageAsRead(Long messageId, Long userId);
 

@@ -73,4 +73,10 @@ public class MessageController {
         Message updatedMessage = messageService.updateMessage(messageId, newContent);
         return ResponseEntity.ok(updatedMessage);
     }
+    
+    @PutMapping("/{messageId}/read")
+    public ResponseEntity<Void> markMessageAsRead(@PathVariable Long messageId) {
+        messageService.markMessageAsRead(messageId);
+        return ResponseEntity.ok().build();
+    }
 }
