@@ -38,8 +38,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void deleteMessage(Long messageId) {
         try {
-            // Xóa tệp đính kèm trước khi xóa tin nhắn
-            attachmentService.deleteAttachmentsByMessageIds(List.of(messageId));
+
             
             // Sau đó xóa tin nhắn
             messageRepository.deleteById(messageId);
@@ -61,9 +60,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void deleteAllMessagesByConversationId(Long conversationId) {
         try {
-            // Trước tiên, xóa tất cả tệp đính kèm liên quan đến các tin nhắn trong cuộc trò chuyện
-            attachmentService.deleteAttachmentsByConversationId(conversationId);
-            
+
             // Sau đó xóa tất cả tin nhắn trong cuộc trò chuyện
             List<Message> messages = messageRepository.findMessagesByConversationId(conversationId);
             if (messages != null && !messages.isEmpty()) {

@@ -33,7 +33,7 @@ public class BlockController {
         blockedPayload.put("type", "BLOCKED");
         blockedPayload.put("userId", blocked);
         blockedPayload.put("initiatorId", blocker);
-        blockedPayload.put("targetId", blocker);
+        blockedPayload.put("targetId", blocked);
         blockedPayload.put("timestamp", LocalDateTime.now().toString());
 
         messagingTemplate.convertAndSendToUser(
