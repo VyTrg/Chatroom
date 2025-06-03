@@ -1,17 +1,4 @@
 # Realtime chatroom
-## Table of contents
-1. Contributors
-2. Project structures
-3. Tech stacks
-4. Previews
-## Contributors
-## Project structures
-## Tech stacks
-1. Spring boot
-2. Bootstrap
-3. SQL Server
-## Previews
-# Realtime chatroom
 A secure realtime chat application built with Spring Boot, SQL Server, and WebSocket. The frontend is implemented using simple HTML, CSS, and JavaScript. Authentication and authorization are handled via Spring Security. Includes CRUD APIs for user and message management.
 ### Backend (Spring Boot)
 - User authentication and authorization using Spring Security
