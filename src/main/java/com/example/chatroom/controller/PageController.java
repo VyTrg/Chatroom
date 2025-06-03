@@ -4,6 +4,7 @@ import com.example.chatroom.dto.UserDto;
 import com.example.chatroom.model.User;
 import com.example.chatroom.service.UserService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class PageController {
 
     @RequestMapping("/home")
-    public String home() {
+    public String home(Model model) {
+        model.addAttribute("includeUserStatusFix", true);
         return "home";
     }
 
@@ -25,5 +27,4 @@ public class PageController {
     public String signin() {
         return "sign-in";
     }
-
 }

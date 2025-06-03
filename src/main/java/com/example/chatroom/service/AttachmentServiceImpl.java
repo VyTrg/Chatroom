@@ -102,36 +102,4 @@ public class AttachmentServiceImpl implements AttachmentService {
             throw new RuntimeException("File upload failed", e);
         }
     }
-
-    @Override
-    public void deleteAttachmentsByConversationId(Long conversationId) {
-        try {
-            List<Attachment> attachments = attachmentRepository.findByConversationId(conversationId);
-            if (attachments != null && !attachments.isEmpty()) {
-                System.out.println("Xóa " + attachments.size() + " tệp đính kèm từ cuộc trò chuyện " + conversationId);
-                attachmentRepository.deleteAll(attachments);
-            }
-        } catch (Exception e) {
-            System.err.println("Lỗi khi xóa tệp đính kèm theo cuộc trò chuyện: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    @Override
-    public void deleteAttachmentsByMessageIds(List<Long> messageIds) {
-        try {
-            if (messageIds != null && !messageIds.isEmpty()) {
-                List<Attachment> attachments = attachmentRepository.findByMessageIds(messageIds);
-                if (attachments != null && !attachments.isEmpty()) {
-                    System.out.println("Xóa " + attachments.size() + " tệp đính kèm từ " + messageIds.size() + " tin nhắn");
-                    attachmentRepository.deleteAll(attachments);
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Lỗi khi xóa tệp đính kèm theo tin nhắn: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
-    }
 }
