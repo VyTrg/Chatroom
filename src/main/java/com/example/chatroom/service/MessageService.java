@@ -20,5 +20,7 @@ public interface MessageService {
     
     void deleteAllMessagesByConversationId(Long conversationId);
     
-    void markMessageAsRead(Long messageId);
+    Message markMessageAsRead(Long messageId);
+    
+    List<Message> markAllMessagesAsReadInConversation(Long conversationId, Long userId);
 }

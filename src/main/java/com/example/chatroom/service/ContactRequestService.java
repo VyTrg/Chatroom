@@ -7,7 +7,7 @@ import java.util.List;
 public interface ContactRequestService {
 
     List<ContactRequest> getAllNotificationsForUser(Long userId);
-    void acceptRequest(Long requestId);
-    void declineRequest(Long requestId);
+    ContactRequest acceptRequest(Long requestId);
+    ContactRequest declineRequest(Long requestId);
     void createRequest(Long userOne, Long userTwo);
 }

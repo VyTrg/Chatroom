@@ -7,6 +7,7 @@ import com.example.chatroom.model.Message;
 import com.example.chatroom.model.User;
 import com.example.chatroom.model.Conversation;
 import com.example.chatroom.repository.ConversationRepository;
+import com.example.chatroom.repository.ConversationMemberRepository;
 import com.example.chatroom.service.ChatService;
 import com.example.chatroom.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -30,13 +32,22 @@ public class ChatController {
     private final ChatService chatService;
     private final UserRepository userRepository;
     private final ConversationRepository conversationRepository;
+    private final ConversationMemberRepository conversationMemberRepository;
+    private final WebSocketEventController webSocketEventController;
 
     @Autowired
-    public ChatController(SimpMessagingTemplate messagingTemplate, ChatService chatService, UserRepository userRepository, ConversationRepository conversationRepository) {
+    public ChatController(SimpMessagingTemplate messagingTemplate, 
+                         ChatService chatService, 
+                         UserRepository userRepository, 
+                         ConversationRepository conversationRepository,
+                         ConversationMemberRepository conversationMemberRepository,
+                         WebSocketEventController webSocketEventController) {
         this.messagingTemplate = messagingTemplate;
         this.chatService = chatService;
         this.userRepository = userRepository;
         this.conversationRepository = conversationRepository;
+        this.conversationMemberRepository = conversationMemberRepository;
+        this.webSocketEventController = webSocketEventController;
     }
 
     @MessageMapping("/chat.sendMessage")
@@ -54,76 +65,6 @@ public class ChatController {
         }
         return chatMessage;
     }
-
-//    @MessageMapping("/chat.private")
-//    public void sendPrivate(@Payload ChatMessage chatMessage) {
-//        User sender = userRepository.findByUsername(chatMessage.getSender()).orElse(null);
-//        User recipient = null;
-//        if (chatMessage.getRecipientId() != null) {
-//            try {
-//                Long recipientId = Long.parseLong(chatMessage.getRecipientId());
-//                recipient = userRepository.findById(recipientId).orElse(null);
-//            } catch (Exception e) {
-//                log.error("[PRIVATE] Error parsing recipient ID: {}", e.getMessage(), e);
-//                recipient = null;
-//            }
-//        }
-//        if (sender != null && recipient != null) {
-//            try {
-//                // Log thông tin người gửi và người nhận để debug
-//                log.info("[PRIVATE] Sending from {} (ID={}) to {} (ID={})",
-//                        sender.getUsername(), sender.getId(),
-//                        recipient.getUsername(), recipient.getId());
-//
-//                // Lưu tin nhắn vào database
-//                Conversation conversation = chatService.findOrCreatePrivateConversation(sender, recipient);
-//                log.info("[PRIVATE] Using conversation ID: {}", conversation.getId());
-//
-//                Message message = new Message();
-//                message.setSender(sender);
-//                message.setConversation(conversation);
-//                message.setMessageText(chatMessage.getContent());
-//                message.setCreatedAt(LocalDateTime.now());
-//                message.setIsRead(false);
-//                Message savedMessage = chatService.saveMessage(message);
-//
-//                // Thêm thông tin đầy đủ vào chatMessage để gửi qua WebSocket
-//                chatMessage.setMessageId(savedMessage.getId().toString());
-//                chatMessage.setConversationId(conversation.getId().toString());
-//                chatMessage.setType(MessageType.CHAT);
-//                chatMessage.setTimestamp(savedMessage.getCreatedAt().toString());
-//                chatMessage.setSenderId(sender.getId().toString());
-//
-//                // Gửi tin nhắn qua topic của cuộc trò chuyện
-//                String conversationTopic = "/topic/private." + conversation.getId();
-//                log.info("[PRIVATE] Sending to topic: {} with content: {}", conversationTopic, chatMessage.getContent());
-//                messagingTemplate.convertAndSend(conversationTopic, chatMessage);
-//
-//                // Gửi tin nhắn riêng trực tiếp đến người nhận
-//                log.info("[PRIVATE] Sending direct message to recipient: {}", recipient.getId());
-//                messagingTemplate.convertAndSendToUser(
-//                        recipient.getId().toString(),
-//                        "/queue/messages",
-//                        chatMessage
-//                );
-//
-//                // Gửi tin nhắn riêng trực tiếp đến người gửi
-//                log.info("[PRIVATE] Also sending direct message to sender: {}", sender.getId());
-//                messagingTemplate.convertAndSendToUser(
-//                        sender.getId().toString(),
-//                        "/queue/messages",
-//                        chatMessage
-//                );
-//
-//                log.info("[PRIVATE] Message saved with ID: {} and sent successfully", savedMessage.getId());
-//            } catch (Exception e) {
-//                log.error("[PRIVATE] Error sending private message: {}", e.getMessage(), e);
-//            }
-//        } else {
-//            log.error("[PRIVATE] Failed to send message - sender or recipient not found. Sender: {}, Recipient ID: {}",
-//                    chatMessage.getSender(), chatMessage.getRecipientId());
-//        }
-//    }
 
     @MessageMapping("/chat.private")
     public void sendPrivate(@Payload ChatMessage chatMessage) {
@@ -189,7 +130,6 @@ public class ChatController {
                 }
 
                 log.info("[PRIVATE] Using conversation ID: {}", conversation.getId());
-                // KẾT THÚC thay đổi
 
                 Message message = new Message();
                 message.setSender(sender);
@@ -226,6 +166,9 @@ public class ChatController {
                         "/queue/messages",
                         chatMessage
                 );
+                
+                // Gửi thông báo tin nhắn mới đến người nhận
+                webSocketEventController.sendNewMessageNotification(savedMessage, recipient.getId());
 
                 log.info("[PRIVATE] Message saved with ID: {} and sent successfully", savedMessage.getId());
             } catch (Exception e) {
@@ -264,6 +207,14 @@ public class ChatController {
                         savedMessage.getId(), groupId, chatMessage.getSender());
 
                 messagingTemplate.convertAndSend("/topic/group." + groupId, chatMessage);
+                
+                // Gửi thông báo tin nhắn mới đến tất cả thành viên trong nhóm (trừ người gửi)
+                List<ConversationMember> members = conversationMemberRepository.findAllByConversationId(group.getId());
+                for (ConversationMember member : members) {
+                    if (!member.getUser().getId().equals(sender.getId())) {
+                        webSocketEventController.sendNewMessageNotification(savedMessage, member.getUser().getId());
+                    }
+                }
             } else {
                 log.error("[GROUP] Failed to send message - group or sender not found. Group ID: {}, Sender: {}",
                         groupId, chatMessage.getSender());

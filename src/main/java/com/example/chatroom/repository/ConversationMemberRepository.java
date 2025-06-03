@@ -41,4 +41,12 @@ public interface ConversationMemberRepository extends JpaRepository<Conversation
 
     // Lấy thành viên nhóm
     List<ConversationMember> findAllByConversationId(Long conversationId);
+
+    // Kiểm tra xem người dùng có quyền admin trong cuộc hội thoại không
+    @Query("SELECT COUNT(cm) > 0 FROM ConversationMember cm WHERE cm.user.id = :userId AND cm.conversation.id = :conversationId AND cm.role = 'admin'")
+    boolean isUserAdmin(@Param("userId") Long userId, @Param("conversationId") Long conversationId);
+
+    // Lấy vai trò của người dùng trong cuộc hội thoại
+    @Query("SELECT cm.role FROM ConversationMember cm WHERE cm.user.id = :userId AND cm.conversation.id = :conversationId")
+    String getUserRole(@Param("userId") Long userId, @Param("conversationId") Long conversationId);
 }

@@ -9,6 +9,7 @@ import com.example.chatroom.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,9 @@ public class ContactWithController {
     
     @Autowired
     private ConversationMemberRepository conversationMemberRepository;
+    
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     // Lấy tất cả liên hệ
     @GetMapping
@@ -79,13 +83,39 @@ public class ContactWithController {
             }
 
             // Lưu thông tin liên hệ trước khi xóa để frontend có thể sử dụng
+            Long user1Id = contact.getContactOne().getId();
+            Long user2Id = contact.getContactTwo().getId();
+            
             Map<String, Object> contactInfo = Map.of(
                     "id", contact.getId(),
-                    "user1", contact.getContactOne().getId(),
-                    "user2", contact.getContactTwo().getId()
+                    "user1", user1Id,
+                    "user2", user2Id
             );
 
             contactWithService.deleteContactWith(contact);
+            
+            // Gửi thông báo WebSocket đến cả hai người dùng
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("type", "DELETE");
+            payload.put("contactId", id);
+            payload.put("initiatorId", user1Id); // Giả định người xóa là user1
+            payload.put("timestamp", LocalDateTime.now().toString());
+            
+            // Thông báo cho người dùng thứ nhất
+            payload.put("userId", user2Id);
+            messagingTemplate.convertAndSendToUser(
+                user1Id.toString(),
+                "/queue/contact-changes",
+                payload
+            );
+            
+            // Thông báo cho người dùng thứ hai
+            payload.put("userId", user1Id);
+            messagingTemplate.convertAndSendToUser(
+                user2Id.toString(),
+                "/queue/contact-changes",
+                payload
+            );
 
             return ResponseEntity.ok(Map.of(
                     "success", true,
@@ -170,86 +200,176 @@ public class ContactWithController {
             if (conversationId != null) {
                 // Nếu có conversationId, xóa trực tiếp bằng conversationId
                 List<ConversationMember> members = conversationMemberRepository.findAllByConversationId(conversationId);
-                
+
                 if (members.isEmpty()) {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND)
                             .body(Collections.singletonMap("message", "Không tìm thấy cuộc trò chuyện"));
                 }
-                
+
                 // Lấy conversation từ member đầu tiên
                 Conversation conversation = members.get(0).getConversation();
-                
-                // Xác định xem đây có phải là cuộc trò chuyện nhóm hay không
-                // Nếu có chính xác 2 thành viên thì đây là cuộc trò chuyện cá nhân
-                if (members.size() == 2) {
-                    // Đây là cuộc trò chuyện 1-1, tìm và cập nhật contact
-                    Long user1 = members.get(0).getUser().getId();
-                    Long user2 = members.get(1).getUser().getId();
-                    
-                    // Tìm contact giữa hai người dùng
-                    ContactWith contact = contactWithService.findContactBetweenUsers(user1, user2);
-                    if (contact != null) {
-                        // Đánh dấu contact đã bị xóa (soft delete)
-                        contact.setDeletedAt(LocalDateTime.now());
-                        contactWithService.save(contact);
+
+                if (conversation.getIsGroup()) {
+                    if (userId != null) {
+                        boolean isAdmin = conversationMemberRepository.isUserAdmin(userId, conversationId);
+                        if (!isAdmin) {
+                            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                    .body(Collections.singletonMap("message", "Bạn không có quyền xóa nhóm"));
+                        }
                     }
-                }
-                
-//                // Xóa tất cả message trong conversation
-//                messageService.deleteAllMessagesByConversationId(conversationId);
-//
-//                // Đánh dấu conversation đã bị xóa (soft delete)
-//                conversation.setDeletedAt(LocalDateTime.now());
-//                conversationService.save(conversation);
-                try {
-                    // Xóa tất cả message trong conversation
                     try {
+                        // Xóa tất cả tin nhắn trong cuộc trò chuyện (đã bao gồm xóa attachments)
                         messageService.deleteAllMessagesByConversationId(conversationId);
+                        conversation.setDeletedAt(LocalDateTime.now());
+                        conversationService.save(conversation);
+
+                        // Gửi thông báo WebSocket đến tất cả thành viên trong nhóm
+                        for (ConversationMember member : members) {
+                            Long memberId = member.getUser().getId();
+                            
+                            Map<String, Object> payload = new HashMap<>();
+                            payload.put("type", "GROUP_DELETED");
+                            payload.put("conversationId", conversationId);
+                            payload.put("initiatorId", userId);
+                            payload.put("timestamp", LocalDateTime.now().toString());
+
+                            messagingTemplate.convertAndSendToUser(
+                                memberId.toString(),
+                                "/queue/contact-changes",
+                                payload
+                            );
+                        }
+
+                        return ResponseEntity.ok(Map.of(
+                                "message", "Đã xóa nhóm thành công",
+                                "conversationId", conversationId,
+                                "isGroup", true
+                        ));
                     } catch (Exception e) {
-                        System.err.println("Lỗi khi xóa tin nhắn: " + e.getMessage());
-                        // Tiếp tục xử lý, không dừng lại
+                        System.err.println("Lỗi: " + e.getMessage());
+                        e.printStackTrace();
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(Collections.singletonMap("message", "Lỗi xóa nhóm" + e.getMessage()));
+
                     }
 
-                    // Đánh dấu conversation đã bị xóa (soft delete)
-                    conversation.setDeletedAt(LocalDateTime.now());
-                    conversationService.save(conversation);
+                }else {
+                    // Xử lý cuộc trò chuyện cá nhân
+                    if (members.size() == 2) {
+                        // Lấy ID người dùng từ các thành viên
+                        Long user1 = members.get(0).getUser().getId();
+                        Long user2 = members.get(1).getUser().getId();
+                        
+                        // Xác định initiatorId (người thực hiện xóa)
+                        Long initiatorId = userId != null ? userId : user1;
+                        Long targetId = initiatorId.equals(user1) ? user2 : user1;
 
-                } catch (Exception e) {
-                    System.err.println("Lỗi chi tiết: " + e.getMessage());
-                    e.printStackTrace();
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(Collections.singletonMap("message", "Lỗi khi xóa cuộc trò chuyện: " + e.getMessage()));
+                        // Tìm contact giữa hai người dùng - sử dụng contactWithService thay vì repository
+                        ContactWith contact = contactWithService.findContactBetweenUsers(user1, user2);
+                        if (contact != null) {
+                            // Đánh dấu contact đã bị xóa (soft delete)
+                            contact.setDeletedAt(LocalDateTime.now());
+                            contactWithService.save(contact);
+                            
+                            // Gửi thông báo WebSocket cho cả hai người dùng
+                            Map<String, Object> payload = new HashMap<>();
+                            payload.put("type", "DELETE");
+                            payload.put("contactId", contact.getId());
+                            payload.put("initiatorId", initiatorId);
+                            payload.put("timestamp", LocalDateTime.now().toString());
+                            
+                            // Thông báo cho người bị xóa liên hệ
+                            payload.put("userId", initiatorId);
+                            messagingTemplate.convertAndSendToUser(
+                                targetId.toString(),
+                                "/queue/contact-changes",
+                                payload
+                            );
+                            
+                            // Thông báo xác nhận cho người xóa liên hệ
+                            payload.put("type", "DELETE_CONFIRMATION");
+                            payload.put("userId", targetId);
+                            payload.put("message", "Bạn đã xóa liên hệ thành công");
+                            messagingTemplate.convertAndSendToUser(
+                                initiatorId.toString(),
+                                "/queue/contact-changes",
+                                payload
+                            );
+                        }
+                    }
+
+                    try {
+                        // Xóa tất cả tin nhắn trong cuộc trò chuyện (đã bao gồm xóa attachments)
+                        messageService.deleteAllMessagesByConversationId(conversationId);
+
+                        // Đánh dấu conversation đã bị xóa (soft delete)
+                        conversation.setDeletedAt(LocalDateTime.now());
+                        conversationService.save(conversation);
+
+                        return ResponseEntity.ok(Map.of(
+                                "message", "Đã xóa liên hệ và cuộc trò chuyện thành công",
+                                "conversationId", conversationId,
+                                "isGroup", false
+                        ));
+                    } catch (Exception e) {
+                        System.err.println("Lỗi chi tiết: " + e.getMessage());
+                        e.printStackTrace();
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(Collections.singletonMap("message", "Lỗi khi xóa cuộc trò chuyện: " + e.getMessage()));
+                    }
                 }
-                
-                return ResponseEntity.ok(Map.of(
-                        "message", "Đã xóa liên hệ và cuộc trò chuyện thành công",
-                        "conversationId", conversationId
-                ));
             } else if (userId != null && contactId != null) {
-                // Cách cũ: Dùng userId và contactId
                 // Tìm contact giữa hai người dùng
                 ContactWith contact = contactWithService.findContactBetweenUsers(userId, contactId);
-                
+
                 if (contact == null) {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND)
                             .body(Collections.singletonMap("message", "Không tìm thấy liên hệ giữa hai người dùng"));
                 }
-                
+
                 // Tìm conversation liên quan đến contact này
                 List<Conversation> conversations = conversationService.findByContactId(contact.getId());
-                
-                // Xóa tất cả message trong các conversation và đánh dấu conversation đã bị xóa
+
+                // Xóa tất cả tin nhắn trong các conversation và đánh dấu conversation đã bị xóa
                 for (Conversation conversation : conversations) {
+                    // Xóa tin nhắn và attachments
                     messageService.deleteAllMessagesByConversationId(conversation.getId());
-                    
+
                     // Đánh dấu conversation đã bị xóa (soft delete)
                     conversation.setDeletedAt(LocalDateTime.now());
                     conversationService.save(conversation);
                 }
-                
+
                 // Đánh dấu contact đã bị xóa (soft delete)
                 contact.setDeletedAt(LocalDateTime.now());
                 contactWithService.save(contact);
+                
+                // Gửi thông báo WebSocket cho người bị xóa liên hệ
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("type", "DELETE");
+                payload.put("contactId", contact.getId());
+                payload.put("initiatorId", userId);
+                payload.put("timestamp", LocalDateTime.now().toString());
+                payload.put("userId", userId);
+                
+                messagingTemplate.convertAndSendToUser(
+                    contactId.toString(),
+                    "/queue/contact-changes",
+                    payload
+                );
+                
+                // Thông báo xác nhận cho người xóa liên hệ
+                Map<String, Object> confirmationPayload = new HashMap<>();
+                confirmationPayload.put("type", "DELETE_CONFIRMATION");
+                confirmationPayload.put("contactId", contact.getId());
+                confirmationPayload.put("userId", contactId);
+                confirmationPayload.put("message", "Bạn đã xóa liên hệ thành công");
+                
+                messagingTemplate.convertAndSendToUser(
+                    userId.toString(),
+                    "/queue/contact-changes",
+                    confirmationPayload
+                );
                 
                 return ResponseEntity.ok(Map.of(
                         "message", "Đã xóa liên hệ và cuộc trò chuyện thành công",

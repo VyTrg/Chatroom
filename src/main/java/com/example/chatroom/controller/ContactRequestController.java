@@ -38,7 +38,27 @@ public class ContactRequestController {
 
     @PostMapping("/accept/{id}")
     public ResponseEntity<Map<String, String>> acceptRequest(@PathVariable Long id) {
-        contactRequestService.acceptRequest(id);
+        ContactRequest request = contactRequestService.acceptRequest(id);
+        
+        // Gửi thông báo WebSocket đến người gửi yêu cầu
+        if (request != null && request.getSender() != null) {
+            NotificationMessage message = new NotificationMessage();
+            message.setType(MessageType.FRIEND_REQUEST_ACCEPTED);
+            message.setMessage("Your friend request has been accepted!");
+            message.setData(Map.of(
+                "requestId", request.getId(), 
+                "sender", request.getSender().getId(), 
+                "receiver", request.getReceiver().getId(),
+                "timestamp", new Date().getTime()
+            ));
+            
+            messagingTemplate.convertAndSendToUser(
+                request.getSender().getId().toString(),
+                "/queue/notifications",
+                message
+            );
+        }
+        
         Map<String, String> response = new HashMap<>();
         response.put("message", "Request accepted.");
         return ResponseEntity.ok(response);
@@ -46,11 +66,28 @@ public class ContactRequestController {
 
     @PostMapping("/decline/{id}")
     public ResponseEntity<Map<String, String>> declineRequest(@PathVariable Long id) {
-        contactRequestService.declineRequest(id);
-//        messagingTemplate.convertAndSend("/topic/notification", "Request accepted.");
+        ContactRequest request = contactRequestService.declineRequest(id);
+        
+        // Gửi thông báo WebSocket đến người gửi yêu cầu
+        if (request != null && request.getSender() != null) {
+            NotificationMessage message = new NotificationMessage();
+            message.setType(MessageType.FRIEND_REQUEST_DECLINED);
+            message.setMessage("Your friend request has been declined.");
+            message.setData(Map.of(
+                "requestId", request.getId(),
+                "sender", request.getSender().getId(),
+                "timestamp", new Date().getTime()
+            ));
+            
+            messagingTemplate.convertAndSendToUser(
+                request.getSender().getId().toString(),
+                "/queue/notifications",
+                message
+            );
+        }
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Request accepted.");
+        response.put("message", "Request declined.");
         return ResponseEntity.ok(response);
     }
 
@@ -69,7 +106,7 @@ public class ContactRequestController {
                 message                          // Message body
         );
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Request accepted.");
+        response.put("message", "Request sent.");
         return ResponseEntity.ok(response);
     }
 }

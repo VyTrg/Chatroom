@@ -35,7 +35,7 @@ public class ContactRequestServiceImpl implements ContactRequestService {
 
     @Override
     @Transactional
-    public void acceptRequest(Long requestId) {
+    public ContactRequest acceptRequest(Long requestId) {
         ContactRequest request = contactRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
@@ -68,16 +68,20 @@ public class ContactRequestServiceImpl implements ContactRequestService {
         // Add users to conversation
         addMemberToConversation(conversation, sender, "member");
         addMemberToConversation(conversation, receiver, "member");
+        
+        return request;
     }
 
 
     @Override
-    public void declineRequest(Long requestId) {
+    public ContactRequest declineRequest(Long requestId) {
         ContactRequest request = contactRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
         request.setIsAccepted(false);
         contactRequestRepository.save(request);
+        
+        return request;
     }
 
     @Override

@@ -98,4 +98,12 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     @Query("SELECT cm.conversation FROM ConversationMember cm WHERE cm.user.id = :userId")
     boolean existsByConversationAndUser(Long conversationoId, Long userId);
 
+    // Kiểm tra xem một cuộc trò chuyện có phải là nhóm hay không
+    @Query("SELECT c.isGroup FROM Conversation c WHERE c.id = :conversationId")
+    boolean isGroupConversation(@Param("conversationId") Long conversationId);
+
+    // Lấy thông tin conversation kèm theo trạng thái isGroup
+    @Query("SELECT c FROM Conversation c WHERE c.id = :conversationId")
+    Optional<Conversation> findConversationWithDetails(@Param("conversationId") Long conversationId);
+
 }

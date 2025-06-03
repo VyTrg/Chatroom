@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -16,6 +17,8 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private MessageRepository messageRepository;
 
+    @Autowired
+    private AttachmentService attachmentService;
 
     @Override
     public List<Message> getUnreadMessagesForUserInConversation(Long userId, Long conversationId) {
@@ -34,7 +37,18 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void deleteMessage(Long messageId) {
-        messageRepository.deleteById(messageId);
+        try {
+            // Xóa tệp đính kèm trước khi xóa tin nhắn
+            attachmentService.deleteAttachmentsByMessageIds(List.of(messageId));
+            
+            // Sau đó xóa tin nhắn
+            messageRepository.deleteById(messageId);
+            System.out.println("Đã xóa tin nhắn ID: " + messageId);
+        } catch (Exception e) {
+            System.err.println("Lỗi khi xóa tin nhắn và tệp đính kèm: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Override
@@ -46,9 +60,21 @@ public class MessageServiceImpl implements MessageService {
     
     @Override
     public void deleteAllMessagesByConversationId(Long conversationId) {
-        // Xóa tất cả tin nhắn trong cuộc trò chuyện
-        List<Message> messages = messageRepository.findMessagesByConversationId(conversationId);
-        messageRepository.deleteAll(messages);
+        try {
+            // Trước tiên, xóa tất cả tệp đính kèm liên quan đến các tin nhắn trong cuộc trò chuyện
+            attachmentService.deleteAttachmentsByConversationId(conversationId);
+            
+            // Sau đó xóa tất cả tin nhắn trong cuộc trò chuyện
+            List<Message> messages = messageRepository.findMessagesByConversationId(conversationId);
+            if (messages != null && !messages.isEmpty()) {
+                System.out.println("Xóa " + messages.size() + " tin nhắn từ cuộc trò chuyện " + conversationId);
+                messageRepository.deleteAll(messages);
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi khi xóa tin nhắn và tệp đính kèm: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     @Override
@@ -65,14 +91,28 @@ public class MessageServiceImpl implements MessageService {
     }
     
     @Override
-    public void markMessageAsRead(Long messageId) {
+    public Message markMessageAsRead(Long messageId) {
         Optional<Message> messageOpt = messageRepository.findById(messageId);
         if (messageOpt.isPresent()) {
             Message message = messageOpt.get();
             message.setIsRead(true);
-            messageRepository.save(message);
+            return messageRepository.save(message);
         } else {
             throw new NoSuchElementException("Không tìm thấy tin nhắn với ID: " + messageId);
         }
+    }
+    
+    @Override
+    public List<Message> markAllMessagesAsReadInConversation(Long conversationId, Long userId) {
+        // Lấy tất cả tin nhắn chưa đọc trong cuộc trò chuyện không phải do người dùng hiện tại gửi
+        List<Message> unreadMessages = messageRepository.findUnreadMessagesForUserInConversation(userId, conversationId);
+        
+        // Đánh dấu tất cả là đã đọc
+        for (Message message : unreadMessages) {
+            message.setIsRead(true);
+            messageRepository.save(message);
+        }
+        
+        return unreadMessages;
     }
 }

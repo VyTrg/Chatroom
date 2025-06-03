@@ -4,23 +4,27 @@ import com.example.chatroom.dto.UserWithContactsDTO;
 import com.example.chatroom.model.Conversation;
 import com.example.chatroom.model.User;
 
-
 import com.example.chatroom.repository.UserRepository;
 import com.example.chatroom.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-
+/**
+ * REST controller for managing users.
+ */
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -32,6 +36,8 @@ public class UserController {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @GetMapping
     public List<User> getAllUsers() {
@@ -104,11 +110,11 @@ public class UserController {
         }
     }
 
-        @GetMapping("/search-contacts")
-        public ResponseEntity<User> searchUser(@RequestParam("info") String search, @RequestParam("user") Long userId) {
-            User user = userService.getUserByEmailOrUsernameInDiscussion(search, userId);
-            return ResponseEntity.ok(user);
-        }
+    @GetMapping("/search-contacts")
+    public ResponseEntity<User> searchUser(@RequestParam("info") String search, @RequestParam("user") Long userId) {
+        User user = userService.getUserByEmailOrUsernameInDiscussion(search, userId);
+        return ResponseEntity.ok(user);
+    }
 
     @GetMapping("/search-new")
     public ResponseEntity<User> searchNewUser(@RequestParam("info") String search, @RequestParam("user") Long userId) {
@@ -118,8 +124,30 @@ public class UserController {
     @PostMapping("/{userId}/block/{blockedUserId}")
     public ResponseEntity<Void> blockUser(@PathVariable Long userId, @PathVariable Long blockedUserId) {
         userService.blockUser(userId, blockedUserId);
+        
+        // Gửi thông báo WebSocket đến cả hai người dùng
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("type", "BLOCKED");
+        payload.put("userId", blockedUserId);  
+        payload.put("initiatorId", userId);
+        payload.put("timestamp", LocalDateTime.now().toString());
+
+        // Thông báo cho người dùng bị chặn
+        messagingTemplate.convertAndSendToUser(
+                blockedUserId.toString(),
+                "/queue/contact-changes",
+                payload
+        );
+
+        // Thông báo cho người chặn
+        payload.put("type", "CONFIRMATION");
+        payload.put("message", "Bạn đã chặn liên hệ thành công");
+        messagingTemplate.convertAndSendToUser(
+                userId.toString(),
+                "/queue/contact-changes",
+                payload
+        );
+        
         return ResponseEntity.ok().build();
     }
-
-
 }

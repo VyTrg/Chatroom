@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,8 @@ public class GroupController {
     private UserRepository userRepository;
     @Autowired
     private ConversationMemberRepository conversationMemberRepository;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/create")
     public ResponseEntity<?> createGroup(
@@ -62,30 +65,25 @@ public class GroupController {
             cm.setRole("member");
             cm.setJoinedAt(LocalDateTime.now());
             conversationMemberRepository.save(cm);
+            
+            // Gửi thông báo WebSocket về nhóm mới cho mỗi thành viên
+            Map<String, Object> notification = new HashMap<>();
+            notification.put("type", "NEW_GROUP");
+            notification.put("groupId", group.getId());
+            notification.put("groupName", group.getName());
+            notification.put("timestamp", LocalDateTime.now().toString());
+            
+            messagingTemplate.convertAndSendToUser(
+                user.getId().toString(),
+                "/queue/group-updates",
+                notification
+            );
         }
 
         // Thêm log
         logger.info("Tạo group với id = {} và các thành viên: {}", group.getId(), users.stream().map(User::getUsername).collect(Collectors.joining(", ")));
 
         return ResponseEntity.ok("Tạo group thành công với id: " + group.getId());
-
-        /*
-        Conversation group = new Conversation();
-        group.setName(groupName);
-        group.setIsGroup(true);
-        group.setCreatedAt(LocalDateTime.now());
-        conversationRepository.save(group);
-
-        for (User user : users) {
-            ConversationMember cm = new ConversationMember();
-            cm.setConversation(group);
-            cm.setUser(user);
-            cm.setRole("member");
-            cm.setJoinedAt(LocalDateTime.now());
-            conversationMemberRepository.save(cm);
-        }
-        return ResponseEntity.ok("Tạo group thành công với id: " + group.getId());
-        */
     }
 
     // API thêm thành viên vào group đã có, cho phép phân quyền
@@ -142,9 +140,43 @@ public class GroupController {
                 addedUsers.add(user.getUsername());
                 String name = user.getFirstName() + " " + user.getLastName();
                 group.setName(group.getName() + "," + name);
-
+                
+                // Gửi thông báo WebSocket khi được thêm vào nhóm
+                Map<String, Object> notification = new HashMap<>();
+                notification.put("type", "ADDED_TO_GROUP");
+                notification.put("groupId", groupId);
+                notification.put("groupName", group.getName());
+                notification.put("timestamp", LocalDateTime.now().toString());
+                
+                messagingTemplate.convertAndSendToUser(
+                    user.getId().toString(),
+                    "/queue/group-updates",
+                    notification
+                );
             }
             conversationRepository.save(group);
+            
+            // Thông báo cho tất cả thành viên hiện tại về việc thêm thành viên mới
+            List<ConversationMember> existingMembers = conversationMemberRepository.findAllByConversationId(groupId);
+            for (ConversationMember member : existingMembers) {
+                // Bỏ qua các thành viên mới thêm vào
+                if (userIds.contains(member.getUser().getId())) {
+                    continue;
+                }
+                
+                Map<String, Object> updateNotification = new HashMap<>();
+                updateNotification.put("type", "GROUP_MEMBERS_UPDATED");
+                updateNotification.put("groupId", groupId);
+                updateNotification.put("addedUsers", addedUsers);
+                updateNotification.put("timestamp", LocalDateTime.now().toString());
+                
+                messagingTemplate.convertAndSendToUser(
+                    member.getUser().getId().toString(),
+                    "/queue/group-updates",
+                    updateNotification
+                );
+            }
+            
             Map<String, Object> response = new HashMap<>();
             response.put("groupId", groupId);
             response.put("addedUsers", addedUsers);
@@ -156,7 +188,4 @@ public class GroupController {
             return ResponseEntity.badRequest().body(error);
         }
     }
-
-
-
 }

@@ -56,9 +56,43 @@ public class ConversationController {
     @PutMapping("/conversations/{conversationId}/rename")
     public ResponseEntity<Conversation> renameConversation(
             @PathVariable Long conversationId,
-            @RequestBody Map<String, String> nameRequest) {
+            @RequestBody Map<String, String> nameRequest,
+            @RequestHeader("Authorization") String token) {
         String newName = nameRequest.get("name");
         Conversation renamed = conversationService.renameConversation(conversationId, newName);
+        
+        // Lấy thông tin người thực hiện từ token và đổi tên
+        String tokenValue = token.replace("Bearer ", "");
+        Long initiatorId = null;
+        try {
+            initiatorId = Long.valueOf(token.split("\\.")[0]); // Đơn giản hóa, trong thực tế nên dùng JWT parser
+        } catch (Exception e) {
+            // Nếu không lấy được ID từ token, vẫn tiếp tục nhưng không gửi initiatorId
+        }
+        
+        // Gửi thông báo WebSocket đến tất cả thành viên cuộc trò chuyện
+        List<ConversationMember> members = conversationService.getConversationMembers(conversationId);
+        for (ConversationMember member : members) {
+            // Bỏ qua người thực hiện đổi tên (nếu có)
+            if (initiatorId != null && member.getUser().getId().equals(initiatorId)) {
+                continue;
+            }
+            
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("type", "RENAME");
+            payload.put("conversationId", conversationId);
+            payload.put("newName", newName);
+            if (initiatorId != null) {
+                payload.put("initiatorId", initiatorId);
+            }
+            
+            messagingTemplate.convertAndSendToUser(
+                member.getUser().getId().toString(),
+                "/queue/conversation-changes",
+                payload
+            );
+        }
+        
         return ResponseEntity.ok(renamed);
     }
 
